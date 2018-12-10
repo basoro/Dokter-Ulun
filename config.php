@@ -24,13 +24,15 @@ define('VERSION', '0.2 Beta');
 define('URL', '');
 define('DIR', '');
 define('PRODUCTION', 'YES'); // YES to hide error page. NO to display error page.
+
+// INACBG's and VClaim Configurations
 define('INACBG_KEYRS', '');
 define('INACBG_URLWS', '');
 define('NO_RM', '999999');
 define('NO_PESERTA', '99999999');
 define('SEP', '9999999999');
 define('NIK_KODER', '99999999999999');
-define('TIPE_RS', 'C');
+define('TIPE_RS', 'CP');
 
 function escape($string) {
     global $connection;
