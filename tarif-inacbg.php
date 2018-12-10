@@ -36,9 +36,9 @@ include_once('layout/sidebar.php');
                             <form name="frm_aturadmin" onsubmit="return validasiIsi();" method="post" action="" enctype=multipart/form-data>
                               <dl class="dl-horizontal">
                                 <dt>Diagnosa</dt>
-                                <dd><select name="diagnosa" class="kd_diagnosa" multiple="multiple" style="width:100%"></select></dd><br>
+                                <dd><select name="diagnosa[]" class="kd_diagnosa" multiple="multiple" style="width:100%"></select></dd><br>
                                 <dt>Prosedur</dt>
-                                <dd><select name="prosedur" class="kd_prosedur" multiple="multiple" style="width:100%"></select></dd><br>
+                                <dd><select name="prosedur[]" class="kd_prosedur" multiple="multiple" style="width:100%"></select></dd><br>
                                 <dt>Jenis Rawat</dt>
                                 <dd>
                                   <select name="jenis_rawat" style="width:100%">
@@ -74,12 +74,37 @@ include_once('layout/sidebar.php');
                                   } else {
                                     $tgl_lahir = '1990-01-01';
                                   }
-                                  $diagnosa  = trim($_POST['diagnosa']);
+
+                                  $diagnosa="";
+                                  $a=1;
+				                          $get = $_POST['diagnosa'];
+                                  foreach ($get as $key => $value) {
+                                    if($a==1){
+                                      $diagnosa=$value;
+                                    }else{
+                                      $diagnosa=$diagnosa."#".$value;
+                                    }
+                                  $a++;
+                                  }
+
+                                  $prosedur="";
+                                  $a=1;
+				                          $get = $_POST['prosedur'];
+                                  foreach ($get as $key => $value) {
+                                    $value = substr($value, 0, 2) . '.' . substr($value, 2);
+                                    if($a==1){
+                                      $prosedur=$value;
+                                    }else{
+                                      $prosedur=$prosedur."#".$value;
+                                    }
+                                  $a++;
+                                  }
+
                                   $jenis_rawat  = trim($_POST['jenis_rawat']);
                                   $kelas_rawat  = trim($_POST['kelas_rawat']);
                                   $jenis_kelamin  = trim($_POST['jenis_kelamin']);
                                   UpdateDataPasien(NO_RM,NO_PESERTA,NO_RM,'Pasien Uji Coba',$tgl_lahir.' 00:00:00',$jenis_kelamin);
-                                  CekTarif(SEP,NO_PESERTA,'2018-01-01','2018-01-01',$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,'','0','Dokter Uji Coba',TIPE_RS,'','','#',NIK_KODER,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
+                                  CekTarif(SEP,NO_PESERTA,'2018-01-01','2018-01-01',$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,$prosedur,'0','Dokter Uji Coba',TIPE_RS,'','','#',NIK_KODER,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
                                 }
                                 ?>
 
@@ -87,6 +112,9 @@ include_once('layout/sidebar.php');
                                 <dd><button type="submit" name="cektarif" value="cektarif" class="btn bg-indigo waves-effect" onclick="this.value=\'cektarif\'">Cek Tarif</button></dd>
                               </dl>
                             </form>
+                            <?php echo $diagnosa; ?><br>
+                            <?php echo $prosedur; ?>
+
                         </div>
                     </div>
                 </div>
