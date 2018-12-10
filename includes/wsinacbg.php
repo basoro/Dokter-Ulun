@@ -157,6 +157,8 @@
             } else {
               $tarif = $msg['response']['cbg']['tariff'];
             }
+            echo '<dt>Grouper</dt> <dd>'.$msg['response']['cbg']['code'].'</dd><br>';
+            echo '<dt>Deskripsi</dt> <dd>'.$msg['response']['cbg']['description'].'</dd><br>';
             echo '<dt>Tarif INACBG\'s</dt> <dd>Rp. '.number_format($tarif,0,",",".").'</dd><br><br>';
         }
     }
@@ -181,3 +183,4 @@
         return $msg;
     }
 ?>
+
