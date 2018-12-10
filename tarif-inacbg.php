@@ -79,25 +79,17 @@ include_once('layout/sidebar.php');
 
                                 $cektarif = isset($_POST['cektarif'])?$_POST['cektarif']:NULL;
                                 if (isset($cektarif)) {
-                                  $no_rm = '999999';
-                                  $no_peserta = '99999999';
-                                  $sep = '999999999999';
-                                  $nm_pasien = 'Pasien Uji Coba';
                                   if(!empty($_POST['tgl_lahir'])) {
                                     $tgl_lahir = $_POST['tgl_lahir'];
                                   } else {
                                     $tgl_lahir = '1990-01-01';
                                   }
-                                  $tgl_keluar = '2018-01-01';
-                                  $nik_coder = '99999999999999';
-                                  $nm_dokter = 'NAMA DOKTER';
-                                  $tipe_rs = 'CP';
                                   $diagnosa  = trim($_POST['diagnosa']);
                                   $jenis_rawat  = trim($_POST['jenis_rawat']);
                                   $kelas_rawat  = trim($_POST['kelas_rawat']);
                                   $jenis_kelamin  = trim($_POST['jenis_kelamin']);
-                                  UpdateDataPasien($no_rm,$no_peserta,$no_rm,$nm_pasien,$tgl_lahir.' 00:00:00',$jenis_kelamin);
-                                  CekTarif($sep,$no_peserta,$tgl_keluar,$tgl_keluar,$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,'','0',$nm_dokter,$tipe_rs,'','','#',$nik_coder,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
+                                  UpdateDataPasien(NO_RM,NO_PESERTA,NO_RM,'Pasien Uji Coba',$tgl_lahir.' 00:00:00',$jenis_kelamin);
+                                  CekTarif(SEP,NO_PESERTA,$tgl_keluar,'2018-01-01',$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,'','0','Dokter Uji Coba',TIPE_RS,'','','#',NIK_KODER,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
                                 }
                                 ?>
 
