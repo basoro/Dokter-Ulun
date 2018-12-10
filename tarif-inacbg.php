@@ -89,7 +89,7 @@ include_once('layout/sidebar.php');
                                   $kelas_rawat  = trim($_POST['kelas_rawat']);
                                   $jenis_kelamin  = trim($_POST['jenis_kelamin']);
                                   UpdateDataPasien(NO_RM,NO_PESERTA,NO_RM,'Pasien Uji Coba',$tgl_lahir.' 00:00:00',$jenis_kelamin);
-                                  CekTarif(SEP,NO_PESERTA,$tgl_keluar,'2018-01-01',$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,'','0','Dokter Uji Coba',TIPE_RS,'','','#',NIK_KODER,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
+                                  CekTarif(SEP,NO_PESERTA,'2018-01-01','2018-01-01',$jenis_rawat,$kelas_rawat,'','','0','0','0','0','','0','','0','1',$diagnosa,'','0','Dokter Uji Coba',TIPE_RS,'','','#',NIK_KODER,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0');
                                 }
                                 ?>
 
