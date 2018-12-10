@@ -36,9 +36,9 @@ include_once('layout/sidebar.php');
                             <form name="frm_aturadmin" onsubmit="return validasiIsi();" method="post" action="" enctype=multipart/form-data>
                               <dl class="dl-horizontal">
                                 <dt>Diagnosa</dt>
-                                <dd><select name="diagnosa" class="kd_diagnosa" style="width:100%"></select></dd><br>
+                                <dd><select name="diagnosa" class="kd_diagnosa" multiple="multiple" style="width:100%"></select></dd><br>
                                 <dt>Prosedur</dt>
-                                <dd><select name="prosedur" class="kd_prosedur" style="width:100%"></select></dd><br>
+                                <dd><select name="prosedur" class="kd_prosedur" multiple="multiple" style="width:100%"></select></dd><br>
                                 <dt>Jenis Rawat</dt>
                                 <dd>
                                   <select name="jenis_rawat" style="width:100%">
@@ -67,16 +67,6 @@ include_once('layout/sidebar.php');
                                 <p class="small">* Pediatri pilih tanggal lahir</p>
                                 </dd><br>
                                 <?php
-                                $diagnosa = isset($_POST['diagnosa'])?$_POST['diagnosa']:NULL;
-                                if(isset($diagnosa)) {
-                                  $sql = query("SELECT * FROM penyakit WHERE kd_penyakit = '$diagnosa'");
-                                  $result = fetch_assoc($sql);
-                                ?>
-                                <dt>Kode ICD-10</dt> <dd><?php echo $result['kd_penyakit']; ?></dd><br>
-                                <dt>Nama Penyakit</dt> <dd><?php echo $result['nm_penyakit']; ?></dd><br>
-                                <?php
-                                }
-
                                 $cektarif = isset($_POST['cektarif'])?$_POST['cektarif']:NULL;
                                 if (isset($cektarif)) {
                                   if(!empty($_POST['tgl_lahir'])) {
