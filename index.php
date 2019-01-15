@@ -149,7 +149,7 @@
                     echo '<tr>';
         		    echo '<td>'.$no.'</td>';
                     echo '<td>';
-                    echo '<a href="pasien.php?action=view&no_rawat='.$row['0'].'" class="title">'.ucwords(strtolower($row['2'])).'</a>';
+                    echo '<a href="pasien-ralan.php?action=view&no_rawat='.$row['0'].'" class="title">'.ucwords(strtolower($row['2'])).'</a>';
                     echo '</td>';
                     echo '<td>'.$row['3'].'</td>';
                     echo '</tr>';

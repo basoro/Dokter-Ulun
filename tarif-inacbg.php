@@ -41,14 +41,14 @@ include_once('layout/sidebar.php');
                                 <dd><select name="prosedur[]" class="kd_prosedur" multiple="multiple" style="width:100%"></select></dd><br>
                                 <dt>Jenis Rawat</dt>
                                 <dd>
-                                  <select name="jenis_rawat" style="width:100%">
+                                  <select class="form-control show-tick"  name="jenis_rawat" style="width:100%">
                                     <option value="2">Rawat Jalan</option>
                                     <option value="1">Rawat Inap</option>
                                   </select>
                                 </dd><br>
                                 <dt>Kelas Rawat</dt>
                                 <dd>
-                                  <select name="kelas_rawat" style="width:100%">
+                                  <select class="form-control show-tick"  name="kelas_rawat" style="width:100%">
                                     <option value="1">Kelas 1</option>
                                     <option value="2">Kelas 2</option>
                                     <option value="3">Kelas 3</option>
@@ -56,7 +56,7 @@ include_once('layout/sidebar.php');
                                 </dd><br>
                                 <dt>Jenis Kelamin</dt>
                                 <dd>
-                                  <select name="jenis_kelamin" style="width:100%">
+                                  <select class="form-control show-tick" name="jenis_kelamin" style="width:100%">
                                     <option value="1">Laki-Laki</option>
                                     <option value="2">Perempuan</option>
                                   </select>
@@ -77,7 +77,7 @@ include_once('layout/sidebar.php');
 
                                   $diagnosa="";
                                   $a=1;
-				                          $get = $_POST['diagnosa'];
+				                  $get = $_POST['diagnosa'];
                                   foreach ($get as $key => $value) {
                                     if($a==1){
                                       $diagnosa=$value;
@@ -89,7 +89,7 @@ include_once('layout/sidebar.php');
 
                                   $prosedur="";
                                   $a=1;
-				                          $get = $_POST['prosedur'];
+				                  $get = $_POST['prosedur'];
                                   foreach ($get as $key => $value) {
                                     $value = substr($value, 0, 2) . '.' . substr($value, 2);
                                     if($a==1){
@@ -112,9 +112,6 @@ include_once('layout/sidebar.php');
                                 <dd><button type="submit" name="cektarif" value="cektarif" class="btn bg-indigo waves-effect" onclick="this.value=\'cektarif\'">Cek Tarif</button></dd>
                               </dl>
                             </form>
-                            <?php echo $diagnosa; ?><br>
-                            <?php echo $prosedur; ?>
-
                         </div>
                     </div>
                 </div>

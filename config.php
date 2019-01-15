@@ -20,19 +20,20 @@ define('DB_NAME', 'sik');
 
 $connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-define('VERSION', '0.2 Beta');
+define('VERSION', '0.1 Beta');
 define('URL', '');
 define('DIR', '');
-define('PRODUCTION', 'YES'); // YES to hide error page. NO to display error page.
+define('PRODUCTION', 'NO'); // YES to hide error page. NO to display error page.
+define('SIMRSURL', 'http://localhost/webapps');
 
 // INACBG's and VClaim Configurations
 define('INACBG_KEYRS', '');
 define('INACBG_URLWS', '');
-define('NO_RM', '999999');
-define('NO_PESERTA', '99999999');
-define('SEP', '9999999999');
-define('NIK_KODER', '99999999999999');
-define('TIPE_RS', 'CP');
+define('NO_RM', ' ');
+define('NO_PESERTA', '');
+define('SEP', '');
+define('NIK_KODER', '');
+define('TIPE_RS', '');
 
 function escape($string) {
     global $connection;
@@ -74,7 +75,7 @@ $time       = date('H:i:s');
 $date_time  = date('Y-m-d H:i:s');
 
 // Get settings
-$getSettings = query("SELECT nama_instansi, alamat_instansi, kabupaten, propinsi, kontak, email FROM setting");
+$getSettings = query("SELECT * FROM setting");
 $dataSettings = fetch_assoc($getSettings);
 
 // Get jenis poli

@@ -33,22 +33,35 @@
                 <ul class="list">
                     <li class="header">MAIN NAVIGATION</li>
                     <li class="active">
+                    </li>
+                    <li class>
                         <a href="index.php">
                             <i class="material-icons">home</i>
                             <span>Beranda</span>
                         </a>
                     </li>
                     <li>
-                        <a href="pasien.php">
-                            <i class="material-icons">people</i>
-                            <span>Data Pasien</span>
+                        <a href="javascript:void(0);" class="menu-toggle">
+                            <i class="material-icons">text_fields</i>
+                            <span>Pasien</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="rekam-medik.php">
-                            <i class="material-icons">layers</i>
-                            <span>Rekam Medik</span>
-                        </a>
+                        <ul class="ml-menu">
+                            <li>
+                                <a href="booking.php">Booking</a>
+                            </li>
+                            <li>
+                                <a href="pasien-ralan.php">Rawat Jalan</a>
+                            </li>
+                            <li>
+                                <a href="pasien-ranap.php">Rawat Inap</a>
+                            </li>
+                            <li>
+                                <a href="rekam-medik.php">Rekam Medik</a>
+                            </li>
+                            <li>
+                                <a href="pasien.php">Database</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="tarif-inacbg.php">

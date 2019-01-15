@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-include_once ('layout/header.php'); 
+include_once ('layout/header.php');
 
 ?>
 
@@ -29,14 +29,14 @@ include_once ('layout/header.php');
                         if (isset($_POST['proses'])) {
                             if (($_POST['tanggal_awal'] == "")||($_POST['tanggal_akhir'] == "")) {
         	                    redirect ('rekam-medik.php');
-                            } else {  
+                            } else {
                         ?>
 
 
-                        <?php 
+                        <?php
                         $q_pasien = query ("select * from pasien where no_rkm_medis = '$_POST[no_pasien]'");
                         $no_rkm_medis = $_POST['no_pasien'];
-                        $data_pasien = fetch_array($q_pasien); 
+                        $data_pasien = fetch_array($q_pasien);
                         ?>
                             <dl class="dl-horizontal">
                                 <dt>Nama Lengkap</dt>
@@ -49,7 +49,7 @@ include_once ('layout/header.php');
                                 <dd><?php echo $data_pasien['umur']; ?></dd>
                             </dl>
 			    			<div class="body table-responsive">
-                              
+
                             <table id="riwayatmedis" class="table">
                                 <thead>
                                     <tr>
@@ -61,12 +61,13 @@ include_once ('layout/header.php');
                                         <th>Diagnosa</th>
                                         <th>Obat</th>
                                         <th>Laboratorium</th>
+                                        <th>Radiologi</th>
                                     </tr>
                                 </thead>
                             <tbody>
                             <?php
                             $q_kunj = query ("SELECT tgl_registrasi, no_rawat, status_lanjut FROM reg_periksa WHERE no_rkm_medis = '$no_rkm_medis' ORDER BY tgl_registrasi DESC");
-                            if(num_rows($q_kunj) >= 1) {                              
+                            if(num_rows($q_kunj) >= 1) {
                             while ($data_kunj = fetch_array($q_kunj)) {
                                 $tanggal_kunj   = $data_kunj[0];
                                 $no_rawat_kunj = $data_kunj[1];
@@ -132,10 +133,25 @@ include_once ('layout/header.php');
                                         ?>
                                         </ul>
                                     </td>
+                                    <td>
+                                        <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
+                                        <?php
+                                        $sql_rad = query("select * from gambar_radiologi where no_rawat= '$no_rawat_kunj'");
+                                        $no=1;
+                                        while ($row_rad = fetch_array($sql_rad)) {
+                                            echo '<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">';
+                                            echo '<a href="'.$_SERVER['PHP_SELF'].'?action=radiologi&no_rawat='.$no_rawat_kunj.'" class="title"><img class="img-responsive thumbnail"  src="'.SIMRSURL.'/radiologi/'.$row_rad[3].'"></a>';
+                                            echo '</div>';
+                                            $no++;
+                                        }
+                                        ?>
+
+                                      </div>
+                                    </td>
                                 </tr>
-                                <?php 
+                                <?php
                                     }
-                                } else { 
+                                } else {
                                 ?>
                                     <tr>
                                         <td>Blank..!!</td>
@@ -146,9 +162,10 @@ include_once ('layout/header.php');
                                         <td></td>
                                         <td></td>
                                         <td></td>
+                                        <td></td>
                                     </tr>
                                 <?php
-                                } 
+                                }
                                 ?>
                             </tbody>
                             </table>

@@ -69,6 +69,18 @@
 
     <!-- Moment Plugin Js -->
     <script src="plugins/momentjs/moment.js"></script>
+    <script src="plugins/light-gallery/js/lightgallery-all.js"></script>
+	<script>
+
+	$(function () {
+    	$('#aniimated-thumbnials').lightGallery({
+        	thumbnail: true,
+        	selector: 'a'
+    	});
+	});
+
+	</script>
+
 
     <!-- Bootstrap Material Datetime Picker Plugin Js -->
     <script src="plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
@@ -79,25 +91,41 @@
     <!-- Custom Js -->
     <script src="js/admin.js"></script>
 
+	  <script>
+
+      var url = window.location.pathname; //sets the variable "url" to the pathname of the current window
+      var activePage = url.substring(url.lastIndexOf('/') + 1); //sets the variable "activePage" as the substring after the last "/" in the "url" variable
+      if($('.menu li a > .active').length > 0){
+        $('.active').removeClass('active');//remove current active element if there's
+      }
+      $('.menu li a').each(function () { //looks in each link item within the primary-nav list
+        var linkPage = this.href.substring(this.href.lastIndexOf('/') + 1); //sets the variable "linkPage" as the substring of the url path in each &lt;a&gt;
+        if (activePage == linkPage) { //compares the path of the current window to the path of the linked page in the nav item
+          $(this).parents('li').addClass('active');
+          $(this).parent().addClass('active'); //if the above is true, add the "active" class to the parent of the &lt;a&gt; which is the &lt;li&gt; in the nav list
+        }
+      });
+
+	  </script>
+
 
 	<script>
 
         $(document).ready(function() {
 
-            var url = window.location.pathname; //sets the variable "url" to the pathname of the current window
-            var activePage = url.substring(url.lastIndexOf('/') + 1); //sets the variable "activePage" as the substring after the last "/" in the "url" variable
-            if($('.active').length > 0){
-                $('.active').removeClass('active');//remove current active element if there's
-            }
+            //var url = window.location.pathname; //sets the variable "url" to the pathname of the current window
+            //var activePage = url.substring(url.lastIndexOf('/') + 1); //sets the variable "activePage" as the substring after the last "/" in the "url" variable
+            //if($('.active').length > 0){
+            //   $('.active').removeClass('active');//remove current active element if there's
+            //}
 
-            $('.menu li a').each(function () { //looks in each link item within the primary-nav list
-                var linkPage = this.href.substring(this.href.lastIndexOf('/') + 1); //sets the variable "linkPage" as the substring of the url path in each &lt;a&gt;
- 
-                if (activePage == linkPage) { //compares the path of the current window to the path of the linked page in the nav item
-                    $(this).parent().addClass('active'); //if the above is true, add the "active" class to the parent of the &lt;a&gt; which is the &lt;li&gt; in the nav list
-                }
-            });
+            //$('.menu li a').each(function () { //looks in each link item within the primary-nav list
+            //    var linkPage = this.href.substring(this.href.lastIndexOf('/') + 1); //sets the variable "linkPage" as the substring of the url path in each &lt;a&gt;
 
+            //    if (activePage == linkPage) { //compares the path of the current window to the path of the linked page in the nav item
+            //        $(this).parent().addClass('active'); //if the above is true, add the "active" class to the parent of the &lt;a&gt; which is the &lt;li&gt; in the nav list
+            //    }
+            //});
 
             //Textare auto growth
             autosize($('textarea.auto-growth'));
@@ -110,8 +138,10 @@
             });
 
             $('.count-to').countTo();
-          
+
             $('#riwayatmedis').dataTable( {
+	          	responsive: true
+				/*
                 "responsive": {
                    "details": {
                        "display": $.fn.dataTable.Responsive.display.modal( {
@@ -123,9 +153,12 @@
                         "renderer": $.fn.dataTable.Responsive.renderer.tableAll()
                     }
                 }
+                */
             } );
-          
+
             $('#datatable').dataTable( {
+	          	responsive: true
+              /*
                 "responsive": {
                    "details": {
                        "display": $.fn.dataTable.Responsive.display.modal( {
@@ -137,6 +170,7 @@
                         "renderer": $.fn.dataTable.Responsive.renderer.tableAll()
                     }
                 }
+              */
             } );
 
 
@@ -148,8 +182,8 @@
 		    chart: {
 			    type: 'column'
 			},
-            exporting: { 
-                enabled: false 
+            exporting: {
+                enabled: false
             },
 		    title: {
 			    text: 'Grafik Kunjungan'
@@ -159,7 +193,7 @@
 			},
 		    xAxis: {
 		        categories: <?=json_encode($poli);?> ,
-								
+
 				title: {
 				    enabled: false
 				}
@@ -193,7 +227,7 @@
 				name: 'Poliklinik dan Rawat Jalan',
 				data: <?=json_encode($jumlah);?>
 			}]
-		});		
+		});
 	</script>
 
     <script type="text/javascript">
@@ -286,6 +320,40 @@
           },
           templateResult: formatData,
           minimumInputLength: 3
+        });
+
+        $('.kd_jenis_prw_lab').select2({
+            placeholder: 'Pilih Jenis',
+            ajax: {
+                url: 'includes/select-laboratorium.php',
+                dataType: 'json',
+                delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                cache: true
+            },
+            templateResult: formatData,
+            minimumInputLength: 3
+        });
+
+        $('.kd_jenis_prw_rad').select2({
+            placeholder: 'Pilih Jenis',
+            ajax: {
+                url: 'includes/select-radiology.php',
+                dataType: 'json',
+                delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    },
+                cache: true
+            },
+            templateResult: formatData,
+            minimumInputLength: 3
         });
 
         $(function () {
