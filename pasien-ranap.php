@@ -596,6 +596,28 @@ if(isset($_GET['no_rawat'])) {
 
     }
 
+    //delete
+    if($action == "delete_lab"){
+
+	$hapus = "DELETE FROM permintaan_pemeriksaan_lab WHERE noorder='{$_REQUEST['noorder']}' AND kd_jenis_prw='{$_REQUEST['kd_jenis_prw']}'";
+	$hasil = query($hapus);
+	if (($hasil)) {
+	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+	}
+
+    }
+
+    //delete
+    if($action == "delete_rad"){
+
+	$hapus = "DELETE FROM permintaan_pemeriksaan_radiologi WHERE noorder='{$_REQUEST['noorder']}' AND kd_jenis_prw='{$_REQUEST['kd_jenis_prw']}'";
+	$hasil = query($hapus);
+	if (($hasil)) {
+	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+	}
+
+    }
+
     ?>
 
         </div>
