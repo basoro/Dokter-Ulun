@@ -39,10 +39,9 @@ if(isset($_GET['no_rawat'])) {
                         </div>
                         <div class="table-responsive">
                           <div class="body">
-                            <table id="datatable" class="table responsive table-bordered table-striped table-hover display nowrap js-exportable" width="100%">
+                            <table id="datatable_ranap" class="table responsive table-bordered table-striped table-hover display nowrap js-exportable" width="100%">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
                                         <th>Nama</th>
                                         <th>Nomer MR</th>
                                         <th>Kamar</th>
@@ -88,14 +87,13 @@ if(isset($_GET['no_rawat'])) {
                                     AND
                                     	dpjp_ranap.kd_dokter = '{$_SESSION['username']}'
                                 ";
-                                $sql .= " ORDER BY kamar_inap.kd_kamar ASC";
+                                $sql .= " ORDER BY kamar_inap.tgl_masuk ASC";
                                 $result = query($sql);
         						$no = 1;
                                 while($row = fetch_array($result)) {
                                   $get_no_rawat = $row['6'];
                                 ?>
                                     <tr>
-                                        <td><?php echo $no; ?></td>
                                         <td><a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=view&no_rawat=<?php echo $row['6'];?>"><?php echo SUBSTR($row['0'], 0, 25).' ...'; ?></a></td>
                                         <td><?php echo $row['1']; ?></td>
                                         <td><?php echo $row['2']; ?></td>
@@ -144,6 +142,7 @@ if(isset($_GET['no_rawat'])) {
 
                         <div class="body">
                         <!-- Nav tabs -->
+                          	<div class="row">
                             <ul class="nav nav-tabs tab-nav-right" role="tablist">
                                 <li role="presentation" class="active"><a href="#riwayat" data-toggle="tab">RIWAYAT</a></li>
                                 <li role="presentation"><a href="#diagnosa" data-toggle="tab">DIAGNOSA</a></li>
@@ -151,6 +150,8 @@ if(isset($_GET['no_rawat'])) {
                                 <li role="presentation"><a href="#permintaanlab" data-toggle="tab">PERMINTAAN LAB</a></li>
                                 <li role="presentation"><a href="#permintaanrad" data-toggle="tab">PERMINTAAN RAD</a></li>
                             </ul>
+                          	</div>
+
                             <form method="post" action="">
                       	    <?php
                       	    if (isset($_POST['ok_diagnosa'])) {
@@ -199,7 +200,7 @@ if(isset($_GET['no_rawat'])) {
                                   if (($_POST['kode_obat'] <> "") and ($no_rawat <> "")) {
                             	    		$onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}'");
                                 			$dtonhand = fetch_array($onhand);
-                                			$get_number = fetch_array(query("SELECT max(no_resep) FROM resep_obat WHERE tgl_peresepan = '{$date}'"));
+                                			$get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
                                 			$lastNumber = substr($get_number[0], 0, 10);
                                 			$next_no_resep = sprintf('%010s', ($lastNumber + 1));
 
@@ -226,12 +227,12 @@ if(isset($_GET['no_rawat'])) {
                         <!-- Tab panes -->
                             <div class="tab-content m-t-20">
                                 <div role="tabpanel" class="tab-pane fade in active" id="riwayat">
-                                  <table id="riwayatmedis" class="table">
+                                  <table id="riwayatmedis" class="table row">
                                       <thead>
                                           <tr>
                                               <th>Tanggal</th>
                                               <th>Nomor Rawat</th>
-                                              <th>Klinik/Ruangan</th>
+                                              <th>Klinik/Ruangan/Dokter</th>
                                               <th>Keluhan</th>
                                               <th>Pemeriksaan</th>
                                               <th>Diagnosa</th>
@@ -254,8 +255,10 @@ if(isset($_GET['no_rawat'])) {
                                           <td>
                                             <?php
                                             if($status_lanjut_kunj == 'Ralan') {
-                                              $sql_poli = fetch_assoc(query("SELECT a.nm_poli FROM poliklinik a, reg_periksa b WHERE b.no_rawat = '$no_rawat_kunj' AND a.kd_poli = b.kd_poli"));
+                                              $sql_poli = fetch_assoc(query("SELECT a.nm_poli, c.nm_dokter FROM poliklinik a, reg_periksa b, dokter c WHERE b.no_rawat = '$no_rawat_kunj' AND a.kd_poli = b.kd_poli AND b.kd_dokter = c.kd_dokter"));
                                               echo $sql_poli['nm_poli'];
+                                              echo '<br>';
+                                              echo "(".$sql_poli['nm_dokter'].")";
                                             } else {
                                               echo 'Rawat Inap';
                                             }
@@ -342,7 +345,12 @@ if(isset($_GET['no_rawat'])) {
                                               <option value="2">Diagnosa Ke-2</option>
                                               <option value="3">Diagnosa Ke-3</option>
                                               <option value="4">Diagnosa Ke-4</option>
-                                              <option value="5">Diagnosa Ke-4</option>
+                                              <option value="5">Diagnosa Ke-5</option>
+                                              <option value="6">Diagnosa Ke-6</option>
+                                              <option value="7">Diagnosa Ke-7</option>
+                                              <option value="8">Diagnosa Ke-8</option>
+                                              <option value="9">Diagnosa Ke-9</option>
+                                              <option value="10">Diagnosa Ke-10</option>
                                           </select>
                                       </dd><br/>
                                       <dt></dt>
@@ -351,11 +359,11 @@ if(isset($_GET['no_rawat'])) {
                                       <dd>
       	                        		<ul style="list-style:none;margin-left:0;padding-left:0;">
       	                    		    <?php
-      	                    		    $query = query("SELECT a.kd_penyakit, b.nm_penyakit, a.prioritas FROM diagnosa_pasien a, penyakit b, reg_periksa c WHERE a.kd_penyakit = b.kd_penyakit AND a.no_rawat = '{$no_rawat}' AND a.no_rawat = c.no_rawat ORDER BY a.prioritas ASC");
+      	                    		    $query = query("SELECT a.kd_penyakit, b.nm_penyakit, a.prioritas, c.kd_dokter FROM diagnosa_pasien a, penyakit b, reg_periksa c WHERE a.kd_penyakit = b.kd_penyakit AND a.no_rawat = '{$no_rawat}' AND a.no_rawat = c.no_rawat ORDER BY a.prioritas ASC");
                                   		$no=1;
       	                    		    while ($data = fetch_array($query)) {
       	                    		    ?>
-              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[Hapus]</a></li>
+              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <?php if($data['3'] == $_SESSION['username']) { ?><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[Hapus]</a><?php } ?></li>
       	                    		    <?php
                                       		$no++;
       	                        		}
@@ -398,19 +406,23 @@ if(isset($_GET['no_rawat'])) {
                               <th>Nama Obat</th>
                               <th>Jumlah</th>
                               <th>Aturan Pakai</th>
+                              <th>Dokter</th>
+                              <th>Tanggal</th>
                               <th>Tools</th>
                           </tr>
                       </thead>
                       <tbody>
                       <?php
-                      $query_resep = query("SELECT a.kode_brng, a.jml, a.aturan_pakai, b.nama_brng, a.no_resep FROM resep_dokter a, databarang b, resep_obat c WHERE a.kode_brng = b.kode_brng AND a.no_resep = c.no_resep AND c.no_rawat = '{$no_rawat}' AND c.kd_dokter = '{$_SESSION['username']}' ");
+                      $query_resep = query("SELECT a.kode_brng, a.jml, a.aturan_pakai, b.nama_brng, a.no_resep, c.tgl_peresepan, d.nm_dokter, c.kd_dokter FROM resep_dokter a, databarang b, resep_obat c, dokter d WHERE a.kode_brng = b.kode_brng AND a.no_resep = c.no_resep AND c.no_rawat = '{$no_rawat}' AND c.kd_dokter = d.kd_dokter ORDER BY c.tgl_peresepan DESC");
                       while ($data_resep = fetch_array($query_resep)) {
                       ?>
                           <tr>
                               <td><?php echo $data_resep['3']; ?></td>
                               <td><?php echo $data_resep['1']; ?></td>
                               <td><?php echo $data_resep['2']; ?></td>
-                              <td><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">Hapus</a></td>
+                              <td><?php echo $data_resep['6']; ?></td>
+                              <td><?php echo $data_resep['5']; ?></td>
+                              <td><?php if($data_resep['5'] == $date) { if($data_resep['7'] == $_SESSION['username']) { ?><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">Hapus</a><?php } } ?></td>
                           </tr>
                       <?php
                       }

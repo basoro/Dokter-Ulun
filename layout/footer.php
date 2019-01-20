@@ -61,7 +61,7 @@
     <script src="plugins/jquery-countto/jquery.countTo.js"></script>
 
     <!-- Highcharts Plugin Js -->
-	<script src="plugins/highcharts/highcharts.js"></script>
+	  <script src="plugins/highcharts/highcharts.js"></script>
     <script src="plugins/highcharts/exporting.js"></script>
 
     <!-- Autosize Plugin Js -->
@@ -85,11 +85,11 @@
     <!-- Bootstrap Material Datetime Picker Plugin Js -->
     <script src="plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
 
-    <script src="js/jquery-ui.min.js"></script>
-    <script src="js/select2.min.js"></script>
+    <script src="assets/js/jquery-ui.min.js"></script>
+    <script src="assets/js/select2.min.js"></script>
 
     <!-- Custom Js -->
-    <script src="js/admin.js"></script>
+    <script src="assets/js/admin.js"></script>
 
 	  <script>
 
@@ -173,6 +173,18 @@
               */
             } );
 
+            $('#datatable_ralan').dataTable( {
+	          	responsive: true,
+				order: [[ 2, 'asc' ]]
+            } );
+            $('#datatable_ranap').dataTable( {
+	          	responsive: true,
+				order: [[ 4, 'asc' ]]
+            } );
+            $('#datatable_booking').dataTable( {
+	          	responsive: true,
+				order: [[ 1, 'asc' ]]
+            } );
 
         } );
 	</script>

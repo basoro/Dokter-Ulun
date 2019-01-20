@@ -39,10 +39,9 @@ if(isset($_GET['no_rawat'])) {
                         </div>
                         <div class="table-responsive">
                           <div class="body">
-                            <table id="datatable" class="table table-bordered table-striped table-hover display nowrap">
+                            <table id="datatable_ralan" class="table table-bordered table-striped table-hover display nowrap">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
                                         <th>Nama Pasien</th>
                                         <th>Dokter Tujuan</th>
                                         <th>No. Antrian</th>
@@ -63,7 +62,6 @@ if(isset($_GET['no_rawat'])) {
         						$no = 1;
 								while($row = fetch_array($sql)){
 		    						echo '<tr>';
-		    						echo '<td>'.$no.'</td>';
 		    						echo '<td>';
 		    						echo '<a href="'.$_SERVER['PHP_SELF'].'?action=view&no_rawat='.$row['4'].'" class="title">'.ucwords(strtolower(SUBSTR($row['0'], 0, 20))).' ...</a>';
 		    						echo '</td>';
@@ -145,11 +143,11 @@ if(isset($_GET['no_rawat'])) {
                                 $errors[] = 'Sudah ada diagnosa yang sama.';
                             }
 
-                            if (!empty($cek_prioritas_primer)) {
-                                $errors[] = 'Sudah ada prioritas primer.';
+                            //if (!empty($cek_prioritas_primer)) {
+                            //    $errors[] = 'Sudah ada prioritas primer.';
                             //} else if (!empty($cek_prioritas)) {
                             //    $errors[] = 'Sudah ada prioritas yang sama sebelumnya.';
-                            }
+                            //}
 
                             if(!empty($errors)) {
 
@@ -173,9 +171,10 @@ if(isset($_GET['no_rawat'])) {
                               if (($_POST['kode_obat'] <> "") and ($no_rawat <> "")) {
                                   $onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}'");
                                   $dtonhand = fetch_array($onhand);
-                                  $get_number = fetch_array(query("SELECT max(no_resep) FROM resep_obat WHERE tgl_peresepan = '{$date}'"));
+                                  $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
                             			$lastNumber = substr($get_number[0], 0, 10);
                             			$next_no_resep = sprintf('%010s', ($lastNumber + 1));
+                                  //$next_no_resep = $get_number + 1;
 
                                   if ($dtonhand['0'] > 1) {
                                     if ($_POST['aturan_pakai_lainnya'] == "") {
@@ -199,6 +198,7 @@ if(isset($_GET['no_rawat'])) {
 
                         <div class="body">
                             <!-- Nav tabs -->
+                          	<div class="row">
                             <ul class="nav nav-tabs tab-nav-right" role="tablist">
                                 <li role="presentation" class="active"><a href="#riwayat" data-toggle="tab">RIWAYAT</a></li>
                                 <li role="presentation"><a href="#diagnosa" data-toggle="tab">DIAGNOSA</a></li>
@@ -206,16 +206,17 @@ if(isset($_GET['no_rawat'])) {
                                 <li role="presentation"><a href="#permintaanlab" data-toggle="tab">PERMINTAAN LAB</a></li>
                                 <li role="presentation"><a href="#permintaanrad" data-toggle="tab">PERMINTAAN RAD</a></li>
                             </ul>
+                          	</div>
 
                             <!-- Tab panes -->
-                            <div class="tab-content">
+                            <div class="tab-content m-t-20">
                                 <div role="tabpanel" class="tab-pane fade in active" id="riwayat">
                                   <table id="riwayatmedis" class="table">
                                       <thead>
                                           <tr>
                                               <th>Tanggal</th>
                                               <th>Nomor Rawat</th>
-                                              <th>Klinik/Ruangan</th>
+                                              <th>Klinik/Ruangan/Dokter</th>
                                               <th>Keluhan</th>
                                               <th>Pemeriksaan</th>
                                               <th>Diagnosa</th>
@@ -238,8 +239,10 @@ if(isset($_GET['no_rawat'])) {
                                           <td>
                                             <?php
                                             if($status_lanjut_kunj == 'Ralan') {
-                                              $sql_poli = fetch_assoc(query("SELECT a.nm_poli FROM poliklinik a, reg_periksa b WHERE b.no_rawat = '$no_rawat_kunj' AND a.kd_poli = b.kd_poli"));
+                                              $sql_poli = fetch_assoc(query("SELECT a.nm_poli, c.nm_dokter FROM poliklinik a, reg_periksa b, dokter c WHERE b.no_rawat = '$no_rawat_kunj' AND a.kd_poli = b.kd_poli AND b.kd_dokter = c.kd_dokter"));
                                               echo $sql_poli['nm_poli'];
+                                              echo '<br>';
+                                              echo "(".$sql_poli['nm_dokter'].")";
                                             } else {
                                               echo 'Rawat Inap';
                                             }
@@ -326,7 +329,12 @@ if(isset($_GET['no_rawat'])) {
                                               <option value="2">Diagnosa Ke-2</option>
                                               <option value="3">Diagnosa Ke-3</option>
                                               <option value="4">Diagnosa Ke-4</option>
-                                              <option value="5">Diagnosa Ke-4</option>
+                                              <option value="5">Diagnosa Ke-5</option>
+                                              <option value="6">Diagnosa Ke-6</option>
+                                              <option value="7">Diagnosa Ke-7</option>
+                                              <option value="8">Diagnosa Ke-8</option>
+                                              <option value="9">Diagnosa Ke-9</option>
+                                              <option value="10">Diagnosa Ke-10</option>
                                           </select>
                                       </dd><br/>
                                       <dt></dt>

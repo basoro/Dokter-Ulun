@@ -28,10 +28,12 @@ include_once('layout/header.php');
                         </div>
                         <div class="body table-responsive">
                             <div id="buttons" class="align-center m-l-10 m-b-15 export-hidden"></div>
-                            <table id="datatable" class="table responsive table-bordered table-striped table-hover display nowrap js-exportable" width="100%">
+                            <table id="datatable_booking" class="table table-bordered table-striped table-hover display nowrap">
                                 <thead>
                                     <tr>
                                         <th>Nama Pasien</th>
+                                        <th>Antrian</th>
+                                        <th>Dokter</th>
                                         <th>No. RM</th>
                                         <th>Alamat</th>
                                         <th>Tgl. Periksa</th>
@@ -41,12 +43,13 @@ include_once('layout/header.php');
                                 <tbody>
                                 <?php
                                 //$sql = "SELECT a.nm_pasien, b.no_rkm_medis, a.alamat, c.png_jawab, d.nm_poli, b.no_reg, b.tanggal_booking, b.jam_booking FROM pasien a, booking_registrasi b, penjab c, poliklinik d WHERE a.no_rkm_medis = b.no_rkm_medis AND b.kd_pj = c.kd_pj AND b.kd_poli = '{$_SESSION['jenis_poli']}'";
-                                $sql = "SELECT a.nm_pasien, b.no_rkm_medis, a.alamat, b.tanggal_periksa, c.png_jawab FROM pasien a, booking_registrasi b, penjab c WHERE a.no_rkm_medis = b.no_rkm_medis AND b.kd_poli = '{$_SESSION['jenis_poli']}' AND b.kd_pj = c.kd_pj";
+                                $sql = "SELECT a.nm_pasien, b.no_reg, d.nm_dokter, b.no_rkm_medis, a.alamat, b.tanggal_periksa, c.png_jawab FROM pasien a, booking_registrasi b, penjab c, dokter d WHERE a.no_rkm_medis = b.no_rkm_medis AND b.kd_poli = '{$_SESSION['jenis_poli']}' AND b.kd_pj = c.kd_pj AND b.kd_dokter = d.kd_dokter";
                                 if(isset($_POST['tgl_awal']) && isset($_POST['tgl_akhir'])) {
                                 	$sql .= " AND b.tanggal_periksa BETWEEN '$_POST[tgl_awal]' AND '$_POST[tgl_akhir]'";
                                 } else {
                                   	$sql .= " AND b.tanggal_periksa = '$date'";
                                 }
+                                $sql .= " ORDER BY b.no_reg ASC";
                                 $query = query($sql);
                                 while($row = fetch_array($query)) {
                                 ?>
@@ -56,6 +59,8 @@ include_once('layout/header.php');
                                         <td><?php echo $row['2']; ?></td>
                                         <td><?php echo $row['3']; ?></td>
                                         <td><?php echo $row['4']; ?></td>
+                                        <td><?php echo $row['5']; ?></td>
+                                        <td><?php echo $row['6']; ?></td>
                                     </tr>
                                 <?php
                                 }

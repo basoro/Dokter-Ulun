@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /***
 * e-Dokter from version 0.1 Beta
@@ -9,7 +9,7 @@
 * File : login.php
 * Description : Login, cookie and session process
 * Licence under GPL
-***/ 
+***/
 
 ob_start();
 session_start();
@@ -35,10 +35,10 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Google Fonts -->
-    <link href="css/roboto.css" rel="stylesheet">
+    <link href="assets/css/roboto.css" rel="stylesheet">
 
     <!-- Material Icon Css -->
-    <link href="css/material-icon.css" rel="stylesheet">
+    <link href="assets/css/material-icon.css" rel="stylesheet">
 
     <!-- Bootstrap Core Css -->
     <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
@@ -50,14 +50,14 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     <link href="plugins/animate-css/animate.css" rel="stylesheet" />
 
     <!-- Custom Css -->
-    <link href="css/style.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
-    <link href="css/all-themes.min.css" rel="stylesheet" />
+    <link href="assets/css/all-themes.min.css" rel="stylesheet" />
 </head>
 
 <body class="login-page">
-<?php 
+<?php
   if(PRODUCTION == 'YES') {
 ?>
     <!-- Page Loader -->
@@ -79,53 +79,53 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     <!-- #END# Page Loader -->
 <?php
   }
-?>    
+?>
     <div class="login-box" style="margin: 20px;">
         <div class="logo">
-            <div class="align-center p-b-15"><img src="images/logo-hst.png"></div>
+            <div class="align-center p-b-15"><img src="assets/images/logo-hst.png"></div>
             <a href="index.php"><?php echo $dataSettings['nama_instansi']; ?></a>
             <small><?php echo $dataSettings['alamat_instansi']; ?> - <?php echo $dataSettings['kabupaten']; ?></small>
         </div>
 
-    <?php if(!isset($_GET['action'])){ 
+    <?php if(!isset($_GET['action'])){
 
-        if($_SERVER['REQUEST_METHOD'] == "POST") { 
+        if($_SERVER['REQUEST_METHOD'] == "POST") {
 
             if (empty ($_POST['username']) || empty ($_POST['password'])) {
-                $errors[] = 'Username or password empty'; 
+                $errors[] = 'Username or password empty';
             }
 
-            if ($_POST['username'] !=="" || $_POST['password'] !=="") { 
+            if ($_POST['username'] !=="" || $_POST['password'] !=="") {
 
                 $sql = "SELECT AES_DECRYPT(id_user,'nur') as id_user, AES_DECRYPT(password,'windi') as password FROM user WHERE id_user = AES_ENCRYPT('{$_POST['username']}','nur')";
                 $found = query($sql);
-            
+
                 if(num_rows($found) !== 1) {
                     $errors[] = 'Kode dokter tidak terdaftar atau tidak aktif.';
-                }    
+                }
 
-                if(num_rows($found) == 1) { 
+                if(num_rows($found) == 1) {
                     $user = fetch_assoc($found);
         		    if($user['password'] !== $_POST['password']) {
                         $errors[] = 'Kata kunci tidak valid.';
-                    }    
-                }    
+                    }
+                }
 
             }
 
-            if(!empty($errors)) { 
+            if(!empty($errors)) {
 
                 foreach($errors as $error) {
                     echo validation_errors($error);
                 }
 
-            } else { 
+            } else {
 
                 if (isset($_POST['remember'])) {
                     /* Set cookie to last 1 year */
                     setcookie('username', $_POST['username'], time()+60*60*24*365);
                     setcookie('password', $_POST['password'], time()+60*60*24*365);
-        
+
                 } else {
                     /* Cookie expires when browser closes */
                     setcookie('username', $_POST['username'], false);
@@ -135,11 +135,11 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
                 redirect('index.php');
 
             }
-        
+
         }
         ?>
 
-        <div class="card">        
+        <div class="card">
             <div class="body">
                 <form id="sign_in" method="POST">
                     <div class="msg">Silahkan login dulu untuk memulai</div>
@@ -175,20 +175,20 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
 
     <?php
     //logout
-    if(isset($_GET['action']) == "logout"){ 
+    if(isset($_GET['action']) == "logout"){
 
         setcookie('username', '', time()-60*60*24*365);
         setcookie('password', '', time()-60*60*24*365);
 
-        unset($_SESSION['username']); 
+        unset($_SESSION['username']);
         unset($_SESSION['level']);
         unset($_SESSION['jenis_poli']);
-        $_SESSION = array(); 
-        session_destroy(); 
+        $_SESSION = array();
+        session_destroy();
 
-        redirect('login.php'); 
+        redirect('login.php');
 
-    } 
+    }
     ?>
         </div>
     </div>
@@ -206,7 +206,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     <script src="plugins/jquery-validation/jquery.validate.js"></script>
 
     <!-- Custom Js -->
-    <script src="js/admin.js"></script>
+    <script src="assets/js/admin.js"></script>
 </body>
 
 </html>
