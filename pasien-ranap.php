@@ -363,7 +363,7 @@ if(isset($_GET['no_rawat'])) {
                                   		$no=1;
       	                    		    while ($data = fetch_array($query)) {
       	                    		    ?>
-              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <?php if($data['3'] == $_SESSION['username']) { ?><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[Hapus]</a><?php } ?></li>
+              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <?php if($data['3'] == $_SESSION['username']) { ?><a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a><?php } ?></li>
       	                    		    <?php
                                       		$no++;
       	                        		}
@@ -408,7 +408,6 @@ if(isset($_GET['no_rawat'])) {
                               <th>Aturan Pakai</th>
                               <th>Dokter</th>
                               <th>Tanggal</th>
-                              <th>Tools</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -417,12 +416,11 @@ if(isset($_GET['no_rawat'])) {
                       while ($data_resep = fetch_array($query_resep)) {
                       ?>
                           <tr>
-                              <td><?php echo $data_resep['3']; ?></td>
+                              <td><?php echo $data_resep['3']; ?> <?php if($data_resep['5'] == $date) { if($data_resep['7'] == $_SESSION['username']) { ?><a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a><?php } } ?></td>
                               <td><?php echo $data_resep['1']; ?></td>
                               <td><?php echo $data_resep['2']; ?></td>
                               <td><?php echo $data_resep['6']; ?></td>
                               <td><?php echo $data_resep['5']; ?></td>
-                              <td><?php if($data_resep['5'] == $date) { if($data_resep['7'] == $_SESSION['username']) { ?><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">Hapus</a><?php } } ?></td>
                           </tr>
                       <?php
                       }

@@ -347,7 +347,7 @@ if(isset($_GET['no_rawat'])) {
                                   		$no=1;
       	                    		    while ($data = fetch_array($query)) {
       	                    		    ?>
-              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[Hapus]</a></li>
+              	                              <li><?php echo $no; ?>. <?php echo $data['1']; ?> <a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_diagnosa&kode=<?php echo $data['0']; ?>&prioritas=<?php echo $data['2']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></li>
       	                    		    <?php
                                       		$no++;
       	                        		}
@@ -389,7 +389,6 @@ if(isset($_GET['no_rawat'])) {
                               <th>Nama Obat</th>
                               <th>Jumlah</th>
                               <th>Aturan Pakai</th>
-                              <th>Tools</th>
                           </tr>
                       </thead>
                       <tbody>
@@ -398,10 +397,9 @@ if(isset($_GET['no_rawat'])) {
                       while ($data_resep = fetch_array($query_resep)) {
                       ?>
                           <tr>
-                              <td><?php echo $data_resep['3']; ?></td>
+                              <td><?php echo $data_resep['3']; ?> <a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
                               <td><?php echo $data_resep['1']; ?></td>
                               <td><?php echo $data_resep['2']; ?></td>
-                              <td><a href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">Hapus</a></td>
                           </tr>
                       <?php
                       }
