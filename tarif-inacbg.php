@@ -36,9 +36,17 @@ include_once('layout/sidebar.php');
                             <form name="frm_aturadmin" onsubmit="return validasiIsi();" method="post" action="" enctype=multipart/form-data>
                               <dl class="dl-horizontal">
                                 <dt>Diagnosa</dt>
-                                <dd><select name="diagnosa[]" class="kd_diagnosa" multiple="multiple" style="width:100%"></select></dd><br>
+                                <dd>
+                                  <select name="diagnosa[]" class="kd_diagnosa" multiple="multiple" style="width:100%"></select>
+                                  <p class="small">* Wajib diisi</p>
+                                </dd>
+                                <br>
                                 <dt>Prosedur</dt>
-                                <dd><select name="prosedur[]" class="kd_prosedur" multiple="multiple" style="width:100%"></select></dd><br>
+                                <dd>
+                                  <select name="prosedur[]" class="kd_prosedur" multiple="multiple" style="width:100%"></select>
+                                  <p class="small">* Wajib diisi</p>
+                                </dd>
+                                <br>
                                 <dt>Jenis Rawat</dt>
                                 <dd>
                                   <select class="form-control show-tick"  name="jenis_rawat" style="width:100%">
@@ -77,7 +85,7 @@ include_once('layout/sidebar.php');
 
                                   $diagnosa="";
                                   $a=1;
-				                  $get = $_POST['diagnosa'];
+				                          $get = $_POST['diagnosa'];
                                   foreach ($get as $key => $value) {
                                     if($a==1){
                                       $diagnosa=$value;
@@ -89,7 +97,7 @@ include_once('layout/sidebar.php');
 
                                   $prosedur="";
                                   $a=1;
-				                  $get = $_POST['prosedur'];
+				                          $get = $_POST['prosedur'];
                                   foreach ($get as $key => $value) {
                                     $value = substr($value, 0, 2) . '.' . substr($value, 2);
                                     if($a==1){
