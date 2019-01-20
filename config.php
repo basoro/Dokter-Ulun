@@ -75,7 +75,7 @@ $time       = date('H:i:s');
 $date_time  = date('Y-m-d H:i:s');
 
 // Get settings
-$getSettings = query("SELECT * FROM setting");
+$getSettings = query("SELECT nama_instansi, alamat_instansi, kabupaten, propinsi FROM setting");
 $dataSettings = fetch_assoc($getSettings);
 
 // Get jenis poli
