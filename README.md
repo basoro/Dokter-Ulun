@@ -1,2 +1,2 @@
 # Dokter-Ulun
-Aplikasi e-Dokter uituk SIMRS Khanza
+Aplikasi e-Dokter untuk SIMRS Khanza
