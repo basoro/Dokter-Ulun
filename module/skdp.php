@@ -2,7 +2,6 @@
   <?php
   if(isset($_POST['ok_skdp'])){
     if(($no_rawat <> "")){
-      if($_SESSION['username'] == "DR00015") {echo "<script type='text/javascript'>alert('Maaf fitur ini dinonaktifkan, silahkan hubungi Kabid Pelayanan Medik');</script>";}else{
         
       $insert = query("INSERT INTO skdp_bpjs VALUES ('{$year}','{$no_rkm_medis}','{$_POST['dx']}','{$_POST['terapi']}','{$_POST['alasan']}','-','{$_POST['tlj']}','-','{$_POST['tgl']}'
                   ,'{$date}','{$_POST['noan']}','{$_SESSION['username']}','Menunggu')");
@@ -11,7 +10,6 @@
                     ,'{$date_time}','Belum')");
         redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
       }
-    }
     }
   }
   ?>
