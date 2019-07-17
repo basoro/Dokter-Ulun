@@ -136,6 +136,23 @@
                 weekStart: 1,
                 time: false
             });
+          
+          	$(".tglprk").bootstrapMaterialDatePicker({
+                format: 'YYYY-MM-DD',
+                clearButton: true,
+                weekStart: 1,
+                time: false
+            }).on("change", function(e) {
+                var kode = $("#tglprk").val();
+                $.ajax({
+                    url: './includes/noreg.php',
+                    data: "kode="+kode,
+                }).success(function (data){
+                var json = data,
+                    obj = JSON.parse(json);
+                        $('#noreg').val(obj.noreg);
+                });
+            });
 
             $('.count-to').countTo();
 

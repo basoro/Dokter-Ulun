@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 /***
 * e-Dokter from version 0.1 Beta
@@ -13,27 +13,27 @@
 
 if (preg_match ('/config.php/', basename($_SERVER['PHP_SELF']))) die ('Unable to access this script directly from browser!');
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'sik');
+define('DB_HOST', '192.168.0.250');
+define('DB_USER', 'rshd_sik');
+define('DB_PASS', 'Murakata04');
+define('DB_NAME', 'rshd_sik');
 
-$connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME); 
 
 define('VERSION', '0.1 Beta');
 define('URL', '');
 define('DIR', '');
-define('PRODUCTION', 'NO'); // YES to hide error page. NO to display error page.
-define('SIMRSURL', 'http://localhost/webapps');
+define('PRODUCTION', 'YES'); // YES to hide error page. NO to display error page.
+define('SIMRSURL', 'http://simrs.rshdbarabai.com');
 
 // INACBG's and VClaim Configurations
-define('INACBG_KEYRS', '');
-define('INACBG_URLWS', '');
-define('NO_RM', ' ');
-define('NO_PESERTA', '');
-define('SEP', '');
-define('NIK_KODER', '');
-define('TIPE_RS', '');
+define('INACBG_KEYRS', '1c57226a5be815d1ae1900e722814b00d14f971780c0ead88d9fc1e9a731d4dd');
+define('INACBG_URLWS', 'http://192.168.0.248/E-Klaim/ws.php');
+define('NO_RM', '0015636 ');
+define('NO_PESERTA', '1708R00801150001177');
+define('SEP', '0000172684247');
+define('NIK_KODER', '6307061604860001');
+define('TIPE_RS', 'CP');
 
 function escape($string) {
     global $connection;
@@ -69,12 +69,13 @@ function num_rows($result) {
 // Get date and time
 
 date_default_timezone_set('Asia/Makassar');
+$year       = date('Y');
 $month      = date('Y-m');
 $date       = date('Y-m-d');
 $time       = date('H:i:s');
 $date_time  = date('Y-m-d H:i:s');
 
-// Get settings
+// Get settings 
 $getSettings = query("SELECT nama_instansi, alamat_instansi, kabupaten, propinsi FROM setting");
 $dataSettings = fetch_assoc($getSettings);
 
@@ -118,3 +119,6 @@ function validation_errors($error) {
     $errors = '<div class="alert bg-pink alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'.$error.'</div>';
     return $errors;
 }
+
+
+
