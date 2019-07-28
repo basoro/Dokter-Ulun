@@ -64,6 +64,12 @@
                         </ul>
                     </li>
                     <li>
+                        <a href="statistik.php">
+                            <i class="material-icons">trending_up</i>
+                            <span>Statistik</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="tarif-inacbg.php">
                             <i class="material-icons">attach_money</i>
                             <span>Cek Tarif INACBG's</span>

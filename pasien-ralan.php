@@ -251,7 +251,7 @@ if(isset($_GET['no_rawat'])) {
                 <!-- riwayat -->
                 <!-- anamnese -->
                   <div class="tab-pane fade" role="tabpanel" id="anamnese">
-                    <?php include_once ('module/anamnese.php');?>
+                    <?php include_once ('./module/anamnese.php');?>
                   </div>
                 <!-- anamnese -->
                 <!-- diagnosa -->

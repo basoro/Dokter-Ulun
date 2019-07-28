@@ -79,7 +79,9 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
 
     <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
     <link rel="stylesheet" href="assets/css/select2.min.css">
- 	  <link href="plugins/light-gallery/css/lightgallery.css" rel="stylesheet">
+    <link href="plugins/light-gallery/css/lightgallery.css" rel="stylesheet">
+    <!-- Morris Css -->
+    <link href="plugins/morrisjs/morris.css" rel="stylesheet" />
 
     <!-- Custom Css -->
     <link href="assets/css/style.css" rel="stylesheet">
