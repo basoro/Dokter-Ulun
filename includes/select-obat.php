@@ -18,7 +18,8 @@ include_once('../config.php');
  
 $q = $_GET['q'];
  
-$sql = query("SELECT kode_brng AS id, nama_brng AS text FROM databarang WHERE (kode_brng LIKE '%".$q."%' OR nama_brng LIKE '%".$q."%')");
+$sql = query("SELECT a.kode_brng AS id, a.nama_brng AS text FROM databarang a WHERE status = '1' AND (a.kode_brng LIKE '%".$q."%' OR a.nama_brng LIKE '%".$q."%')");
+//$sql = query("SELECT a.kode_brng AS is, b.nama_brng AS text FROM riwayat_barang_medis a, databarang b WHERE (b.kode_brng LIKE '%".$q."%' OR b.nama_brng LIKE '%".$q."%') AND a.jam IN (SELECT MAX(a.jam) FROM riwayat_barang_medis a WHERE a.tanggal IN (SELECT MAX(a.tanggal) FROM riwayat_barang_medis a))");
 $json = [];
 
 while($row = fetch_assoc($sql)){

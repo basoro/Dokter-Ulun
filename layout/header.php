@@ -80,6 +80,7 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
     <link rel="stylesheet" href="assets/css/jquery-ui.min.css">
     <link rel="stylesheet" href="assets/css/select2.min.css">
     <link href="plugins/light-gallery/css/lightgallery.css" rel="stylesheet">
+
     <!-- Morris Css -->
     <link href="plugins/morrisjs/morris.css" rel="stylesheet" />
 
@@ -88,6 +89,16 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
     <link href="assets/css/all-themes.min.css" rel="stylesheet" />
+  <style>
+.back-to-top {
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display:none;
+}
+  </style>
+
 </head>
 
 <body class="theme-green">

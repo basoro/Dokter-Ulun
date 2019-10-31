@@ -3,6 +3,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nama Pasien</th>
+                                      	<th>No RM</th>
                                         <th>Dokter Tujuan</th>
                                         <th>No. Antrian</th>
                                         <th>Status</th>
@@ -25,6 +26,7 @@
 		    						echo '<td>';
 		    						echo '<a href="'.$_SERVER['PHP_SELF'].'?action=view&no_rawat='.$row['4'].'" class="title">'.ucwords(strtolower(SUBSTR($row['0'], 0, 20))).' ...</a>';
 		    						echo '</td>';
+                                  	echo '<td>'.$row['3'].'</td>';
 		    						echo '<td>'.$row['1'].'</td>';
 		    						echo '<td>'.$row['2'].'</td>';
 		    						echo '<td>'.$row['5'].'</td>';
