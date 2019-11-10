@@ -73,17 +73,19 @@
     <thead>
         <tr>
             <th>Nama Obat</th>
+            <th>Tanggal/Jam</th>
             <th>Jumlah</th>
             <th>Aturan Pakai</th>
         </tr>
     </thead>
     <tbody>
     <?php
-    $query_resep = query("SELECT a.kode_brng, a.jml, a.aturan_pakai, b.nama_brng, a.no_resep FROM resep_dokter a, databarang b, resep_obat c WHERE a.kode_brng = b.kode_brng AND a.no_resep = c.no_resep AND c.no_rawat = '{$no_rawat}' AND c.kd_dokter = '{$_SESSION['username']}' ");
+    $query_resep = query("SELECT a.kode_brng, a.jml, a.aturan_pakai, b.nama_brng, a.no_resep, c.tgl_peresepan, c.jam_peresepan FROM resep_dokter a, databarang b, resep_obat c WHERE a.kode_brng = b.kode_brng AND a.no_resep = c.no_resep AND c.no_rawat = '{$no_rawat}' AND c.kd_dokter = '{$_SESSION['username']}' ");
     while ($data_resep = fetch_array($query_resep)) {
     ?>
         <tr>
             <td><?php echo $data_resep['3']; ?> <a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat&kode_obat=<?php echo $data_resep['0']; ?>&no_resep=<?php echo $data_resep['4']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
+            <td><?php echo $data_resep['5']; ?> <?php echo $data_resep['6']; ?></td>
             <td><?php echo $data_resep['1']; ?></td>
             <td><?php echo $data_resep['2']; ?></td>
         </tr>

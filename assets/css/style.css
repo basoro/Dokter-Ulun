@@ -4110,8 +4110,13 @@ section.content {
 
 /* Nav Tabs ==================================== */
 .nav-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: -webkit-box;
+  display: -moz-box;
   border-bottom: 2px solid #eee; }
-  .nav-tabs > li {
+  .nav-tabs > li { 
+    float: none;
     position: relative;
     top: 3px;
     left: -2px; }

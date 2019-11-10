@@ -1,5 +1,5 @@
 
-                            <table id="datatable_ralan" class="table table-bordered table-striped table-hover display nowrap">
+                            <table id="datatable" class="table table-bordered table-striped table-hover display nowrap" width="100%">
                                 <thead>
                                     <tr>
                                         <th>Nama Pasien</th>
@@ -24,7 +24,7 @@
 								while($row = fetch_array($sql)){
 		    						echo '<tr>';
 		    						echo '<td>';
-		    						echo '<a href="'.$_SERVER['PHP_SELF'].'?action=view&no_rawat='.$row['4'].'" class="title">'.ucwords(strtolower(SUBSTR($row['0'], 0, 20))).' ...</a>';
+		    						echo '<a href="'.$_SERVER['PHP_SELF'].'?action=rujuk_internal&no_rawat='.$row['4'].'" class="title">'.ucwords(strtolower(SUBSTR($row['0'], 0, 20))).' ...</a>';
 		    						echo '</td>';
                                   	echo '<td>'.$row['3'].'</td>';
 		    						echo '<td>'.$row['1'].'</td>';

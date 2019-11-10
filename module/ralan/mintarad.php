@@ -11,6 +11,9 @@
           echo $next_no_order;
           $insert = query("INSERT INTO permintaan_radiologi VALUES ('{$next_no_order}', '{$no_rawat}', '{$date}', '{$time}', '0000-00-00', '00:00:00', '0000-00-00', '00:00:00', '{$_SESSION['username']}', 'ralan')");
           if($insert) {
+            if($_POST['klinis'] <> "") {
+                $insert_klinis = query("INSERT INTO diagnosa_pasien_klinis VALUES ('{$next_no_order}', '{$_POST['klinis']}')");
+            }
             $get_kd_jenis_prw = $_POST['kd_jenis_prw_rad'];
             for ($i = 0; $i < count($get_kd_jenis_prw); $i++) {
                 $kd_jenis_prw = $get_kd_jenis_prw[$i];
@@ -23,6 +26,8 @@
   }
   ?>
 <dl class="dl-horizontal">
+    <dt>Klinis</dt>
+    <dd><input name="klinis" class="form-control" style="width:100%"></dd><br/>  
     <dt>Jenis Pemeriksaan</dt>
     <dd><select name="kd_jenis_prw_rad[]" class="kd_jenis_prw_rad" multiple="multiple" style="width:100%"></select></dd><br/>
     <dt></dt>

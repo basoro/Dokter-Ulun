@@ -3,7 +3,7 @@
 include_once ('layout/header.php');
 
 if(isset($_GET['no_rawat'])) {
-    $_sql = "SELECT a.no_rkm_medis, a.no_rawat, b.nm_pasien, b.umur, a.status_lanjut , a.kd_pj, c.png_jawab, b.tgl_lahir FROM reg_periksa a, pasien b, penjab c WHERE a.no_rkm_medis = b.no_rkm_medis AND a.no_rawat = '$_GET[no_rawat]' AND a.kd_pj = c.kd_pj";
+    $_sql = "SELECT a.no_rkm_medis, a.no_rawat, b.nm_pasien, b.umur, a.status_lanjut , a.kd_pj, c.png_jawab, b.tgl_lahir, d.nm_dokter, e.nm_poli FROM reg_periksa a, pasien b, penjab c, dokter d, poliklinik e WHERE a.no_rkm_medis = b.no_rkm_medis AND a.no_rawat = '$_GET[no_rawat]' AND a.kd_pj = c.kd_pj AND a.kd_dokter = d.kd_dokter AND a.kd_poli = e.kd_poli";
     $found_pasien = query($_sql);
     if(num_rows($found_pasien) == 1) {
 	     while($row = fetch_array($found_pasien)) {
@@ -16,6 +16,9 @@ if(isset($_GET['no_rawat'])) {
           $kd_pj         = $row['5'];
            $png_jawab = $row['6'];
            $tgl_lahir = $row['7'];
+           $nama_dokter = $row['8'];
+           $nama_poli = $row['9'];
+
 	     }
     } else {
 	redirect ("{$_SERVER['PHP_SELF']}");
@@ -25,6 +28,7 @@ if(isset($_GET['no_rawat'])) {
 <section class="content">
   <div class="container-fluid">
     <?php $action = isset($_GET['action'])?$_GET['action']:null; ?>
+    <?php $do = isset($_GET['do'])?$_GET['do']:null; ?>
     <?php if(!$action){  ?>
       <!-- Menu Utama -->
       <div class="row">
@@ -86,27 +90,25 @@ if(isset($_GET['no_rawat'])) {
                         ?>
                       </tbody>
                     </table>
+                    <form method="POST" action="">
+                      <div class="row clearfix">
+                        <div class="col-xs-8 col-lg-10">
+                          <div class="form-group">
+                            <div class="form-line">
+                              <input type="text" class="datepicker form-control" name="tanggal" placeholder="Pilih tanggal...">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-xs-4 col-lg-2">
+                          <input type="submit" class="btn btn-primary btn-lg m-l-15 waves-effect" value="Submit">
+                        </div>
+                      </div>
+                    </form>
+
                   </div>
                   <div role="tabpanel" class="tab-pane fade in" id="intern">
                     <?php include_once ('intern.php');?>
                   </div>
-                </div>
-                <!--tab utama -->
-                <div class="body">
-                  <form method="POST" action="">
-                    <div class="row clearfix">
-                      <div class="col-xs-8 col-lg-10">
-                        <div class="form-group">
-                          <div class="form-line">
-                            <input type="text" class="datepicker form-control" name="tanggal" placeholder="Pilih tanggal...">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-xs-4 col-lg-2">
-                        <input type="submit" class="btn btn-primary btn-lg m-l-15 waves-effect" value="Submit">
-                      </div>
-                    </div>
-                  </form>
                 </div>
               </div>
             </div>
@@ -151,6 +153,7 @@ if(isset($_GET['no_rawat'])) {
                   <li role="presentation"><a href="#permintaanlab" data-toggle="tab">PERMINTAAN LAB</a></li>
                   <li role="presentation"><a href="#permintaanrad" data-toggle="tab">PERMINTAAN RAD</a></li>
                   <li role="presentation"><a href="#catatan_dokter" data-toggle="tab">CATATAN</a></li>
+                  <li role="presentation"><a href="#rujuk_internal" data-toggle="tab">RUJUK INTERNAL</a></li>
                   <li role="presentation"><a href="#skdp" data-toggle="tab">SURAT KONTROL</a></li>
                 </ul>
               </div>
@@ -406,11 +409,16 @@ if(isset($_GET['no_rawat'])) {
                     <?php include_once ('./module/ralan/mintarad.php');?>
                   </div>
                 <!-- end permintaan rad -->
-                <!-- tindakan -->
+                <!-- catatan -->
                   <div role="tabpanel" class="tab-pane fade" id="catatan_dokter">
                     <?php include_once ('./module/ralan/catatan-dokter.php'); ?>
                   </div>
-                <!-- end tindakan -->
+                <!-- end catatan -->
+                <!-- rujuk internal -->
+                  <div role="tabpanel" class="tab-pane fade" id="rujuk_internal">
+                    <?php include_once ('./module/ralan/rujuk-internal.php'); ?>
+                  </div>
+                <!-- end rujuk internal -->
                 <!-- skdp -->
                   <div role="tabpanel" class="tab-pane fade" id="skdp">
                     <?php include_once ('./module/ralan/skdp.php');?>
@@ -501,6 +509,98 @@ if(isset($_GET['no_rawat'])) {
       <br><br>
     <?php } ?>
     <!-- end Menu Radiologi -->
+
+<?php if($action == 'rujuk_internal') { ?>
+
+      <div class="card">
+        <div class="header">
+          <h2>
+            RUJUKAN INTERNAL 
+          </h2>
+        </div>
+        <div class="body">
+          <dl class="dl-horizontal">
+            <dt>Nama Lengkap</dt>
+            <dd><?php echo $nm_pasien; ?></dd>
+            <dt>No. RM</dt>
+            <dd><?php echo $no_rkm_medis; ?></dd>
+            <dt>No. Rawat</dt>
+            <dd><?php echo $no_rawat; ?></dd>
+            <dt>Umur</dt>
+            <dd><?php echo $umur; ?></dd>
+            <dt>Poli Perujuk</dt>
+            <dd><?php echo $nama_poli; ?></dd>
+            <dt>Dokter Perujuk</dt>
+            <dd><?php echo $nama_dokter; ?></dd>
+          </dl>
+
+    
+  <?php
+  if (isset($_POST['ok_rujuk_jawab'])) {
+    if (($_POST['saran'] <> "") and ($no_rawat <> "")) { 
+
+           $insert = query("UPDATE rujukan_internal_poli_detail SET pemeriksaan = '{$_POST['pemeriksaan']}', diagnosa = '{$_POST['diagnosa']}', saran = '{$_POST['saran']}' WHERE no_rawat = '{$no_rawat}'");
+           if ($insert) {
+                redirect("{$_SERVER['PHP_SELF']}?action=rujuk_internal&no_rawat={$no_rawat}");
+           }
+    }
+  }
+
+  ?>
+<dl class="dl-horizontal">
+  <?php
+  $data = fetch_array(query("SELECT b.nm_poli, c.nm_dokter FROM rujukan_internal_poli a, poliklinik b, dokter c WHERE a.no_rawat = '{$no_rawat}' AND a.kd_poli = b.kd_poli AND a.kd_dokter = c.kd_dokter"));
+  $data1 = fetch_array(query("SELECT * FROM rujukan_internal_poli_detail WHERE no_rawat = '{$no_rawat}'"));
+  ?>
+
+  <h4>Konsul / Rujukan Internal</h4>
+
+  <dt>Poli Tujuan</dt>
+  <dd><?php echo $data['0']; ?></dd><br>
+  <dt>Dokter Tujuan</dt>
+  <dd><?php echo $data['1']; ?></dd><br>
+
+  <dt>Catatan Kosul</dt>
+  <dd><?php echo nl2br($data1['1']); ?></dd><br>
+  <?php if(!empty($data1['saran'])) { ?>
+  <h4>Jawaban Konsul</h4>
+  <dt>Pemeriksaan</dt>
+  <dd><?php echo $data1['2']; ?></dd><br>
+  <dt>Diagnosa</dt>
+  <dd><?php echo $data1['3']; ?></dd><br>
+  <dt>Saran</dt>
+  <dd><?php echo $data1['4']; ?></dd><br>
+  <?php } ?>
+</dl>
+
+
+<form method="post">          
+<div class="row clearfix">
+    <div class="col-sm-12">
+        <dl class="dl-horizontal">
+
+            <dt>Pemeriksaan</dt>
+            <dd><textarea rows="4" name="pemeriksaan" class="form-control no-resize" placeholder="Tulis pemeriksaan konsul disini..."></textarea></dd><br>
+
+            <dt>Diagnosa</dt>
+            <dd><input type="text" class="form-control" name="diagnosa" placeholder="Masukkan diagnosa..."></dd><br>
+
+            <dt>Saran Konsul</dt>
+            <dd><textarea rows="8" name="saran" class="form-control no-resize" placeholder="Tulis saran konsul disini..."></textarea></dd><br>
+            <dt></dt>
+            <dd><button type="submit" name="ok_rujuk_jawab" value="ok_rujuk_jawab" class="btn bg-indigo waves-effect" onclick="this.value=\'ok_rujuk_jawab\'">SIMPAN</button></dd><br>
+            <dt></dt>
+        </dl>
+    </div>
+</div>
+</form>
+
+        </div>
+    </div>
+
+
+<?php } ?>    
+    
     <!-- delete -->
     <?php
     if($action == "delete_diagnosa"){

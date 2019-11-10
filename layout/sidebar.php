@@ -55,6 +55,11 @@
                             <li>
                                 <a href="pasien-ranap.php">Rawat Inap</a>
                             </li>
+                            <?php if($_SESSION['username'] == 'DR00015'){?>
+                          	<li>
+                                <a href="hemodialisa.php">Hemodialisa</a>
+                            </li>
+                            <?php } ?>
                             <li>
                                 <a href="rekam-medik.php">Rekam Medik</a>
                             </li>
@@ -67,6 +72,12 @@
                         <a href="statistik.php">
                             <i class="material-icons">trending_up</i>
                             <span>Statistik</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="book-op.php">
+                            <i class="material-icons">book</i>
+                            <span>Booking Operasi</span>
                         </a>
                     </li>
                     <li>
@@ -93,7 +104,7 @@
             <!-- Footer -->
             <div class="legal">
                 <div class="copyright">
-                    &copy; 2017 - <?php echo date('Y'); ?> <a href="#" data-toggle="modal" data-target="#ICTRSHD">Instalasi ICT RSHD</a> <a href="../dr_ulun/">Barabai</a>.
+                    &copy; 2017 - <?php echo date('Y'); ?> <a href="#" data-toggle="modal" data-target="#ICTRSHD">Instalasi ICT RSHD Barabai</a>.
                 </div>
             </div>
             <!-- #Footer -->
