@@ -252,16 +252,12 @@ if(isset($_GET['no_rawat'])) {
                                             </ul>
                                         </td>
                                         <td>
-                                            <ul style="list-style:none;">
                                             <?php
                                             $sql_rad = query("select * from hasil_radiologi  where no_rawat= '$no_rawat_kunj'");
-                                            $no=1;
                                             while ($row_rad = fetch_array($sql_rad)) {
-                                                echo '<li>'.$no.'. '.nl2br($row_rad[hasil]).'</li>';
-                                                $no++;
+                                                echo nl2br($row_rad[hasil]);
                                             }
                                             ?>
-                                            </ul>
                                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                                             <?php
                                             $sql_rad = query("select * from gambar_radiologi where no_rawat= '$no_rawat_kunj'");
