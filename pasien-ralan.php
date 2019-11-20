@@ -355,7 +355,7 @@ if(isset($_GET['no_rawat'])) {
                             $sql_rad = query("select * from hasil_radiologi  where no_rawat= '$no_rawat_kunj'");
                             $no=1;
                             while ($row_rad = fetch_array($sql_rad)) {
-                                echo '<li>'.$no.'. '.$row_rad[hasil].'</li>';
+                                echo '<li>'.$no.'. '.nl2br($row_rad[hasil]).'</li>';
                                 $no++;
                             }
                             ?>
