@@ -160,7 +160,7 @@ if(isset($_GET['no_rawat'])) {
               <!-- End Nav Tabs -->
               <button class="btn bg-cyan waves-effect m-t-15 m-b-15" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Berkas RM Lama</button>
               <div class="collapse" id="collapseExample">
-                <div class="well"> 
+                <div class="well">
                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                             <?php
                             $sql_rmlama = query("SELECT * FROM berkas_digital_perawatan WHERE kode = '003' AND no_rawat IN (SELECT no_rawat FROM reg_periksa WHERE no_rkm_medis = '$no_rkm_medis')");
@@ -182,7 +182,7 @@ if(isset($_GET['no_rawat'])) {
                                 $no++;
                             }
                             ?>
-                            </div>                      
+                            </div>
                 </div>
               </div>
               <div class="clearfix"></div>
@@ -227,7 +227,7 @@ if(isset($_GET['no_rawat'])) {
                           } else {
                             echo 'Rawat Inap';
                           }
-                          ?>                          
+                          ?>
                         </td>
                           <?php
                           if($status_lanjut_kunj == 'Ralan') {
@@ -280,7 +280,7 @@ if(isset($_GET['no_rawat'])) {
         <?php
         $query = query("SELECT a.kode, b.deskripsi_pendek, a.prioritas FROM prosedur_pasien a, icd9 b, reg_periksa c WHERE a.kode = b.kode AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat ORDER BY a.prioritas ASC");
           $no=1;
-        if(num_rows($query) !== 0){ 
+        if(num_rows($query) !== 0){
         	echo '<li><b>Prosedur ICD 9</b></li>';
         }
          while ($data = fetch_array($query)) {
@@ -292,11 +292,11 @@ if(isset($_GET['no_rawat'])) {
         ?>
       </ul>
       <ul style="list-style:none;margin-left:0;padding-left:0;">
-        
+
         <?php
         $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_dr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
           $no=1;
-        if(num_rows($query) !== 0){ 
+        if(num_rows($query) !== 0){
         	echo '<li><b>Jenis Perawatan</b></li>';
         }
         while ($data = fetch_array($query)) {
@@ -307,7 +307,7 @@ if(isset($_GET['no_rawat'])) {
         }
         ?>
       </ul>
-        
+
                         </td>
                         <td>
                             <ul style="list-style:none;">
@@ -350,6 +350,16 @@ if(isset($_GET['no_rawat'])) {
                           </div>
                         </td>
                         <td>
+                            <ul style="list-style:none;">
+                            <?php
+                            $sql_rad = query("select * from hasil_radiologi  where no_rawat= '$no_rawat_kunj'");
+                            $no=1;
+                            while ($row_rad = fetch_array($sql_rad)) {
+                                echo '<li>'.$no.'. '.$row_rad[hasil].'</li>';
+                                $no++;
+                            }
+                            ?>
+                            </ul>
                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                             <?php
                             $sql_rad = query("select * from gambar_radiologi where no_rawat= '$no_rawat_kunj'");
@@ -515,7 +525,7 @@ if(isset($_GET['no_rawat'])) {
       <div class="card">
         <div class="header">
           <h2>
-            RUJUKAN INTERNAL 
+            RUJUKAN INTERNAL
           </h2>
         </div>
         <div class="body">
@@ -534,10 +544,10 @@ if(isset($_GET['no_rawat'])) {
             <dd><?php echo $nama_dokter; ?></dd>
           </dl>
 
-    
+
   <?php
   if (isset($_POST['ok_rujuk_jawab'])) {
-    if (($_POST['saran'] <> "") and ($no_rawat <> "")) { 
+    if (($_POST['saran'] <> "") and ($no_rawat <> "")) {
 
            $insert = query("UPDATE rujukan_internal_poli_detail SET pemeriksaan = '{$_POST['pemeriksaan']}', diagnosa = '{$_POST['diagnosa']}', saran = '{$_POST['saran']}' WHERE no_rawat = '{$no_rawat}'");
            if ($insert) {
@@ -574,7 +584,7 @@ if(isset($_GET['no_rawat'])) {
 </dl>
 
 
-<form method="post">          
+<form method="post">
 <div class="row clearfix">
     <div class="col-sm-12">
         <dl class="dl-horizontal">
@@ -599,8 +609,8 @@ if(isset($_GET['no_rawat'])) {
     </div>
 
 
-<?php } ?>    
-    
+<?php } ?>
+
     <!-- delete -->
     <?php
     if($action == "delete_diagnosa"){
@@ -626,7 +636,7 @@ if(isset($_GET['no_rawat'])) {
     	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
     	}
     }
-    
+
     if($action == "delete_obat"){
     	$hapus = "DELETE FROM resep_dokter WHERE no_resep='{$_REQUEST['no_resep']}' AND kode_brng='{$_REQUEST['kode_obat']}'";
     	$hasil = query($hapus);
@@ -657,7 +667,7 @@ if(isset($_GET['no_rawat'])) {
       if (($hasil)) {
         redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
       }
-    }      
+    }
     if($action == "delete_an"){
       $hapus = "DELETE FROM pemeriksaan_ralan WHERE no_rawat='{$_REQUEST['no_rawat']}'";
       $hasil = query($hapus);
@@ -687,4 +697,3 @@ function Antri()
 setInterval(function(){ Antri(); }, 1000);
 
 </script>
-
