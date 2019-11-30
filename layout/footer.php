@@ -94,6 +94,9 @@
     <script src="assets/js/jquery-ui.min.js"></script>
     <script src="assets/js/select2.min.js"></script>
 
+    <!-- Odontogram Js -->
+    <script src="assets/js/odontogram.js"></script>
+
     <!-- Custom Js -->
     <script src="assets/js/admin.js"></script>
 
@@ -124,7 +127,9 @@
           var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
           $("a[href='" + anchor + "']").tab("show");
       });
-        
+
+      $('.color').colorPicker();
+
 	  </script>
 
 
@@ -155,7 +160,7 @@
                 weekStart: 1,
                 time: false
             });
-          
+
           	$(".tglprk").bootstrapMaterialDatePicker({
                 format: 'YYYY-MM-DD',
                 clearButton: true,
@@ -176,7 +181,7 @@
             $('.count-to').countTo();
 
             $('#riwayatmedis').dataTable( {
-	          	responsive: true, 
+	          	responsive: true,
 				order: [[ 0, 'desc' ]]
             } );
 
@@ -319,7 +324,7 @@
             templateResult: formatData,
             minimumInputLength: 3
         });
-      
+
         $('.prioritas').select2({
             placeholder: 'Pilih prioritas diagnosa'
         });
@@ -416,7 +421,7 @@
              });
          });
 
-      
+
     </script>
 
     <script>
@@ -437,11 +442,11 @@ $(document).ready(function(){
             }, 800);
             return false;
         });
-        
+
         $('#back-to-top').tooltip('show');
 
 });
-      
+
    </script>
 
 

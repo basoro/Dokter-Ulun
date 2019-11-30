@@ -147,6 +147,7 @@ if(isset($_GET['no_rawat'])) {
                 <ul class="nav nav-tabs tab-nav-right" role="tablist">
                   <li role="presentation" class="active"><a href="#riwayat" data-toggle="tab">RIWAYAT</a></li>
                   <li role="presentation"><a href="#anamnese" data-toggle="tab">PEMERIKSAAN</a></li>
+                  <li role="presentation"><a href="#odontogram" data-toggle="tab">ODONTOGRAM</a></li>
                   <li role="presentation"><a href="#diagnosa" data-toggle="tab">DIAGNOSA</a></li>
                   <li role="presentation"><a href="#tindakan" data-toggle="tab">TINDAKAN</a></li>
                   <li role="presentation"><a href="#resep" data-toggle="tab">RESEP</a></li>
@@ -390,6 +391,11 @@ if(isset($_GET['no_rawat'])) {
                     <?php include_once ('./module/ralan/anamnese.php');?>
                   </div>
                 <!-- anamnese -->
+                <!-- odontogram -->
+                  <div class="tab-pane fade" role="tabpanel" id="odontogram">
+                    <?php include_once ('./module/ralan/odontogram.php');?>
+                  </div>
+                <!-- odontogram -->
                 <!-- diagnosa -->
                   <div role="tabpanel" class="tab-pane fade" id="diagnosa">
                     <?php include_once ('./module/ralan/diagnosa.php');?>

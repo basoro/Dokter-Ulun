@@ -84,6 +84,9 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
     <!-- Morris Css -->
     <link href="plugins/morrisjs/morris.css" rel="stylesheet" />
 
+    <!-- Odontogram Css -->
+    <link href="assets/css/odontogram.css" rel="stylesheet">
+
     <!-- Custom Css -->
     <link href="assets/css/style.css" rel="stylesheet">
 
