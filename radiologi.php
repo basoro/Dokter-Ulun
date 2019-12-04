@@ -47,9 +47,7 @@ if(isset($_GET['no_rawat'])) {
                           <th>Nama Pasien</th>
                           <th>No RM</th>
                           <th>Dokter Pengirim</th>
-                          <th>No. Antrian</th>
                           <th>Pemeriksaan</th>
-                          <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -71,9 +69,7 @@ if(isset($_GET['no_rawat'])) {
                               echo '</td>';
                               echo '<td>'.$row['3'].'</td>';
                               echo '<td>'.$row['1'].'</td>';
-                              echo '<td>'.$row['2'].'</td>';
                               echo '<td>'.$row['6'].'</td>';
-                              echo '<td>'.$row['5'].'</td>';
                               echo '</tr>';
                             $no++;
                           }
