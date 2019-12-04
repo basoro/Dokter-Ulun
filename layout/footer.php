@@ -94,8 +94,29 @@
     <script src="assets/js/jquery-ui.min.js"></script>
     <script src="assets/js/select2.min.js"></script>
 
-    <!-- Odontogram Js -->
-    <script src="assets/js/odontogram.js"></script>
+    <!-- TinyMCE -->
+    <script src="plugins/tinymce/tinymce.js"></script>
+  	<script>
+      $(function () {
+
+          //TinyMCE
+          tinymce.init({
+              selector: "textarea#tinymce",
+              theme: "modern",
+              height: 200,
+              plugins: [
+                  'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                  'searchreplace wordcount visualblocks visualchars code fullscreen',
+                  'insertdatetime media nonbreaking save table contextmenu directionality',
+                  'emoticons template paste textcolor colorpicker textpattern imagetools'
+              ],
+              toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
+              image_advtab: true
+          });
+          tinymce.suffix = ".min";
+          tinyMCE.baseURL = 'plugins/tinymce';
+      });
+  	</script>
 
     <!-- Custom Js -->
     <script src="assets/js/admin.js"></script>
@@ -127,8 +148,6 @@
           var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
           $("a[href='" + anchor + "']").tab("show");
       });
-
-      $('.color').colorPicker();
 
 	  </script>
 

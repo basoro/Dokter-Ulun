@@ -55,7 +55,17 @@
                             <li>
                                 <a href="pasien-ranap.php">Rawat Inap</a>
                             </li>
-                            <?php if($_SESSION['username'] == 'DR00015'){?>
+                            <?php if($_SESSION['username'] == 'DR001'){?>
+                          	<li>
+                                <a href="laboratorium.php">Laboratorium</a>
+                            </li>
+                            <?php } ?>
+                            <?php if($_SESSION['username'] == 'DR001'){?>
+                          	<li>
+                                <a href="radiologi.php">Radiologi</a>
+                            </li>
+                            <?php } ?>
+                            <?php if($_SESSION['username'] == 'DR001'){?>
                           	<li>
                                 <a href="hemodialisa.php">Hemodialisa</a>
                             </li>
