@@ -57,17 +57,20 @@ if(isset($_GET['no_rawat'])) {
                       </thead>
                       <tbody>
                         <?php
-                          $data = "SELECT b.nm_pasien, a.no_rkm_medis, c.nm_perawatan, d.jam_mulai, d.jam_selesai, e.nm_penyakit, d.status
-                          FROM reg_periksa a, pasien b, paket_operasi c, booking_operasi d, penyakit e, diagnosa_pasien f , dokter g
-                          WHERE d.kd_dokter = '{$_SESSION['username']}' AND a.no_rkm_medis = b.no_rkm_medis AND d.kode_paket = c.kode_paket
-                          AND d.kd_dokter = g.kd_dokter AND a.no_rawat = d.no_rawat AND a.no_rawat = f.no_rawat AND f.kd_penyakit = e.kd_penyakit
-                          AND d.kd_dokter = g.kd_dokter";
+                         $data = "SELECT pasien.nm_pasien, pasien.no_rkm_medis, booking_operasi.no_rawat, paket_operasi.nm_perawatan, booking_operasi.jam_mulai, booking_operasi.jam_selesai, booking_operasi.status, GROUP_CONCAT(DISTINCT penyakit.nm_penyakit SEPARATOR '<br>') as nm_penyakit
+						 FROM pasien, booking_operasi, paket_operasi, reg_periksa, diagnosa_pasien, penyakit
+						 WHERE booking_operasi.no_rawat = reg_periksa.no_rawat
+						 AND pasien.no_rkm_medis = reg_periksa.no_rkm_medis
+						 AND booking_operasi.kode_paket = paket_operasi.kode_paket
+						 AND diagnosa_pasien.no_rawat = booking_operasi.no_rawat
+						 AND diagnosa_pasien.kd_penyakit = penyakit.kd_penyakit
+						 AND booking_operasi.kd_dokter = '{$_SESSION['username']}' ";
                           if(isset($_POST['tanggal']) && $_POST['tanggal'] !="") {
-                              $data .= " AND d.tanggal = '{$_POST['tanggal']}'";
+						      $data .= " AND booking_operasi.tanggal = '{$_POST['tanggal']}'";
                           } else {
-                              $data .= " AND d.tanggal = '$date'";
+                              $data .= " AND booking_operasi.tanggal='$date'";
                           }
-                          $data .= "  ORDER BY a.no_reg ASC";
+                          $data .= "  ORDER BY  reg_periksa.no_reg ASC";
                             $sql = query($data);
                             $no = 1;
                             while($row = fetch_array($sql)){?>
