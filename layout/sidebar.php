@@ -55,17 +55,17 @@
                             <li>
                                 <a href="pasien-ranap.php">Rawat Inap</a>
                             </li>
-                            <?php if($_SESSION['username'] == 'DR001'){?>
+                            <?php if($_SESSION['username'] == 'DR00017' OR $_SESSION['username'] == 'D0000040'){?>
                           	<li>
                                 <a href="laboratorium.php">Laboratorium</a>
                             </li>
                             <?php } ?>
-                            <?php if($_SESSION['username'] == 'DR001'){?>
+                            <?php if($_SESSION['username'] == 'DR00019' OR $_SESSION['username'] == 'D0000040'){?>
                           	<li>
                                 <a href="radiologi.php">Radiologi</a>
                             </li>
                             <?php } ?>
-                            <?php if($_SESSION['username'] == 'DR001'){?>
+                            <?php if($_SESSION['username'] == 'DR00015' OR $_SESSION['username'] == 'D0000040'){?>
                           	<li>
                                 <a href="hemodialisa.php">Hemodialisa</a>
                             </li>

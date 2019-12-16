@@ -7,10 +7,14 @@
           $get_obatmaxjam = fetch_assoc(query("SELECT MAX(jam) AS jam FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND kd_bangsal = 'B0014'"));
           $get_obatstok = fetch_assoc(query("SELECT * FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND jam = '{$get_obatmaxjam['jam']}' AND kd_bangsal = 'B0014'"));
         
-          if($get_obatstok['stok_akhir'] < 1 ) {
+          if($get_obatstok['stok_akhir'] == '0' ) {
           	$errors[] = 'Maaf stok obat di depo rawat jalan tidak mencukupi';
           }
 
+          if($get_obatstok['stok_akhir'] < $_POST['jumlah'] ) {
+          	$errors[] = 'Maaf stok obat di depo rawat jalan tersisa '.$get_obatstok['stok_akhir'];
+          }
+        
           if(!empty($errors)) {
               foreach($errors as $error) {
                   echo validation_errors($error);
@@ -22,6 +26,13 @@
               $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
               $lastNumber = substr($get_number[0], 0, 10);
               $next_no_resep = sprintf('%010s', ($lastNumber + 1));
+
+              //$get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,4),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
+              //$lastNumber = substr($get_number[0], 0, 4);
+              //$_next_no_resep = sprintf('%04s', ($lastNumber + 1));
+              //$tgl_resep = date('Ymd');
+              //$next_no_resep = $tgl_resep.''.$_next_no_resep;
+
             
               if ($dtonhand['0'] > 1) {
                 if ($_POST['aturan_pakai_lainnya'] == "") {
@@ -45,7 +56,7 @@
   ?>
 <dl class="dl-horizontal">
     <dt>Nama Obat</dt>
-    <dd><select name="kode_obat" class="kd_obat" style="width:100%"></select></dd><br>
+    <dd><select name="kode_obat" class="kd_obat_ralan" style="width:100%"></select></dd><br>
     <dt>Jumlah Obat</dt>
     <dd><input class="form-control" name="jumlah" value="10" style="width:100%"></dd><br>
     <dt>Aturan Pakai</dt>

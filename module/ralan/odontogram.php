@@ -7,7 +7,7 @@ if(isset($_GET['no_rkm_medis']) && $_GET['no_rkm_medis'] !=='') {
   $no_rkm_medis = $get_no_rkm_medis['no_rkm_medis'];
 } else {
    //redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
-}
+} 
 ?>
 
 <?php
@@ -182,7 +182,6 @@ if(isset($_GET['no_rkm_medis']) && $_GET['no_rkm_medis'] !=='') {
             <option value="gg_46">Gigi 46</option>
             <option value="gg_47">Gigi 47</option>
             <option value="gg_48">Gigi 48</option>
-
             <option value="gg_55">Gigi 55</option>
             <option value="gg_54">Gigi 54</option>
             <option value="gg_53">Gigi 53</option>
@@ -203,8 +202,7 @@ if(isset($_GET['no_rkm_medis']) && $_GET['no_rkm_medis'] !=='') {
             <option value="gg_83">Gigi 83</option>
             <option value="gg_84">Gigi 84</option>
             <option value="gg_85">Gigi 85</option>
-            
-          </select>
+        </select>
       </div>
       <div class="col-md-12">
           <p>

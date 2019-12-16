@@ -35,6 +35,8 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
     $_SESSION['jenis_poli'] = $data[2];
 }
 
+unset($_SESSION['poll_answered']);
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -86,7 +88,7 @@ if (!isset($_COOKIE['username']) && !isset($_COOKIE['password'])) {
 
     <!-- Odontogram Css -->
     <link href="assets/css/odontogram.css" rel="stylesheet">
-
+  
     <!-- Custom Css -->
     <link href="assets/css/style.css" rel="stylesheet">
 

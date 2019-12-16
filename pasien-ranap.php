@@ -143,7 +143,7 @@ if(isset($_GET['no_rawat'])) {
                                 <dt>Tgl. Lahir</dt>
                                 <dd><?php echo $tgl_lahir; ?></dd>
                                 <dt>Cara Bayar</dt>
-                                <dd><?php echo $png_jawab; ?></dd>
+                                <dd><?php echo $png_jawab; ?></dd>                              
                             </dl>
                         </div>
 
@@ -252,12 +252,6 @@ if(isset($_GET['no_rawat'])) {
                                             </ul>
                                         </td>
                                         <td>
-                                            <?php
-                                            $sql_rad = query("select * from hasil_radiologi  where no_rawat= '$no_rawat_kunj'");
-                                            while ($row_rad = fetch_array($sql_rad)) {
-                                                echo nl2br($row_rad[hasil]);
-                                            }
-                                            ?>
                                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                                             <?php
                                             $sql_rad = query("select * from gambar_radiologi where no_rawat= '$no_rawat_kunj'");
@@ -344,7 +338,7 @@ if(isset($_GET['no_rawat'])) {
                                 <dd><?php echo $tgl_lahir; ?></dd>
                                 <dt>Cara Bayar</dt>
                                 <dd><?php echo $png_jawab; ?></dd>
-
+                              
                             </dl>
 						    <hr>
                                         <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
@@ -392,7 +386,7 @@ if(isset($_GET['no_rawat'])) {
 
     }
 
-    //delete
+    //delete 
     if($action == "delete_obat_pulang"){
 
 	$hapus = "DELETE FROM resep_pulang WHERE no_rawat='{$_REQUEST['no_rawat']}' AND kode_brng='{$_REQUEST['kode_obat']}'";
@@ -402,7 +396,7 @@ if(isset($_GET['no_rawat'])) {
 	}
 
     }
-
+          
     //delete
     if($action == "delete_lab"){
 

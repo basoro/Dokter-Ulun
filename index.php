@@ -166,4 +166,44 @@
         </div>
     </section>
 
+    <?php
+    if(POLL == true) {
+        $cek_quis = query("SELECT * FROM poll_answers WHERE user_ip = '".$_SESSION['username']."'");
+        if(num_rows($cek_quis) == 0) {
+        ?>
+        <div class="modal fade" id="pengumuman" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="unitModalLabel"><span class="question"></span></h4>
+                    </div>
+                    <div class="modal-body">
+                      <div class="poll">Loading...</div></div>
+                      <div class="poll-content">
+                         <ul class="list-group">
+                         </ul>
+                      </div>
+                      <div class="panel-footer">
+                          <div class="row">
+                            <div class="col-xs-6">
+                              <a href="#">
+                              <button type="button" class="btn btn-lg btn-primary btn-sm button">Pilih</button>
+                              </a>
+                            </div>
+                            <div class="col-xs-6">
+                              <a href="javascript:;" onClick="javascript:get_poll();">
+                                <div class="btn btn-lg btn-danger btn-sm pull-right selesai">Selanjutnya</div>
+                              </a>
+                            </div>
+                          </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+  <?php
+      }
+    }
+  ?>
+
 <?php include_once ('layout/footer.php'); ?>

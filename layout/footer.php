@@ -94,30 +94,32 @@
     <script src="assets/js/jquery-ui.min.js"></script>
     <script src="assets/js/select2.min.js"></script>
 
+    <!-- Odontogram Js -->
+    <script src="assets/js/odontogram.js"></script>
+
     <!-- TinyMCE -->
     <script src="plugins/tinymce/tinymce.js"></script>
-  	<script>
-      $(function () {
+	<script>
+    $(function () {
 
-          //TinyMCE
-          tinymce.init({
-              selector: "textarea#tinymce",
-              theme: "modern",
-              height: 200,
-              plugins: [
-                  'advlist autolink lists link image charmap print preview hr anchor pagebreak',
-                  'searchreplace wordcount visualblocks visualchars code fullscreen',
-                  'insertdatetime media nonbreaking save table contextmenu directionality',
-                  'emoticons template paste textcolor colorpicker textpattern imagetools'
-              ],
-              toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
-              image_advtab: true
-          });
-          tinymce.suffix = ".min";
-          tinyMCE.baseURL = 'plugins/tinymce';
-      });
-  	</script>
-
+        //TinyMCE
+        tinymce.init({
+            selector: "textarea#tinymce",
+            theme: "modern",
+            height: 200,
+            plugins: [
+                'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                'searchreplace wordcount visualblocks visualchars code fullscreen',
+                'insertdatetime media nonbreaking save table contextmenu directionality',
+                'emoticons template paste textcolor colorpicker textpattern imagetools'
+            ],
+            toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
+            image_advtab: true
+        });
+        tinymce.suffix = ".min";
+        tinyMCE.baseURL = 'plugins/tinymce';
+    });
+	</script>
     <!-- Custom Js -->
     <script src="assets/js/admin.js"></script>
 
@@ -149,6 +151,12 @@
           $("a[href='" + anchor + "']").tab("show");
       });
 
+      $(window).on('load',function(){
+           $('#pengumuman').modal('show');
+      });
+
+      $('.color').colorPicker();
+        
 	  </script>
 
 
@@ -179,7 +187,7 @@
                 weekStart: 1,
                 time: false
             });
-
+          
           	$(".tglprk").bootstrapMaterialDatePicker({
                 format: 'YYYY-MM-DD',
                 clearButton: true,
@@ -200,7 +208,7 @@
             $('.count-to').countTo();
 
             $('#riwayatmedis').dataTable( {
-	          	responsive: true,
+	          	responsive: true, 
 				order: [[ 0, 'desc' ]]
             } );
 
@@ -293,6 +301,13 @@
             return $data;
         };
 
+        function formatDataObat (data) {
+            var $data = $(
+                '<b>'+ data.id +'</b> - <i>'+ data.text +' [ Stok: '+ data.jumlah +' ]</i>'
+            );
+            return $data;
+        };
+      
         $('.kd_diagnosa').select2({
             placeholder: 'Pilih diagnosa',
             ajax: {
@@ -343,7 +358,7 @@
             templateResult: formatData,
             minimumInputLength: 3
         });
-
+      
         $('.prioritas').select2({
             placeholder: 'Pilih prioritas diagnosa'
         });
@@ -361,10 +376,29 @@
             },
             cache: true
           },
-          templateResult: formatData,
+          templateResult: formatDataObat,
       	minimumInputLength: 3
         });
 
+        $('.kd_obat_ralan').select2({
+          placeholder: 'Pilih obat',
+          ajax: {
+            url: 'includes/select-obat-ralan.php',
+            dataType: 'json',
+            delay: 250,
+            processResults: function (data) {
+              return {
+                results: data
+              };
+            },
+            cache: true
+          },
+          templateResult: formatDataObat,
+      	minimumInputLength: 3
+        });
+
+
+      
         $('.aturan_pakai').select2({
             placeholder: 'Pilih aturan pakai'
         });
@@ -440,7 +474,7 @@
              });
          });
 
-
+      
     </script>
 
     <script>
@@ -461,12 +495,101 @@ $(document).ready(function(){
             }, 800);
             return false;
         });
-
+        
         $('#back-to-top').tooltip('show');
 
 });
-
+      
    </script>
+
+<script>
+$(document).ready(function(){
+	var total;
+	var width,html = "",label = "";
+function loading(){
+	$(".poll").html("<div style='padding-left:45%'><img src='poll/477.gif'></div>");
+}
+	// load first question
+	get_poll();
+
+	$(".button").on("click",function(){
+		var ans = $("input[type=radio]:checked").val();
+
+		if(ans){
+			loading();
+$(".poll-content > ul").empty();
+			$.ajax({
+				type: "POST",
+				url: "poll/ajax.php",
+				data : "act=suba&ans="+ans,
+				dataType: "json",
+				success: function(response){
+
+					total = response.total;
+					if(response.success == 1){
+						html="";
+						$.each(response.opt, function(aid,label) {
+							if(response.details[aid] == undefined){
+								width  = 0
+								acount = 0
+							}else{
+								acount = response.details[aid];
+								width = Math.round((parseInt(acount)/parseInt(total)) * 100);
+							}
+							if(width < 50 ){ var alert = "danger"} else if((width >=50) && (width <= 75)){ var alert = "primary"; }else{alert="success"}
+	html+='<li class="list-group-item"><label>'+label+' ('+acount+' votes)</label></label><div class="progress"><div class="progress-bar  progress-bar-'+alert+'" style="width:'+width+'%">'+width+'%</div></div></li>';
+								});
+
+						html += '<p><span class="total">Total votes : <b>'+total+'</b></span>';
+						$(".poll").html("");
+						$(".poll-content > ul").append(html);
+						$(".poll-content > ul").slideDown("slow");
+
+					}else{
+						alert("Seems Something Error ?");
+					}
+				}
+			});
+
+		}
+	});
+});
+
+function get_poll(){
+	loading();
+	$(".poll-content > ul").html("");
+	$.ajax({
+		type: "POST",
+		url: "poll/ajax.php",
+		data : "act=getq",
+		dataType: "json",
+		success: function(response){
+			var ans1, ans = "";
+			if($(".poll").html().length)
+			$(".poll").css("display","none");
+			if(response.id){
+				$.each(response.answers, function(i,val) {
+
+					ans+='<li class="list-group-item"><div class="radio"><label><input class="rad" type="radio" name="poll_options" id="'+i+'" value="'+i+'"/><label for="'+i+'">'+val+'</label></label></div></li>';
+
+				});
+				$(".poll").html("");
+				$(".question").html(response.question);
+				$(".poll-content > ul").append(ans);
+			}else{
+				$(".next").remove();
+				$(".question").html('');
+				$(".button").remove();
+				$(".poll").fadeIn("slow").html("<span class='err'>OOPS. No more question there! :(</span>");
+			}
+		}
+	});
+}
+
+function loading(){
+	$(".poll").html("<div style='padding-left:45%'><img src='poll/477.gif'></div>");
+}
+</script>
 
 
 </body>

@@ -36,7 +36,7 @@ if(isset($_GET['no_rawat'])) {
               </h2>
             </div>
             <div class="table-responsive">
-
+              
               <div class="body">
                 <!--tab utama -->
                 <div class="tab-content m-t-20">
@@ -52,7 +52,7 @@ if(isset($_GET['no_rawat'])) {
                       </thead>
                       <tbody>
                         <?php
-                          $_sql = "SELECT b.nm_pasien, c.nm_dokter, a.no_reg, a.no_rkm_medis, a.no_rawat, a.stts, GROUP_CONCAT(DISTINCT e.nm_perawatan SEPARATOR '<br>') AS nm_perawatan FROM reg_periksa a, pasien b, dokter c, periksa_radiologi d, jns_perawatan_radiologi e WHERE a.no_rkm_medis = b.no_rkm_medis AND a.no_rawat = d.no_rawat AND d.kd_jenis_prw = e.kd_jenis_prw ";
+                          $_sql = "SELECT b.nm_pasien, c.nm_dokter, a.no_reg, a.no_rkm_medis, a.no_rawat, a.stts, GROUP_CONCAT(DISTINCT e.nm_perawatan SEPARATOR '<br>') AS nm_perawatan FROM reg_periksa a, pasien b, dokter c, periksa_radiologi d, jns_perawatan_radiologi e WHERE a.no_rkm_medis = b.no_rkm_medis AND a.kd_dokter = c.kd_dokter AND a.no_rawat = d.no_rawat AND d.kd_jenis_prw = e.kd_jenis_prw ";
                             if(isset($_POST['tanggal']) && $_POST['tanggal'] !="") {
                                 $_sql .= " AND a.tgl_registrasi = '{$_POST['tanggal']}'";
                             } else {
@@ -175,17 +175,17 @@ if(isset($_GET['no_rawat'])) {
             <div class="body">
               <?php
               if (isset($_POST['ok_hasil'])) {
-                if (($_POST['hasil'] <> "") and ($no_rawat <> "")) {
+                if (($_POST['hasil'] <> "") and ($no_rawat <> "")) { 
 
                        $insert = query("INSERT INTO hasil_radiologi VALUES ('{$no_rawat}', CURRENT_DATE(), CURRENT_TIME(), '{$_POST['hasil']}')");
                        $insert2 = query("INSERT INTO saran_kesan_rad VALUES ('{$no_rawat}', CURRENT_DATE(), CURRENT_TIME(), '{$_POST['judul']}','{$_POST['saran']}','{$_POST['kesan']}')");
-                       if ($insert) {
-
+                       if ($insert) { 
+                         	
                             redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
                        }
                 }
               }
-              ?>
+              ?>                
                 <form method="POST" action="">
                   <dt>JudulPemeriksaan</dt><br>
                   <dd><input name="judul" class="form-control" placeholder="Tulis judul disini..."></dd><br>
