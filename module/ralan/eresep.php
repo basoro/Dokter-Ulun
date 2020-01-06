@@ -6,7 +6,7 @@
           $get_obatmaxtgl = fetch_assoc(query("SELECT MAX(tanggal) AS tanggal FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND kd_bangsal = 'B0014'"));
           $get_obatmaxjam = fetch_assoc(query("SELECT MAX(jam) AS jam FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND kd_bangsal = 'B0014'"));
           $get_obatstok = fetch_assoc(query("SELECT * FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND jam = '{$get_obatmaxjam['jam']}' AND kd_bangsal = 'B0014'"));
-        
+
           if($get_obatstok['stok_akhir'] == '0' ) {
           	$errors[] = 'Maaf stok obat di depo rawat jalan tidak mencukupi';
           }
@@ -14,26 +14,26 @@
           if($get_obatstok['stok_akhir'] < $_POST['jumlah'] ) {
           	$errors[] = 'Maaf stok obat di depo rawat jalan tersisa '.$get_obatstok['stok_akhir'];
           }
-        
+
           if(!empty($errors)) {
               foreach($errors as $error) {
                   echo validation_errors($error);
               }
           } else {
-        
+
               $onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}'");
               $dtonhand = fetch_array($onhand);
-              $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
-              $lastNumber = substr($get_number[0], 0, 10);
-              $next_no_resep = sprintf('%010s', ($lastNumber + 1));
+              //$get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
+              //$lastNumber = substr($get_number[0], 0, 10);
+              //$next_no_resep = sprintf('%010s', ($lastNumber + 1));
 
-              //$get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,4),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
-              //$lastNumber = substr($get_number[0], 0, 4);
-              //$_next_no_resep = sprintf('%04s', ($lastNumber + 1));
-              //$tgl_resep = date('Ymd');
-              //$next_no_resep = $tgl_resep.''.$_next_no_resep;
+              $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,4),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
+              $lastNumber = substr($get_number[0], 0, 4);
+              $_next_no_resep = sprintf('%04s', ($lastNumber + 1));
+              $tgl_resep = date('Ymd');
+              $next_no_resep = $tgl_resep.''.$_next_no_resep;
 
-            
+
               if ($dtonhand['0'] > 1) {
                 if ($_POST['aturan_pakai_lainnya'] == "") {
                   $insert = query("INSERT INTO resep_dokter VALUES ('{$dtonhand['0']}', '{$_POST['kode_obat']}', '{$_POST['jumlah']}', '{$_POST['aturan_pakai']}')");
