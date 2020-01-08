@@ -36,7 +36,7 @@ if(isset($_GET['no_rawat'])) {
               </h2>
             </div>
             <div class="table-responsive">
-              
+
               <div class="body">
                 <!--tab utama -->
                 <div class="tab-content m-t-20">
@@ -146,11 +146,14 @@ if(isset($_GET['no_rawat'])) {
             </div>
 
             <div class="body">
+              <?php
+              $sql_lab = query("select template_laboratorium.Pemeriksaan, detail_periksa_lab.nilai, template_laboratorium.satuan, detail_periksa_lab.nilai_rujukan, detail_periksa_lab.keterangan from detail_periksa_lab inner join  template_laboratorium on detail_periksa_lab.id_template=template_laboratorium.id_template  where detail_periksa_lab.no_rawat= '{$_GET['no_rawat']}'");
+              if(num_rows($sql_lab) == 1 ) {
+              ?>
 			  <dt>Hasil Pemeriksaan</dt><br>
               <dd>
                 <ul style="list-style:none;">
                   <?php
-                    $sql_lab = query("select template_laboratorium.Pemeriksaan, detail_periksa_lab.nilai, template_laboratorium.satuan, detail_periksa_lab.nilai_rujukan, detail_periksa_lab.keterangan from detail_periksa_lab inner join  template_laboratorium on detail_periksa_lab.id_template=template_laboratorium.id_template  where detail_periksa_lab.no_rawat= '{$_GET['no_rawat']}'");
                     $no=1;
                     while ($row_lab = fetch_array($sql_lab)) {
                       echo '<li>'.$no.'. '.$row_lab[0].' ('.$row_lab[3].') = '.$row_lab[1].' '.$row_lab[2].'</li>';
@@ -160,38 +163,44 @@ if(isset($_GET['no_rawat'])) {
                 </ul>
 
               </dd>
-            </div>            
-            <div class="body">
+              <br>
+              <?php } ?>
                 <?php
                 $sql = fetch_assoc(query("select * from saran_kesan_lab where no_rawat= '{$_GET['no_rawat']}'"));
                 ?>
-			  <dt>Kesan</dt>
+                <?php if(!empty($sql['kesan'])) {
+                ?>
+			        <dt>Kesan</dt>
               <dd>
                 <?php
                 echo nl2br($sql['kesan']);
                 ?>
               </dd>
               <br>
-			  <dt>Saran</dt>
+              <?php } ?>
+              <?php if(!empty($sql['saran'])) {
+              ?>
+			        <dt>Saran</dt>
               <dd>
                 <?php
                 echo nl2br($sql['saran']);
                 ?>
               </dd>
+            <?php } ?>
             </div>
               <div class="body">
               <?php
               if (isset($_POST['ok_hasil'])) {
-                if (($_POST['saran'] <> "") and ($no_rawat <> "")) { 
+                if (($_POST['saran'] <> "") and ($no_rawat <> "")) {
 
                        $insert2 = query("INSERT INTO saran_kesan_lab VALUES ('{$no_rawat}', CURRENT_DATE(), CURRENT_TIME(), '{$_POST['saran']}','{$_POST['kesan']}')");
-                       if ($insert) { 
-                         	
+                       if ($insert) {
+
                             redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
                        }
                 }
               }
-              ?>                
+              ?>
                 <form method="POST" action="">
                   <dt>Kesan</dt><br>
                   <dd><textarea rows="2" name="kesan" class="form-control no-resize" placeholder="Tulis kesan disini..."></textarea></dd><br>

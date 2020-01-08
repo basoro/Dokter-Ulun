@@ -70,7 +70,7 @@
                         <?php
 						$jumlah=array();
 						$poli=array();
-						$date = date("Y-m-d"); 
+						$date = date("Y-m-d");
 						$sql = "select poliklinik.nm_poli, count(*) as jumlah from reg_periksa INNER JOIN poliklinik on reg_periksa.kd_poli=poliklinik.kd_poli WHERE reg_periksa.tgl_registrasi='$date' and poliklinik.nm_poli !='-' group by reg_periksa.kd_poli  order by count(*) desc ";
 						$hasil=query($sql);
 						while ($data = fetch_array ($hasil)){
@@ -85,7 +85,7 @@
                 </div>
             </div>
             <!-- #END# CPU Usage -->
-            <?php 
+            <?php
     $get_poli = fetch_array(query("SELECT a.nm_poli, b.kd_poli FROM poliklinik a, reg_periksa b WHERE a.kd_poli = b.kd_poli AND b.no_rkm_medis = '$_SESSION[username]' AND b.tgl_registrasi='$date'"));
             ?>
             <div class="row clearfix">
@@ -104,11 +104,11 @@
 		    <th>Kunj</th>
 		</tr>
 	    </thead>
-	    <tbody> 
+	    <tbody>
 	    <?php
-		$sql = query("SELECT no_rkm_medis, count(no_rkm_medis) jumlah FROM reg_periksa WHERE kd_dokter = '{$_SESSION['username']}' GROUP BY no_rkm_medis ORDER BY jumlah DESC LIMIT 10"); 
+		$sql = query("SELECT no_rkm_medis, count(no_rkm_medis) jumlah FROM reg_periksa WHERE kd_dokter = '{$_SESSION['username']}' GROUP BY no_rkm_medis ORDER BY jumlah DESC LIMIT 10");
 		$no=1;
-		while($row = fetch_array($sql)){ 
+		while($row = fetch_array($sql)){
 		    $getNama = fetch_assoc(query("SELECT nm_pasien FROM pasien WHERE no_rkm_medis = '{$row['no_rkm_medis']}'"));
 		    echo '<tr>';
 		    echo '<td>'.$no.'</td>';
@@ -165,45 +165,5 @@
             </div>
         </div>
     </section>
-
-    <?php
-    if(POLL == true) {
-        $cek_quis = query("SELECT * FROM poll_answers WHERE user_ip = '".$_SESSION['username']."'");
-        if(num_rows($cek_quis) == 0) {
-        ?>
-        <div class="modal fade" id="pengumuman" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="unitModalLabel"><span class="question"></span></h4>
-                    </div>
-                    <div class="modal-body">
-                      <div class="poll">Loading...</div></div>
-                      <div class="poll-content">
-                         <ul class="list-group">
-                         </ul>
-                      </div>
-                      <div class="panel-footer">
-                          <div class="row">
-                            <div class="col-xs-6">
-                              <a href="#">
-                              <button type="button" class="btn btn-lg btn-primary btn-sm button">Pilih</button>
-                              </a>
-                            </div>
-                            <div class="col-xs-6">
-                              <a href="javascript:;" onClick="javascript:get_poll();">
-                                <div class="btn btn-lg btn-danger btn-sm pull-right selesai">Selanjutnya</div>
-                              </a>
-                            </div>
-                          </div>
-                      </div>
-                </div>
-            </div>
-        </div>
-  <?php
-      }
-    }
-  ?>
 
 <?php include_once ('layout/footer.php'); ?>
