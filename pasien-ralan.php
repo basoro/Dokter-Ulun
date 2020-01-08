@@ -29,7 +29,7 @@ if(isset($_GET['no_rawat'])) {
 
 <?php
 if (isset($_POST['edit_telp'])) {
-  if (($_POST['edit_telp_no'] <> "")) { 
+  if (($_POST['edit_telp_no'] <> "")) {
     $insert = query("UPDATE pasien SET no_tlp = '{$_POST['edit_telp_no']}' WHERE no_rkm_medis = '{$no_rkm_medis}'");
 	if($insert) {
        redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
@@ -93,7 +93,7 @@ if (isset($_POST['edit_telp'])) {
                               echo '</td>';
                               echo '<td>'.$row['3'].'</td>';
                               echo '<td>';
-                              echo '<a href="tel:'.$row['6'].'" class="title" target="_system">'.$row['6'].'</a>'; 
+                              echo '<a href="tel:'.$row['6'].'" class="title" target="_system">'.$row['6'].'</a>';
                               echo '</td>';
                               echo '<td>'.$row['1'].'</td>';
                               echo '<td>'.$row['2'].'</td>';
@@ -155,11 +155,11 @@ if (isset($_POST['edit_telp'])) {
                 <dd><?php echo $png_jawab; ?></dd>
                 <dt>Nomor Telepon</dt>
                 <dd>
-                  <?php 
-                  echo '<a href="tel:'.$no_tlp.'" class="title" target="_system">'.$no_tlp.'</a>'; 
-                  echo ' <button type="button" class="btn btn-xs btn-danger" data-toggle="modal" data-target="#edit_telp">Edit</button>'; 
+                  <?php
+                  echo '<a href="tel:'.$no_tlp.'" class="title" target="_system">'.$no_tlp.'</a>';
+                  echo ' <button type="button" class="btn btn-xs btn-danger" data-toggle="modal" data-target="#edit_telp">Edit</button>';
                   ?>
-                </dd>                
+                </dd>
               </dl>
             </div>
             <div class="body">
@@ -182,7 +182,7 @@ if (isset($_POST['edit_telp'])) {
               <!-- End Nav Tabs -->
               <button class="btn bg-cyan waves-effect m-t-15 m-b-15" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Berkas RM Lama</button>
               <div class="collapse" id="collapseExample">
-                <div class="well"> 
+                <div class="well">
                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                             <?php
                             $sql_rmlama = query("SELECT * FROM berkas_digital_perawatan WHERE kode = '003' AND no_rawat IN (SELECT no_rawat FROM reg_periksa WHERE no_rkm_medis = '$no_rkm_medis')");
@@ -204,7 +204,7 @@ if (isset($_POST['edit_telp'])) {
                                 $no++;
                             }
                             ?>
-                            </div>                      
+                            </div>
                 </div>
               </div>
               <div class="clearfix"></div>
@@ -249,7 +249,7 @@ if (isset($_POST['edit_telp'])) {
                           } else {
                             echo 'Rawat Inap';
                           }
-                          ?>                          
+                          ?>
                         </td>
                           <?php
                           if($status_lanjut_kunj == 'Ralan') {
@@ -302,7 +302,7 @@ if (isset($_POST['edit_telp'])) {
         <?php
         $query = query("SELECT a.kode, b.deskripsi_pendek, a.prioritas FROM prosedur_pasien a, icd9 b, reg_periksa c WHERE a.kode = b.kode AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat ORDER BY a.prioritas ASC");
           $no=1;
-        if(num_rows($query) !== 0){ 
+        if(num_rows($query) !== 0){
         	echo '<li><b>Prosedur ICD 9</b></li>';
         }
          while ($data = fetch_array($query)) {
@@ -314,22 +314,80 @@ if (isset($_POST['edit_telp'])) {
         ?>
       </ul>
       <ul style="list-style:none;margin-left:0;padding-left:0;">
-        
+
         <?php
-        $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_dr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-          $no=1;
-        if(num_rows($query) !== 0){ 
-        	echo '<li><b>Jenis Perawatan</b></li>';
-        }
-        while ($data = fetch_array($query)) {
-        ?>
-                  <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-        <?php
-              $no++;
+        if($status_lanjut_kunj == 'Ralan') {
+          $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_dr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query) !== 0){
+           echo '<li><b>Jenis Perawatan Dokter</b></li>';
+          }
+          while ($data = fetch_array($query)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
+          $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_pr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query2) !== 0){
+           echo '<li><b>Jenis Perawatan Perawat</b></li>';
+          }
+          while ($data = fetch_array($query2)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
+          $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_drpr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query3) !== 0){
+           echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
+          }
+          while ($data = fetch_array($query3)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
+        } else {
+          $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_dr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query) !== 0){
+           echo '<li><b>Jenis Perawatan Dokter</b></li>';
+          }
+          while ($data = fetch_array($query)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
+          $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_pr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query2) !== 0){
+           echo '<li><b>Jenis Perawatan Perawat</b></li>';
+          }
+          while ($data = fetch_array($query2)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
+          $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_drpr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+            $no=1;
+          if(num_rows($query3) !== 0){
+           echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
+          }
+          while ($data = fetch_array($query3)) {
+          ?>
+                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+          <?php
+                $no++;
+          }
         }
         ?>
       </ul>
-        
+
                         </td>
                         <td>
                             <ul style="list-style:none;">
@@ -371,7 +429,7 @@ if (isset($_POST['edit_telp'])) {
                             ?>
                             </ul>
                         </td>
-                        <td>                          
+                        <td>
                             <div id="aniimated-thumbnials" class="list-unstyled row clearfix">
                             <?php
                             $sql_rad = query("select * from gambar_radiologi where no_rawat= '$no_rawat_kunj'");
@@ -391,7 +449,7 @@ if (isset($_POST['edit_telp'])) {
                             echo nl2br($row_rad['3']);
                           }
                           ?>
-                          </p>                          
+                          </p>
                         </td>
                         <td>
 	                    <?php
@@ -550,7 +608,7 @@ if (isset($_POST['edit_telp'])) {
       <div class="card">
         <div class="header">
           <h2>
-            RUJUKAN INTERNAL 
+            RUJUKAN INTERNAL
           </h2>
         </div>
         <div class="body">
@@ -569,10 +627,10 @@ if (isset($_POST['edit_telp'])) {
             <dd><?php echo $nama_dokter; ?></dd>
           </dl>
 
-    
+
   <?php
   if (isset($_POST['ok_rujuk_jawab'])) {
-    if (($_POST['saran'] <> "") and ($no_rawat <> "")) { 
+    if (($_POST['saran'] <> "") and ($no_rawat <> "")) {
 
            $insert = query("UPDATE rujukan_internal_poli_detail SET pemeriksaan = '{$_POST['pemeriksaan']}', diagnosa = '{$_POST['diagnosa']}', saran = '{$_POST['saran']}' WHERE no_rawat = '{$no_rawat}'");
            if ($insert) {
@@ -609,7 +667,7 @@ if (isset($_POST['edit_telp'])) {
 </dl>
 
 
-<form method="post">          
+<form method="post">
 <div class="row clearfix">
     <div class="col-sm-12">
         <dl class="dl-horizontal">
@@ -634,8 +692,8 @@ if (isset($_POST['edit_telp'])) {
     </div>
 
 
-<?php } ?>    
-    
+<?php } ?>
+
     <!-- delete -->
     <?php
     if($action == "delete_diagnosa"){
@@ -661,7 +719,7 @@ if (isset($_POST['edit_telp'])) {
     	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
     	}
     }
-    
+
     if($action == "delete_obat"){
     	$hapus = "DELETE FROM resep_dokter WHERE no_resep='{$_REQUEST['no_resep']}' AND kode_brng='{$_REQUEST['kode_obat']}'";
     	$hasil = query($hapus);
@@ -692,7 +750,7 @@ if (isset($_POST['edit_telp'])) {
       if (($hasil)) {
         redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
       }
-    }      
+    }
     if($action == "delete_an"){
       $hapus = "DELETE FROM pemeriksaan_ralan WHERE no_rawat='{$_REQUEST['no_rawat']}'";
       $hasil = query($hapus);
@@ -713,7 +771,7 @@ if (isset($_POST['edit_telp'])) {
         <form role="form" method="POST" action="">
             <!-- Modal Header -->
             <div class="modal-header">
-                <button type="button" class="close" 
+                <button type="button" class="close"
                    data-dismiss="modal">
                        <span aria-hidden="true">&times;</span>
                        <span class="sr-only">Close</span>
@@ -722,16 +780,16 @@ if (isset($_POST['edit_telp'])) {
                     Edit No Telepon
                 </h4>
             </div>
-            
+
             <!-- Modal Body -->
-            <div class="modal-body">                
+            <div class="modal-body">
                   <div class="form-group">
                     <div class="form-line">
                       <input type="text" name="edit_telp_no" class="form-control" placeholder="Nomor Telepon"/>
                     </div>
                   </div>
             </div>
-            
+
             <!-- Modal Footer -->
             <div class="modal-footer">
                 <input type="submit" name="edit_telp" class="btn btn-primary" value="SIMPAN">
@@ -758,4 +816,3 @@ function Antri()
 setInterval(function(){ Antri(); }, 1000);
 
 </script>
-
