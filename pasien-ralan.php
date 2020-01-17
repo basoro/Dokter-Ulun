@@ -3,7 +3,7 @@
 include_once ('layout/header.php');
 
 if(isset($_GET['no_rawat'])) {
-    $_sql = "SELECT a.no_rkm_medis, a.no_rawat, b.nm_pasien, b.umur, a.status_lanjut , a.kd_pj, c.png_jawab, b.tgl_lahir, d.nm_dokter, e.nm_poli, b.no_tlp FROM reg_periksa a, pasien b, penjab c, dokter d, poliklinik e WHERE a.no_rkm_medis = b.no_rkm_medis AND a.no_rawat = '$_GET[no_rawat]' AND a.kd_pj = c.kd_pj AND a.kd_dokter = d.kd_dokter AND a.kd_poli = e.kd_poli";
+    $_sql = "SELECT a.no_rkm_medis, a.no_rawat, b.nm_pasien, b.umur, a.status_lanjut , a.kd_pj, c.png_jawab, b.tgl_lahir, d.nm_dokter, e.nm_poli, b.no_tlp, a.kd_poli FROM reg_periksa a, pasien b, penjab c, dokter d, poliklinik e WHERE a.no_rkm_medis = b.no_rkm_medis AND a.no_rawat = '$_GET[no_rawat]' AND a.kd_pj = c.kd_pj AND a.kd_dokter = d.kd_dokter AND a.kd_poli = e.kd_poli";
     $found_pasien = query($_sql);
     if(num_rows($found_pasien) == 1) {
 	     while($row = fetch_array($found_pasien)) {
@@ -19,6 +19,7 @@ if(isset($_GET['no_rawat'])) {
            $nama_dokter = $row['8'];
            $nama_poli = $row['9'];
            $no_tlp = $row['10'];
+           $kd_poli = $row['kd_poli'];
 
 	     }
     } else {
@@ -176,6 +177,7 @@ if (isset($_POST['edit_telp'])) {
                   <li role="presentation"><a href="#permintaanrad" data-toggle="tab">PERMINTAAN RAD</a></li>
                   <li role="presentation"><a href="#catatan_dokter" data-toggle="tab">CATATAN</a></li>
                   <li role="presentation"><a href="#rujuk_internal" data-toggle="tab">RUJUK INTERNAL</a></li>
+                  <li role="presentation"><a href="#resume" data-toggle="tab">RESUME MEDIS</a></li>
                   <li role="presentation"><a href="#skdp" data-toggle="tab">SURAT KONTROL</a></li>
                 </ul>
               </div>
@@ -314,78 +316,77 @@ if (isset($_POST['edit_telp'])) {
         ?>
       </ul>
       <ul style="list-style:none;margin-left:0;padding-left:0;">
-
-        <?php
-        if($status_lanjut_kunj == 'Ralan') {
-          $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_dr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query) !== 0){
-           echo '<li><b>Jenis Perawatan Dokter</b></li>';
-          }
-          while ($data = fetch_array($query)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-          $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_pr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query2) !== 0){
-           echo '<li><b>Jenis Perawatan Perawat</b></li>';
-          }
-          while ($data = fetch_array($query2)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-          $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_drpr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query3) !== 0){
-           echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
-          }
-          while ($data = fetch_array($query3)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-        } else {
-          $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_dr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query) !== 0){
-           echo '<li><b>Jenis Perawatan Dokter</b></li>';
-          }
-          while ($data = fetch_array($query)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-          $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_pr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query2) !== 0){
-           echo '<li><b>Jenis Perawatan Perawat</b></li>';
-          }
-          while ($data = fetch_array($query2)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-          $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_drpr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
-            $no=1;
-          if(num_rows($query3) !== 0){
-           echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
-          }
-          while ($data = fetch_array($query3)) {
-          ?>
-                    <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
-          <?php
-                $no++;
-          }
-        }
-        ?>
+                           <?php
+                           if($status_lanjut_kunj == 'Ralan') {
+                             $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_dr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query) !== 0){
+                             	echo '<li><b>Jenis Perawatan Dokter</b></li>';
+                             }
+                             while ($data = fetch_array($query)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                             $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_pr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query2) !== 0){
+                             	echo '<li><b>Jenis Perawatan Perawat</b></li>';
+                             }
+                             while ($data = fetch_array($query2)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                             $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_jl_drpr a, jns_perawatan b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query3) !== 0){
+                             	echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
+                             }
+                             while ($data = fetch_array($query3)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                           } else {
+                             $query = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_dr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query) !== 0){
+                             	echo '<li><b>Jenis Perawatan Dokter</b></li>';
+                             }
+                             while ($data = fetch_array($query)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                             $query2 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_pr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query2) !== 0){
+                             	echo '<li><b>Jenis Perawatan Perawat</b></li>';
+                             }
+                             while ($data = fetch_array($query2)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                             $query3 = query("SELECT a.kd_jenis_prw, b.nm_perawatan FROM rawat_inap_drpr a, jns_perawatan_inap b, reg_periksa c WHERE a.kd_jenis_prw = b.kd_jenis_prw AND a.no_rawat = '{$no_rawat_kunj}' AND a.no_rawat = c.no_rawat");
+                               $no=1;
+                             if(num_rows($query3) !== 0){
+                             	echo '<li><b>Jenis Perawatan Perawat & Dokter</b></li>';
+                             }
+                             while ($data = fetch_array($query3)) {
+                             ?>
+                                       <li><?php echo $no; ?>. <?php echo $data['0']; ?> - <?php echo $data['1']; ?></li>
+                             <?php
+                                   $no++;
+                             }
+                           }
+                           ?>
       </ul>
 
                         </td>
@@ -512,6 +513,11 @@ if (isset($_POST['edit_telp'])) {
                     <?php include_once ('./module/ralan/rujuk-internal.php'); ?>
                   </div>
                 <!-- end rujuk internal -->
+                 <!-- resume -->
+                  <div role="tabpanel" class="tab-pane fade" id="resume">
+                    <?php include_once ('./module/ralan/resume.php');?>
+                  </div>
+                <!-- end resume -->
                 <!-- skdp -->
                   <div role="tabpanel" class="tab-pane fade" id="skdp">
                     <?php include_once ('./module/ralan/skdp.php');?>
@@ -757,7 +763,13 @@ if (isset($_POST['edit_telp'])) {
       if (($hasil)) {
         redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
       }
-
+    }
+    if($action == "delete_resume"){
+    	$hapus = "DELETE FROM resume_pasien WHERE no_rawat='{$_REQUEST['no_rawat']}'";
+    	$hasil = query($hapus);
+    	if (($hasil)) {
+    	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+    	}
     }
     ?>
     <!-- end delete -->

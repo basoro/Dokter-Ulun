@@ -13,6 +13,40 @@ $title = 'Profile Anda';
 include_once('config.php');
 include_once('layout/header.php');
 include_once('layout/sidebar.php');
+
+if(isset($_POST['ganti_password'])){
+    $old_password   = $_POST['OldPassword'];
+    $new_password   = $_POST['NewPassword'];
+    $new_password2  = $_POST['NewPasswordConfirm'];
+
+    $cek_pass = fetch_assoc(query("SELECT AES_DECRYPT(id_user,'nur') as id_user, AES_DECRYPT(password,'windi') as password FROM user WHERE id_user = AES_ENCRYPT('{$_SESSION['username']}','nur')"));
+
+    if($old_password !== $cek_pass['password']) {
+        $errors[] = 'Recent password dont match';
+    }
+
+    if($new_password !== $new_password2) {
+        $errors[] = 'Password dont match confirm password';
+    }
+
+    if (!empty($errors)) {
+        foreach($errors as $error) {
+           echo validation_errors($error);
+        }
+    } else {
+        $insert = query("UPDATE
+                user
+            SET
+                password = AES_ENCRYPT('{$new_password}','windi')
+            WHERE
+                id_user = AES_ENCRYPT('{$_SESSION['username']}','nur')
+        ");
+        if($insert){
+            redirect("profile.php");
+        };
+    }
+};
+
 ?>
 
 <section class="content">
@@ -69,7 +103,7 @@ include_once('layout/sidebar.php');
                                     </form>
                                 </div>
                                 <div role="tabpanel" class="tab-pane fade in" id="change_password_settings">
-                                    <form class="form-horizontal">
+                                    <form class="form-horizontal" method="post" action="">
                                         <div class="form-group">
                                             <label for="OldPassword" class="col-sm-3 control-label">Old Password</label>
                                             <div class="col-sm-9">
@@ -97,7 +131,7 @@ include_once('layout/sidebar.php');
 
                                         <div class="form-group">
                                             <div class="col-sm-offset-3 col-sm-9">
-                                                <button type="submit" class="btn btn-danger">SUBMIT</button>
+                                                <button type="submit" name="ganti_password" class="btn btn-danger">SUBMIT</button>
                                             </div>
                                         </div>
                                     </form>
