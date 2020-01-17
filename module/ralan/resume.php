@@ -80,7 +80,7 @@
       <td><?php echo $data['0']; ?></td>
       <td><?php echo $data['1']; ?></td>
       <td><?php echo $data['2']; ?></td>
-      <td><?php echo $data['3']; ?></td>
+      <td><?php echo nl2br($data['3']); ?></td>
       <td><a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_resume&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
     </tr>
     <?php
