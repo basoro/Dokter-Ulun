@@ -64,6 +64,7 @@
   <table id="resume" class="table responsive striped">
      <tr>
       <th>No</th>
+      <th>Keluhan Utama</th>
       <th>Diagnosa Utama</th>
       <th>Prosedur Utama</th>
       <th>Terapi / Catatan Dokter</th>
