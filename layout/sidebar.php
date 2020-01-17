@@ -79,10 +79,21 @@
                         </ul>
                     </li>
                     <li>
-                        <a href="statistik.php">
+                        <a href="javascript:void(0);" class="menu-toggle">
                             <i class="material-icons">trending_up</i>
                             <span>Statistik</span>
                         </a>
+                        <ul class="ml-menu">
+                            <li>
+                                <a href="statistik.php">Status Kunjungan</a>
+                            </li>
+                            <li>
+                                <a href="statistik-ralan.php">Jumlah Rawat Jalan</a>
+                            </li>
+                            <li>
+                                <a href="statistik-ranap.php">Jumlah Rawat Inap</a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
                         <a href="book-op.php">
