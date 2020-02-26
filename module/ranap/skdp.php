@@ -2,7 +2,7 @@
   <?php
   if(isset($_POST['ok_skdp'])){
     if(($no_rawat <> "")){
-             
+
       $insert = query("INSERT INTO skdp_bpjs VALUES ('{$year}','{$no_rkm_medis}','{$_POST['dx']}','{$_POST['terapi']}','{$_POST['alasan']}','-','{$_POST['tlj']}','-','{$_POST['tgl']}'
                   ,'{$date}','{$_POST['noan']}','{$_SESSION['username']}','Menunggu')");
       if($insert){
@@ -12,7 +12,7 @@
       }
     }
     }
-  
+
   ?>
 <div class="row clearfix">
   <div class="col-md-3">
@@ -111,7 +111,7 @@
       <td><?php echo $data['1']; ?></td>
       <td><?php echo $data['2']; ?></td>
       <td><?php echo $data['3']; ?></td>
-      <td><a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_an&keluhan=<?php echo $data['0']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
+      <td><a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_skdp&keluhan=<?php echo $data['0']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
     </tr>
     <?php
       $no++;}
