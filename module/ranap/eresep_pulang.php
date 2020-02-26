@@ -5,7 +5,7 @@
       $get_obat = fetch_assoc(query("SELECT* FROM databarang WHERE kode_brng = '{$_POST['kode_obat']}'"));
       $total = $get_obat['kelas3'] * $_POST['jumlah'];
 
-      if ($_POST['aturan_pakai_lainnya'] == "") { 
+      if ($_POST['aturan_pakai_lainnya'] == "") {
         $aturan_pakai = $_POST['aturan_pakai'];
       } else {
         $aturan_pakai = $_POST['aturan_pakai_lainnya'];
@@ -26,10 +26,10 @@
           echo validation_errors($error);
         }
       } else {
-        $insert = query("INSERT INTO resep_pulang VALUES ('{$no_rawat}', '{$_POST['kode_obat']}', '{$_POST['jumlah']}', '{$get_obat['kelas3']}', '{$total}', '{$aturan_pakai}', CURRENT_DATE(), CURRENT_TIME(), '{$get_bangsal['kd_bangsal']}')");
+        $insert = query("INSERT INTO resep_pulang VALUES ('{$no_rawat}', '{$_POST['kode_obat']}', '{$_POST['jumlah']}', '{$get_obat['kelas3']}', '{$total}', '{$aturan_pakai}', CURRENT_DATE(), CURRENT_TIME(), '{$get_bangsal['kd_bangsal']}', '{$get_obatstok['no_batch']}', '{$get_obatstok['no_faktur']}')");
         if($insert) {
-          $insert1 = query("INSERT INTO riwayat_barang_medis VALUES ('{$_POST['kode_obat']}', '{$get_obatstok['stok_akhir']}', '0', '{$_POST['jumlah']}', '{$stokakhir}', 'Resep Pulang', CURRENT_DATE(), CURRENT_TIME(), '{$_SESSION['username']}', '{$get_bangsal['kd_bangsal']}', 'Simpan')");
-          $insert2 = query("INSERT INTO gudangbarang VALUES ('{$_POST['kode_obat']}', '{$get_bangsal['kd_bangsal']}', '{$stokakhir}')");
+          $insert1 = query("INSERT INTO riwayat_barang_medis VALUES ('{$_POST['kode_obat']}', '{$get_obatstok['stok_akhir']}', '0', '{$_POST['jumlah']}', '{$stokakhir}', 'Resep Pulang', CURRENT_DATE(), CURRENT_TIME(), '{$_SESSION['username']}', '{$get_bangsal['kd_bangsal']}', 'Simpan', '{$get_obatstok['no_batch']}', '{$get_obatstok['no_faktur']}')");
+          $insert2 = query("INSERT INTO gudangbarang VALUES ('{$_POST['kode_obat']}', '{$get_bangsal['kd_bangsal']}', '{$stokakhir}', '-', '-')");
         }
       }
     }
@@ -72,11 +72,11 @@
       </thead>
       <tbody>
         <?php
-        $query_resep = query("SELECT b.nama_brng, a.jml_barang, a.dosis FROM resep_pulang a, databarang b WHERE a.no_rawat = '{$no_rawat}' AND a.kode_brng = b.kode_brng ORDER BY a.jam DESC");
+        $query_resep = query("SELECT b.nama_brng, a.jml_barang, a.dosis, b.kode_brng FROM resep_pulang a, databarang b WHERE a.no_rawat = '{$no_rawat}' AND a.kode_brng = b.kode_brng ORDER BY a.jam DESC");
         while ($data_resep = fetch_array($query_resep)) {
         ?>
         <tr>
-          <td><?php echo $data_resep['0']; ?> <a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat_pulang&kode_obat=<?php echo $data_resep['0']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
+          <td><?php echo $data_resep['0']; ?> <a class="btn btn-danger btn-xs" href="<?php $_SERVER['PHP_SELF']; ?>?action=delete_obat_pulang&kode_obat=<?php echo $data_resep['3']; ?>&no_rawat=<?php echo $no_rawat; ?>">[X]</a></td>
           <td><?php echo $data_resep['1']; ?></td>
           <td><?php echo $data_resep['2']; ?></td>
         </tr>

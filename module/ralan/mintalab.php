@@ -9,11 +9,8 @@
           $get_date = str_replace('-', '',$date);
           $next_no_order = 'PL'.$get_date.''.$get_next_number;
           echo $next_no_order;
-          $insert = query("INSERT INTO permintaan_lab VALUES ('{$next_no_order}', '{$no_rawat}', '{$date}', '{$time}', '0000-00-00', '00:00:00', '0000-00-00', '00:00:00', '{$_SESSION['username']}', 'ralan')");
-          if($insert) { 
-            if($_POST['klinis'] <> "") {
-                $insert_klinis = query("INSERT INTO diagnosa_pasien_klinis VALUES ('{$next_no_order}', '{$_POST['klinis']}')");
-            }
+          $insert = query("INSERT INTO permintaan_lab VALUES ('{$next_no_order}', '{$no_rawat}', '{$date}', '{$time}', '0000-00-00', '00:00:00', '0000-00-00', '00:00:00', '{$_SESSION['username']}', 'ralan', '{$_POST['info']}', '{$_POST['klinis']}')");
+          if($insert) {
             $get_kd_jenis_prw = $_POST['kd_jenis_prw_lab'];
             for ($i = 0; $i < count($get_kd_jenis_prw); $i++) {
                 $kd_jenis_prw = $get_kd_jenis_prw[$i];
@@ -28,6 +25,8 @@
 <dl class="dl-horizontal">
     <dt>Klinis</dt>
     <dd><input name="klinis" class="form-control" style="width:100%"></dd><br/>
+    <dt>Info Tambahan</dt>
+    <dd><input name="info" class="form-control" style="width:100%"></dd><br/>
     <dt>Jenis Pemeriksaan</dt>
     <dd><select name="kd_jenis_prw_lab[]" class="kd_jenis_prw_lab" multiple="multiple" style="width:100%"></select></dd><br/>
     <dt></dt>

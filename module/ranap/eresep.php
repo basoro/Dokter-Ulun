@@ -6,7 +6,7 @@
           $get_obatmaxtgl = fetch_assoc(query("SELECT MAX(tanggal) AS tanggal FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND kd_bangsal = 'B0001'"));
           $get_obatmaxjam = fetch_assoc(query("SELECT MAX(jam) AS jam FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND kd_bangsal = 'B0001'"));
           $get_obatstok = fetch_assoc(query("SELECT * FROM riwayat_barang_medis WHERE kode_brng = '{$_POST['kode_obat']}' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND jam = '{$get_obatmaxjam['jam']}' AND kd_bangsal = 'B0001'"));
-        
+
           if($get_obatstok['stok_akhir'] < 10 ) {
           	$errors[] = 'Maaf stok obat di depo rawat inap tidak mencukupi';
           }
@@ -16,8 +16,8 @@
                   echo validation_errors($error);
               }
           } else {
-        
-              $onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}'");
+
+              $onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}' AND kd_dokter = '{$_SESSION['username']}'");
               $dtonhand = fetch_array($onhand);
               $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
               $lastNumber = substr($get_number[0], 0, 10);

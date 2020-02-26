@@ -4,7 +4,7 @@
     if(($no_rawat <> "")){
       $insert = query("INSERT INTO pemeriksaan_ranap VALUES ('{$no_rawat}','{$date}','{$time}','{$_POST['suhu']}','{$_POST['tensi']}',
                     '{$_POST['nadi']}','{$_POST['respirasi']}','{$_POST['tinggi']}','{$_POST['berat']}'
-                  ,'{$_POST['gcs']}','{$_POST['keluhan']}','{$_POST['pemeriksaan']}','{$_POST['alergi']}')");
+                  ,'{$_POST['gcs']}','{$_POST['keluhan']}','{$_POST['pemeriksaan']}','{$_POST['alergi']}', '-', '-')");
       if($insert){
         redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
       }
