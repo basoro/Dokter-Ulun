@@ -399,7 +399,7 @@ if (isset($_POST['edit_telp'])) {
                             $no=1;
                             while ($row_obat = fetch_array($sql_obat)) {
                                 $get_aturan = fetch_assoc(query("SELECT resep_dokter.aturan_pakai AS aturan FROM resep_dokter, resep_obat WHERE resep_dokter.no_resep = resep_obat.no_resep AND resep_obat.no_rawat = '$row_obat[2]' AND resep_dokter.kode_brng = '{$row_obat['3']}'"));
-                                echo '<li>'.$no.'. '.$row_obat[1].' - '.$get_aturan[aturan].' ('.$row_obat[0].')</li>';
+                                echo '<li>'.$no.'. '.$row_obat[1].' - '.$get_aturan['aturan'].' ('.$row_obat[0].')</li>';
                                 //echo '<li>'.$no.'. '.$row_obat[1].' ('.$row_obat[0].')</li>';
                                 $no++;
                             }
@@ -730,7 +730,7 @@ if (isset($_POST['edit_telp'])) {
     	$hapus = "DELETE FROM resep_dokter WHERE no_resep='{$_REQUEST['no_resep']}' AND kode_brng='{$_REQUEST['kode_obat']}'";
     	$hasil = query($hapus);
     	if (($hasil)) {
-    	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+    	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#resep");
     	}
     }
 
