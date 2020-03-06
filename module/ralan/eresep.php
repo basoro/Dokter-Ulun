@@ -71,9 +71,25 @@ if (isset($_POST['ok_copyresep'])) {
           $kode_brng = $get_kode_brng[$i];
           $jml = $get_jml[$i];
           $aturan = $get_aturan[$i];
-          query("INSERT INTO resep_dokter VALUES ('{$next_no_resep}', '{$kode_brng}', '{$jml}', '{$aturan}')");
+
+          $get_obatmaxtgl = fetch_assoc(query("SELECT MAX(tanggal) AS tanggal FROM riwayat_barang_medis WHERE kode_brng = '$kode_brng' AND kd_bangsal = 'B0014'"));
+          $get_obatmaxjam = fetch_assoc(query("SELECT MAX(jam) AS jam FROM riwayat_barang_medis WHERE kode_brng = '$kode_brng' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND kd_bangsal = 'B0014'"));
+          $get_obatstok = fetch_assoc(query("SELECT * FROM riwayat_barang_medis WHERE kode_brng = '$kode_brng' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND jam = '{$get_obatmaxjam['jam']}' AND kd_bangsal = 'B0014'"));
+          $get_nama_brng = fetch_assoc(query("SELECT nama_brng FROM databarang WHERE kode_brng = '$kode_brng'"));
+
+          if($get_obatstok['stok_akhir'] < 10000 ) {
+          	$errors = 'Maaf stok obat '.$get_nama_brng['nama_brng'].' di depo rawat jalan tidak mencukupi';
+          }
+
+          if(!empty($errors)) {
+              //foreach($errors as $error) {
+                  echo validation_errors($errors);
+              //}
+          } else {
+            query("INSERT INTO resep_dokter VALUES ('{$next_no_resep}', '{$kode_brng}', '{$jml}', '{$aturan}')");
+            redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#resep");
+          }
       }
-      redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#resep");
 }
 ?>
 
