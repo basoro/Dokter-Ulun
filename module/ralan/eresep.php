@@ -77,7 +77,7 @@ if (isset($_POST['ok_copyresep'])) {
           $get_obatstok = fetch_assoc(query("SELECT * FROM riwayat_barang_medis WHERE kode_brng = '$kode_brng' AND tanggal = '{$get_obatmaxtgl['tanggal']}' AND jam = '{$get_obatmaxjam['jam']}' AND kd_bangsal = 'B0014'"));
           $get_nama_brng = fetch_assoc(query("SELECT nama_brng FROM databarang WHERE kode_brng = '$kode_brng'"));
 
-          if($get_obatstok['stok_akhir'] < 10000 ) {
+          if($get_obatstok['stok_akhir'] < 1 ) {
           	$errors = 'Maaf stok obat '.$get_nama_brng['nama_brng'].' di depo rawat jalan tidak mencukupi';
           }
 
