@@ -102,6 +102,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="ebook.php">
+                            <i class="material-icons">library_books</i>
+                            <span>E-Book dan Jurnal</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="tarif-inacbg.php">
                             <i class="material-icons">attach_money</i>
                             <span>Cek Tarif INACBG's</span>
