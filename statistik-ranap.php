@@ -111,8 +111,8 @@
 
 <?php include_once ('layout/footer.php'); ?>
   <!-- Morris Plugin Js -->
-  <script src="plugins/raphael/raphael.min.js"></script>
-  <script src="plugins/morrisjs/morris.js"></script>
+  <script src="<?php echo URL; ?>/plugins/raphael/raphael.min.js"></script>
+  <script src="<?php echo URL; ?>/plugins/morrisjs/morris.js"></script>
 
 <script type="text/javascript">
       Highcharts.chart('pasien_ranap', {

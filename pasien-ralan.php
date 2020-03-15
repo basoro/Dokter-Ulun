@@ -492,6 +492,11 @@ if (isset($_POST['edit_telp'])) {
                   <div role="tabpanel" class="tab-pane fade" id="resep">
                     <?php include_once ('./module/ralan/eresep.php');?>
                   </div>
+
+                  <div role="tabpanel" class="tab-pane fade" id="racikan">
+                    <?php include_once ('./module/ralan/eresep-racikan.php');?>
+                  </div>
+
                 <!-- end eresep -->
                 <!-- permintaan lab -->
                   <div role="tabpanel" class="tab-pane fade" id="permintaanlab">
@@ -731,6 +736,15 @@ if (isset($_POST['edit_telp'])) {
     	$hasil = query($hapus);
     	if (($hasil)) {
     	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#resep");
+    	}
+    }
+
+    if($action == "delete_racikan"){
+      query("DELETE FROM resep_dokter_racikan_detail WHERE no_resep='{$_REQUEST['no_resep']}' AND no_racik='{$_REQUEST['no_racik']}'");
+    	$hapus = "DELETE FROM resep_dokter_racikan WHERE no_resep='{$_REQUEST['no_resep']}' AND no_racik='{$_REQUEST['no_racik']}'";
+    	$hasil = query($hapus);
+    	if (($hasil)) {
+    	    redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#racikan");
     	}
     }
 

@@ -1,6 +1,6 @@
   <?php include_once ('layout/header.php'); ?>
 
-          <?php 
+          <?php
           		if(isset($_GET['tahun'])) { $tahun = $_GET['tahun']; } else { $tahun = date("Y"); };
                 if(isset($_GET['bulan'])) { $bulan = $_GET['bulan']; } else { $bulan = date("m"); };
           ?>
@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="block-header">
                 <h2>STATISTIK DOKTER <?php echo "Periode ".$bulan." - ".$tahun; ?></h2>
-            </div>          
+            </div>
                       <!-- CPU Usage -->
             <div class="row clearfix">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -22,14 +22,15 @@
                             </div>
                         </div>
                         <div class="body">
+                          <?php $dates = 'Tanggal : '.date("d-m-Y "); ?>
                         <?php
 						$jumlah=array();
 						$penyakit=array();
 						$kd_penyakit=array();
-						$date = $tahun."-".$bulan; 
-                        $sql = "SELECT c.nm_penyakit, a.kd_penyakit, count(a.kd_penyakit) AS jumlah, d.nm_poli 
-								FROM diagnosa_pasien a, reg_periksa b, penyakit c, poliklinik d 
-								WHERE b.tgl_registrasi LIKE '%$date%' 
+						$date = $tahun."-".$bulan;
+                        $sql = "SELECT c.nm_penyakit, a.kd_penyakit, count(a.kd_penyakit) AS jumlah, d.nm_poli
+								FROM diagnosa_pasien a, reg_periksa b, penyakit c, poliklinik d
+								WHERE b.tgl_registrasi LIKE '%$date%'
 								AND a.no_rawat = b.no_rawat
 								AND a.kd_penyakit = c.kd_penyakit
 								AND b.kd_poli = '{$_SESSION['jenis_poli']}'
@@ -37,7 +38,7 @@
 								AND a.status = 'Ralan'
 								GROUP BY a.kd_penyakit
 								ORDER BY jumlah DESC
-								LIMIT 10";                          
+								LIMIT 10";
 						$hasil=query($sql);
 						while ($data = fetch_array ($hasil)){
                             $jumlah[]=intval($data['jumlah']);
@@ -77,7 +78,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- #END# Donut Chart -->              
+                <!-- #END# Donut Chart -->
             </div>
 			<div class="row clearfix">
                 <!-- Line Chart -->
@@ -109,7 +110,7 @@
                             <div class="col-lg-4">
                               <input type="submit" class="btn bg-blue btn-block btn-lg waves-effect" value="Submit">
                             </div>
-                            </form>          
+                            </form>
           </div>
           <div class="row clearfix">
             <br><br>
@@ -121,8 +122,8 @@
 
 <?php include_once ('layout/footer.php'); ?>
     <!-- Morris Plugin Js -->
-    <script src="plugins/raphael/raphael.min.js"></script>
-    <script src="plugins/morrisjs/morris.js"></script>
+    <script src="<?php echo URL; ?>/plugins/raphael/raphael.min.js"></script>
+    <script src="<?php echo URL; ?>/plugins/morrisjs/morris.js"></script>
 
 	<script type="text/javascript">
         Highcharts.chart('10penyakit', {
@@ -177,9 +178,9 @@
 		});
 	</script>
 
-<?php 
-$date = $tahun."-".$bulan; 
-$_tgl_registrasi = "SELECT tgl_registrasi AS tanggal FROM reg_periksa WHERE tgl_registrasi LIKE '%$date%' AND kd_poli = '{$_SESSION['jenis_poli']}' GROUP BY tgl_registrasi";  
+<?php
+$date = $tahun."-".$bulan;
+$_tgl_registrasi = "SELECT tgl_registrasi AS tanggal FROM reg_periksa WHERE tgl_registrasi LIKE '%$date%' AND kd_poli = '{$_SESSION['jenis_poli']}' GROUP BY tgl_registrasi";
 $hasil = query($_tgl_registrasi);
 ?>
 
@@ -198,9 +199,9 @@ function getMorris(type, element) {
             data: [
 				<?php while($data = fetch_array($hasil)){ ?>
 				{
-                  	tanggal: '<?php echo $data['tanggal']; ?>', 
-      				baru: '<?php echo num_rows(query("SELECT status_poli AS baru FROM reg_periksa WHERE status_poli = 'Baru' AND tgl_registrasi = '{$data['tanggal']}' AND kd_poli = '{$_SESSION['jenis_poli']}'"));?>', 
-      				lama: '<?php echo num_rows(query("SELECT status_poli AS lama FROM reg_periksa WHERE status_poli = 'Lama' AND tgl_registrasi = '{$data['tanggal']}' AND kd_poli = '{$_SESSION['jenis_poli']}'"));?>' 
+                  	tanggal: '<?php echo $data['tanggal']; ?>',
+      				baru: '<?php echo num_rows(query("SELECT status_poli AS baru FROM reg_periksa WHERE status_poli = 'Baru' AND tgl_registrasi = '{$data['tanggal']}' AND kd_poli = '{$_SESSION['jenis_poli']}'"));?>',
+      				lama: '<?php echo num_rows(query("SELECT status_poli AS lama FROM reg_periksa WHERE status_poli = 'Lama' AND tgl_registrasi = '{$data['tanggal']}' AND kd_poli = '{$_SESSION['jenis_poli']}'"));?>'
 				},
 				<?php } ?>
             ],

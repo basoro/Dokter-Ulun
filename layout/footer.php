@@ -29,53 +29,53 @@
     </div>
 
     <!-- Jquery Core Js -->
-    <script src="plugins/jquery/jquery.min.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery/jquery.min.js"></script>
 
     <!-- Bootstrap Core Js -->
-    <script src="plugins/bootstrap/js/bootstrap.js"></script>
+    <script src="<?php echo URL; ?>/plugins/bootstrap/js/bootstrap.js"></script>
 
     <!-- Select Plugin Js -->
-    <script src="plugins/bootstrap-select/js/bootstrap-select.js"></script>
+    <script src="<?php echo URL; ?>/plugins/bootstrap-select/js/bootstrap-select.js"></script>
 
     <!-- Slimscroll Plugin Js -->
-    <script src="plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
 
     <!-- Jquery Validation Plugin Css -->
-    <script src="plugins/jquery-validation/jquery.validate.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-validation/jquery.validate.js"></script>
 
     <!-- JQuery Steps Plugin Js -->
-    <script src="plugins/jquery-steps/jquery.steps.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-steps/jquery.steps.js"></script>
 
     <!-- Sweet Alert Plugin Js -->
-    <script src="plugins/sweetalert/sweetalert.min.js"></script>
+    <script src="<?php echo URL; ?>/plugins/sweetalert/sweetalert.min.js"></script>
 
     <!-- Waves Effect Plugin Js -->
-    <script src="plugins/node-waves/waves.js"></script>
+    <script src="<?php echo URL; ?>/plugins/node-waves/waves.js"></script>
 
     <!-- Jquery DataTable Plugin Js -->
-    <script src="plugins/jquery-datatable/jquery.dataTables.js"></script>
-    <script src="plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
-    <script src="plugins/jquery-datatable/extensions/responsive/js/dataTables.responsive.min.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-datatable/jquery.dataTables.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-datatable/extensions/responsive/js/dataTables.responsive.min.js"></script>
 
     <!-- Jquery CountTo Plugin Js -->
-    <script src="plugins/jquery-countto/jquery.countTo.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-countto/jquery.countTo.js"></script>
 
     <!-- Highcharts Plugin Js -->
-	  <script src="plugins/highcharts/highcharts.js"></script>
-    <script src="plugins/highcharts/exporting.js"></script>
+	  <script src="<?php echo URL; ?>/plugins/highcharts/highcharts.js"></script>
+    <script src="<?php echo URL; ?>/plugins/highcharts/exporting.js"></script>
 
     <!-- Chart Plugins Js -->
-    <script src="plugins/chartjs/Chart.bundle.js"></script>
+    <script src="<?php echo URL; ?>/plugins/chartjs/Chart.bundle.js"></script>
 
     <!-- Sparkline Chart Plugin Js -->
-    <script src="plugins/jquery-sparkline/jquery.sparkline.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-sparkline/jquery.sparkline.js"></script>
 
     <!-- Autosize Plugin Js -->
-    <script src="plugins/autosize/autosize.js"></script>
+    <script src="<?php echo URL; ?>/plugins/autosize/autosize.js"></script>
 
     <!-- Moment Plugin Js -->
-    <script src="plugins/momentjs/moment.js"></script>
-    <script src="plugins/light-gallery/js/lightgallery-all.js"></script>
+    <script src="<?php echo URL; ?>/plugins/momentjs/moment.js"></script>
+    <script src="<?php echo URL; ?>/plugins/light-gallery/js/lightgallery-all.js"></script>
 	<script>
 
 	$(function () {
@@ -89,13 +89,13 @@
 
 
     <!-- Bootstrap Material Datetime Picker Plugin Js -->
-    <script src="plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+    <script src="<?php echo URL; ?>/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
 
-    <script src="assets/js/jquery-ui.min.js"></script>
-    <script src="assets/js/select2.min.js"></script>
+    <script src="<?php echo URL; ?>/assets/js/jquery-ui.min.js"></script>
+    <script src="<?php echo URL; ?>/assets/js/select2.min.js"></script>
 
     <!-- TinyMCE -->
-    <script src="plugins/tinymce/tinymce.js"></script>
+    <script src="<?php echo URL; ?>/plugins/tinymce/tinymce.js"></script>
   	<script>
       $(function () {
 
@@ -114,12 +114,12 @@
               image_advtab: true
           });
           tinymce.suffix = ".min";
-          tinyMCE.baseURL = 'plugins/tinymce';
+          tinyMCE.baseURL = '<?php echo URL; ?>/plugins/tinymce';
       });
   	</script>
 
     <!-- Custom Js -->
-    <script src="assets/js/admin.js"></script>
+    <script src="<?php echo URL; ?>/assets/js/admin.js"></script>
 
 	  <script>
 
@@ -224,7 +224,9 @@
         } );
 	</script>
 
-	<script type="text/javascript">
+<?php if($_SERVER['REQUEST_URI'] == DIR.'/index.php') { ?>
+
+  	<script type="text/javascript">
         Highcharts.chart('kunjungan', {
 		    chart: {
 			    type: 'column'
@@ -276,6 +278,7 @@
 			}]
 		});
 	</script>
+<?php } ?>
 
     <script type="text/javascript">
 
@@ -365,6 +368,10 @@
       	minimumInputLength: 3
         });
 
+        $('.metode_racik').select2({
+            placeholder: 'Pilih metode racik'
+        });
+
         $('.aturan_pakai').select2({
             placeholder: 'Pilih aturan pakai'
         });
@@ -440,6 +447,15 @@
              });
          });
 
+         $(function () {
+              $('#row_dim_racikan').hide();
+              $('#lainnya_racikan').change(function () {
+                  $('#row_dim_racikan').hide();
+                  if (this.options[this.selectedIndex].value == 'lainnya_racikan') {
+                      $('#row_dim_racikan').show();
+                  }
+              });
+          });
 
     </script>
 

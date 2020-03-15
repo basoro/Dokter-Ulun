@@ -35,25 +35,25 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Google Fonts -->
-    <link href="assets/css/roboto.css" rel="stylesheet">
+    <link href="<?php echo URL; ?>/assets/css/roboto.css" rel="stylesheet">
 
     <!-- Material Icon Css -->
-    <link href="assets/css/material-icon.css" rel="stylesheet">
+    <link href="<?php echo URL; ?>/assets/css/material-icon.css" rel="stylesheet">
 
     <!-- Bootstrap Core Css -->
-    <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="<?php echo URL; ?>/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!-- Waves Effect Css -->
-    <link href="plugins/node-waves/waves.css" rel="stylesheet" />
+    <link href="<?php echo URL; ?>/plugins/node-waves/waves.css" rel="stylesheet" />
 
     <!-- Animation Css -->
-    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
+    <link href="<?php echo URL; ?>/plugins/animate-css/animate.css" rel="stylesheet" />
 
     <!-- Custom Css -->
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo URL; ?>/assets/css/style.css" rel="stylesheet">
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
-    <link href="assets/css/all-themes.min.css" rel="stylesheet" />
+    <link href="<?php echo URL; ?>/assets/css/all-themes.min.css" rel="stylesheet" />
 </head>
 
 <body class="login-page">
@@ -82,7 +82,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
 ?>
     <div class="login-box" style="margin: 20px;">
         <div class="logo">
-            <div class="align-center p-b-15"><img src="assets/images/logo-hst.png"></div>
+            <div class="align-center p-b-15"><img src="<?php echo URL; ?>/assets/images/logo-hst.png"></div>
             <a href="index.php"><?php echo $dataSettings['nama_instansi']; ?></a>
             <small><?php echo $dataSettings['alamat_instansi']; ?> - <?php echo $dataSettings['kabupaten']; ?></small>
         </div>
@@ -194,19 +194,19 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password'])) { redirect('inde
     </div>
 
     <!-- Jquery Core Js -->
-    <script src="plugins/jquery/jquery.min.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery/jquery.min.js"></script>
 
     <!-- Bootstrap Core Js -->
-    <script src="plugins/bootstrap/js/bootstrap.js"></script>
+    <script src="<?php echo URL; ?>/plugins/bootstrap/js/bootstrap.js"></script>
 
     <!-- Waves Effect Plugin Js -->
-    <script src="plugins/node-waves/waves.js"></script>
+    <script src="<?php echo URL; ?>/plugins/node-waves/waves.js"></script>
 
     <!-- Validation Plugin Js -->
-    <script src="plugins/jquery-validation/jquery.validate.js"></script>
+    <script src="<?php echo URL; ?>/plugins/jquery-validation/jquery.validate.js"></script>
 
     <!-- Custom Js -->
-    <script src="assets/js/admin.js"></script>
+    <script src="<?php echo URL; ?>/assets/js/admin.js"></script>
 </body>
 
 </html>

@@ -19,9 +19,11 @@
 
               $onhand = query("SELECT no_resep FROM resep_obat WHERE no_rawat = '{$no_rawat}' AND tgl_peresepan = '{$date}' AND kd_dokter = '{$_SESSION['username']}'");
               $dtonhand = fetch_array($onhand);
-              $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,10),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
-              $lastNumber = substr($get_number[0], 0, 10);
-              $next_no_resep = sprintf('%010s', ($lastNumber + 1));
+              $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,4),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
+              $lastNumber = substr($get_number[0], 0, 4);
+              $_next_no_resep = sprintf('%04s', ($lastNumber + 1));
+              $tgl_resep = date('Ymd');
+              $next_no_resep = $tgl_resep.''.$_next_no_resep;
 
               if ($dtonhand['0'] > 1) {
                 if ($_POST['aturan_pakai_lainnya'] == "") {

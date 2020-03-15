@@ -21,8 +21,8 @@ define('DB_NAME', 'sik');
 $connection = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 define('VERSION', '1.1');
-define('URL', '');
-define('DIR', '');
+define('URL', 'http://localhost/Dokter-Ulun/');
+define('DIR', '/Dokter-Ulun');
 define('PRODUCTION', 'NO'); // YES to hide error page. NO to display error page.
 define('SIMRSURL', 'http://localhost/webapps');
 define('BERKAS_RM', '003');

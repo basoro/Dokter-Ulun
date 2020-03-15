@@ -1,3 +1,8 @@
+<ul class="nav nav-tabs m-b-30" role="tablist">
+  <li role="presentation"><a href="#resep" aria-controls="5" role="tab" data-toggle="tab">Umum</a></li>
+  <li role="presentation"><a href="#racikan" aria-controls="6" role="tab" data-toggle="tab">Racikan</a></li>
+</ul>
+
   <?php
   if (isset($_POST['ok_obat'])) {
       if (($_POST['kode_obat'] <> "") and ($no_rawat <> "")) {
@@ -21,7 +26,7 @@
               $get_number = fetch_array(query("select ifnull(MAX(CONVERT(RIGHT(no_resep,4),signed)),0) from resep_obat where tgl_perawatan like '%{$date}%'"));
               $lastNumber = substr($get_number[0], 0, 4);
               $_next_no_resep = sprintf('%04s', ($lastNumber + 1));
-              $tgl_resep = date('Ym');
+              $tgl_resep = date('Ymd');
               $next_no_resep = $tgl_resep.''.$_next_no_resep;
 
 
@@ -39,7 +44,7 @@
                   } else {
                     $insert2 = query("INSERT INTO resep_dokter VALUES ('{$next_no_resep}', '{$_POST['kode_obat']}', '{$_POST['jumlah']}', '{$_POST['aturan_pakai_lainnya']}')");
                   }
-                  redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+                  redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#resep");
               }
           }
       }
@@ -196,7 +201,7 @@ if (isset($_POST['ok_copyresep'])) {
 <h4>Riwayat Peresepan</h4>
 <?php
 //$sql_resep = query("SELECT c.no_rawat, a.kode_brng, a.jml, a.aturan_pakai, b.nama_brng, a.no_resep, c.tgl_peresepan, c.jam_peresepan FROM resep_dokter a, databarang b, resep_obat c, reg_periksa d WHERE a.kode_brng = b.kode_brng AND a.no_resep = c.no_resep AND d.no_rkm_medis = '$no_rkm_medis' AND d.no_rawat = c.no_rawat AND c.kd_dokter = '{$_SESSION['username']}'");
-$sql_resep = query("SELECT resep_obat.no_resep, resep_obat.tgl_peresepan FROM reg_periksa, resep_obat WHERE reg_periksa.no_rkm_medis = '$no_rkm_medis' AND reg_periksa.no_rawat = resep_obat.no_rawat AND reg_periksa.kd_dokter = '{$_SESSION['username']}'");
+$sql_resep = query("SELECT resep_obat.no_resep, resep_obat.tgl_peresepan FROM reg_periksa, resep_obat WHERE reg_periksa.no_rkm_medis = '$no_rkm_medis' AND reg_periksa.no_rawat = resep_obat.no_rawat AND resep_obat.kd_dokter = '{$_SESSION['username']}'");
 ?>
 <div class="table-responsive">
  <table class="table table-striped">
@@ -211,7 +216,8 @@ $sql_resep = query("SELECT resep_obat.no_resep, resep_obat.tgl_peresepan FROM re
     <tbody>
 <?php
 while ($row = fetch_array($sql_resep)) {
-  $sql_obat = query("SELECT databarang.nama_brng, resep_dokter.jml, resep_dokter.aturan_pakai FROM resep_dokter, databarang WHERE resep_dokter.no_resep = '$row[0]' AND resep_dokter.kode_brng = databarang.kode_brng")
+  $sql_obat = query("SELECT databarang.nama_brng, resep_dokter.jml, resep_dokter.aturan_pakai FROM resep_dokter, databarang WHERE resep_dokter.no_resep = '$row[0]' AND resep_dokter.kode_brng = databarang.kode_brng");
+  if(num_rows($sql_obat) > 0) {
 ?>
 <tr>
     <td><?php echo $row['0']; ?></td>
@@ -228,6 +234,7 @@ while ($row = fetch_array($sql_resep)) {
     <td><a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=view&no_rawat=<?php echo $no_rawat;?>&copyresep=<?php echo $row['0']; ?>#resep" class="btn btn-primary">Copy Resep</a></td>
 </tr>
 <?php
+  }
 }
 ?>
     </tbody>

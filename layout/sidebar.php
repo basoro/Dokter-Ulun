@@ -8,9 +8,9 @@
                 <div class="image">
                 <?php
                 if ($dataGet['1'] == 'L') {
-                    echo '<img src="assets/images/pria.png" width="48" height="48" alt="User" />';
+                    echo '<img src="'.URL.'/assets/images/pria.png" width="48" height="48" alt="User" />';
                 } else if ($dataGet['1'] == 'P') {
-                    echo '<img src="assets/images/wanita.png" width="48" height="48" alt="User" />';
+                    echo '<img src="'.URL.'/assets/images/wanita.png" width="48" height="48" alt="User" />';
                 }
                 ?>
                 </div>

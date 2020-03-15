@@ -2,19 +2,18 @@
 if(isset($_POST['ok_an'])){
   if(($no_rawat <> "")){
     $insert = query("INSERT INTO pemeriksaan_ralan VALUE ('{$no_rawat}','{$date}','{$time}','{$_POST['suhu']}','{$_POST['tensi']}','{$_POST['nadi']}','{$_POST['respirasi']}','{$_POST['tinggi']}','{$_POST['berat']}'
-                ,'{$_POST['gcs']}','{$_POST['keluhan']}','{$_POST['pemeriksaan']}','{$_POST['alergi']}','-','{$_POST['tndklnjt']}')");
+                ,'{$_POST['gcs']}','{$_POST['keluhan']}','{$_POST['pemeriksaan']}','{$_POST['alergi']}','-','{$_POST['tndklnjt']}','{$_POST['penilaian']}')");
     if($insert){
-      redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+      redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#anamnese");
     }
   }
 }
 if(isset($_POST['edit_an'])){
   if(($no_rawat <> "")){
-    //$insert = query("UPDATE pemeriksaan_ralan SET suhu_tubuh = $_POST['suhu'], tensi = $_POST['tensi'], nadi = $_POST['nadi'], respirasi = $_POST['respirasi'], tinggi = $_POST['tinggi'], berat = $_POST['berat'], gcs = $_POST['gcs'], keluhan = $_POST['keluhan'], pemeriksaan = $_POST['pemeriksaan'], alergi = $_POST['alergi'], rtl = $_POST['tndklnjt'] WHERE no_rawat = $no_rawat");
-	$insert = query("UPDATE pemeriksaan_ralan SET suhu_tubuh = '{$_POST['suhu']}', tensi = '{$_POST['tensi']}', nadi = '{$_POST['nadi']}', respirasi = '{$_POST['respirasi']}', tinggi = '{$_POST['tinggi']}', berat = '{$_POST['berat']}', gcs = '{$_POST['gcs']}', keluhan = '{$_POST['keluhan']}', pemeriksaan = '{$_POST['pemeriksaan']}', alergi = '{$_POST['alergi']}', rtl = '{$_POST['tndklnjt']}' WHERE no_rawat = '{$no_rawat}'");
+	   $insert = query("UPDATE pemeriksaan_ralan SET suhu_tubuh = '{$_POST['suhu']}', tensi = '{$_POST['tensi']}', nadi = '{$_POST['nadi']}', respirasi = '{$_POST['respirasi']}', tinggi = '{$_POST['tinggi']}', berat = '{$_POST['berat']}', gcs = '{$_POST['gcs']}', keluhan = '{$_POST['keluhan']}', pemeriksaan = '{$_POST['pemeriksaan']}', alergi = '{$_POST['alergi']}', rtl = '{$_POST['tndklnjt']}', penilaian = '{$_POST['penilaian']}' WHERE no_rawat = '{$no_rawat}'");
 
     if($insert){
-      redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}");
+      redirect("{$_SERVER['PHP_SELF']}?action=view&no_rawat={$no_rawat}#anamnese");
     }
   }
 }
@@ -25,7 +24,8 @@ if(isset($_POST['edit_an'])){
 <?php if(!$opt) { ?>
 <form method="post">
 <div class="row clearfix">
-<div class="col-md-3">
+
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
       <dt>Keluhan</dt>
@@ -33,7 +33,7 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
       <dt>Pemeriksaan</dt>
@@ -41,25 +41,18 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
-      <dt>Alergi</dt>
-      <dd><input type="text" class="form-control" name="alergi"></dd>
-    </div>
-  </div>
-</div>
-<div class="col-md-3">
-  <div class="form-group">
-    <div class="form-line">
-      <dt>Tindak Lanjut</dt>
-      <dd><input type="text" class="form-control" name="tndklnjt"></dd>
+      <dt>Penilaian</dt>
+      <dd><textarea rows="4" name="penilaian" class="form-control"></textarea></dd>
     </div>
   </div>
 </div>
 </div>
+
 <div class="row clearfix">
-<div class="col-md-3">
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Suhu Badan (C)</dt>
@@ -67,7 +60,15 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Berat (Kg)</dt>
+      <dd><input type="text" class="form-control" name="berat"></dd>
+    </div>
+  </div>
+</div>
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Tinggi Badan (Cm)</dt>
@@ -75,7 +76,7 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Tensi</dt>
@@ -83,7 +84,15 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Nadi (per Menit)</dt>
+      <dd><input type="text" class="form-control" name="nadi"></dd>
+    </div>
+  </div>
+</div>
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Respirasi (per Menit)</dt>
@@ -92,20 +101,13 @@ if(isset($_POST['edit_an'])){
   </div>
 </div>
 </div>
+
 <div class="row clearfix">
 <div class="col-md-3">
   <div class="form-group">
     <div class="form-line">
-      <dt>Berat (Kg)</dt>
-      <dd><input type="text" class="form-control" name="berat"></dd>
-    </div>
-  </div>
-</div>
-<div class="col-md-3">
-  <div class="form-group">
-    <div class="form-line">
-      <dt>Nadi (per Menit)</dt>
-      <dd><input type="text" class="form-control" name="nadi"></dd>
+      <dt>Alergi</dt>
+      <dd><input type="text" class="form-control" name="alergi"></dd>
     </div>
   </div>
 </div>
@@ -125,7 +127,16 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
+<div class="col-md-3">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Tindak Lanjut</dt>
+      <dd><input type="text" class="form-control" name="tndklnjt"></dd>
+    </div>
+  </div>
 </div>
+</div>
+
 <div class="row clearfix">
 <div class="col-md-3">
   <div class="form-group">
@@ -133,20 +144,25 @@ if(isset($_POST['edit_an'])){
   </div>
 </div>
 </div>
-<div class="row clearfix">
-  <table id="keluhan" class="table striped">
-    <tr>
-      <th>No</th>
-      <th>Keluhan</th>
-      <th>Pemeriksaan</th>
-      <th>Suhu</th>
-      <th>BB</th>
-      <th>Tinggi</th>
-      <th>Tensi</th>
-      <th>Nadi</th>
-      <th>RR</th>
-      <th>Action</th>
-    </tr>
+</form>
+<div class="clearfix">
+  <table id="datatable" class="table table-bordered table-striped table-hover display nowrap" style="width:100%;">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Keluhan</th>
+        <th>Pemeriksaan</th>
+        <th>Penilaian</th>
+        <th>Suhu</th>
+        <th>BB</th>
+        <th>Tinggi</th>
+        <th>Tensi</th>
+        <th>Nadi</th>
+        <th>RR</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
     <?php
     $query = query("SELECT * FROM pemeriksaan_ralan WHERE no_rawat = '{$no_rawat}'");
     $no=1;
@@ -156,6 +172,7 @@ if(isset($_POST['edit_an'])){
       <td><?php echo $no; ?></td>
       <td><?php echo $data['keluhan']; ?></td>
       <td><?php echo $data['pemeriksaan']; ?></td>
+      <td><?php echo $data['penilaian']; ?></td>
       <td><?php echo $data['suhu_tubuh']; ?></td>
       <td><?php echo $data['berat']; ?></td>
       <td><?php echo $data['tinggi']; ?></td>
@@ -167,18 +184,18 @@ if(isset($_POST['edit_an'])){
     <?php
       $no++;}
     ?>
+    </tbody>
   </table>
 </div>
-</form>
 <?php } ?>
 
-<?php if($opt == 'edit_anamnese' ) { ?> 
+<?php if($opt == 'edit_anamnese' ) { ?>
 <?php
     $row = fetch_assoc(query("SELECT * FROM pemeriksaan_ralan WHERE no_rawat = '{$no_rawat}'"));
-?>                           
+?>
 <form method="post">
 <div class="row clearfix">
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
       <dt>Edit Keluhan</dt>
@@ -186,7 +203,7 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
       <dt>Pemeriksaan</dt>
@@ -194,25 +211,17 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
   <div class="form-group">
     <div class="form-line">
-      <dt>Alergi</dt>
-      <dd><input type="text" class="form-control" value="<?php echo $row['alergi']; ?>" name="alergi"></dd>
-    </div>
-  </div>
-</div>
-<div class="col-md-3">
-  <div class="form-group">
-    <div class="form-line">
-      <dt>Tindak Lanjut</dt>
-      <dd><input type="text" class="form-control" value="<?php echo $row['rtl']; ?>" name="tndklnjt"></dd>
+      <dt>Penilaian</dt>
+      <dd><textarea rows="4" name="penilaian" class="form-control"><?php echo $row['penilaian']; ?></textarea></dd>
     </div>
   </div>
 </div>
 </div>
 <div class="row clearfix">
-<div class="col-md-3">
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Suhu Badan (C)</dt>
@@ -220,7 +229,15 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Berat (Kg)</dt>
+      <dd><input type="text" class="form-control" value="<?php echo $row['berat']; ?>" name="berat"></dd>
+    </div>
+  </div>
+</div>
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Tinggi Badan (Cm)</dt>
@@ -228,7 +245,7 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Tensi</dt>
@@ -236,7 +253,15 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
-<div class="col-md-3">
+<div class="col-md-2">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Nadi (per Menit)</dt>
+      <dd><input type="text" class="form-control" value="<?php echo $row['nadi']; ?>" name="nadi"></dd>
+    </div>
+  </div>
+</div>
+<div class="col-md-2">
   <div class="form-group">
     <div class="form-line">
       <dt>Respirasi (per Menit)</dt>
@@ -249,16 +274,8 @@ if(isset($_POST['edit_an'])){
 <div class="col-md-3">
   <div class="form-group">
     <div class="form-line">
-      <dt>Berat (Kg)</dt>
-      <dd><input type="text" class="form-control" value="<?php echo $row['berat']; ?>" name="berat"></dd>
-    </div>
-  </div>
-</div>
-<div class="col-md-3">
-  <div class="form-group">
-    <div class="form-line">
-      <dt>Nadi (per Menit)</dt>
-      <dd><input type="text" class="form-control" value="<?php echo $row['nadi']; ?>" name="nadi"></dd>
+      <dt>Alergi</dt>
+      <dd><input type="text" class="form-control" value="<?php echo $row['alergi']; ?>" name="alergi"></dd>
     </div>
   </div>
 </div>
@@ -278,7 +295,16 @@ if(isset($_POST['edit_an'])){
     </div>
   </div>
 </div>
+<div class="col-md-3">
+  <div class="form-group">
+    <div class="form-line">
+      <dt>Tindak Lanjut</dt>
+      <dd><input type="text" class="form-control" value="<?php echo $row['rtl']; ?>" name="tndklnjt"></dd>
+    </div>
+  </div>
 </div>
+</div>
+
 <div class="row clearfix">
 <div class="col-md-3">
   <div class="form-group">
