@@ -3,8 +3,8 @@
 /***
 * e-Dokter from version 0.1 Beta
 * Last modified: 02 Pebruari 2018
-* Author : drg. Faisol Basoro
-* Email : drg.faisol@basoro.org
+* Author : Didi Andriawan
+* Email : dd.andriawan26@gmail.com
 *
 * File : config.php
 * Description : Main config, function and helper
