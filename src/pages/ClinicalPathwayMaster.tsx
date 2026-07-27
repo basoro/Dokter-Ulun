@@ -364,6 +364,7 @@ const CATEGORY_GROUP_OPTIONS = [
     label: 'Terapi/ medikamentosa',
     options: [
       'Terapi/ medikamentosa',
+      'Tatalaksana/Intervensi',
       'Terapi/ medikamentosa - Injeksi',
       'Terapi/ medikamentosa - Obat anestesi',
       'Terapi/ medikamentosa - Cairan infus',
@@ -378,6 +379,7 @@ const CATEGORY_GROUP_OPTIONS = [
   {
     label: 'Monitoring (Post Op)',
     options: [
+      'Monitoring dan Evaluasi',
       'Monitoring (Post Op)',
       'Monitoring (Post Op) - Perawat',
       'Monitoring (Post Op) - Dokter ruangan',
