@@ -1202,6 +1202,29 @@ const ClinicalPathwayMaster: React.FC = () => {
     }
   };
 
+  const copyTemplateToForm = (item: TemplateItem) => {
+    setTemplateForm({
+      id: null,
+      clinical_pathway_id: Number(item.clinical_pathway_id || 0),
+      clinical_pathway_day_id: null,
+      hari_ke: Number(item.hari_ke || 1),
+      urutan: Number(item.urutan || 0),
+      kategori: item.kategori || '',
+      kegiatan: item.kegiatan || '',
+      tujuan_harian: item.tujuan_harian || '',
+      uraian_kegiatan: item.uraian_kegiatan || '',
+      aktivitas: item.aktivitas || '',
+      keterangan: item.keterangan || '',
+      wajib: item.wajib === 'Tidak' ? 'Tidak' : 'Ya'
+    });
+    setTemplateFilterMasterId(Number(item.clinical_pathway_id || 0));
+    setActiveTab('template');
+    toast({
+      title: 'Berhasil',
+      description: 'Template harian berhasil disalin ke form'
+    });
+  };
+
   const saveTemplate = async () => {
     try {
       setTemplateSaving(true);
@@ -2418,6 +2441,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                         <td className={tableCellClass}>{item.wajib}</td>
                         <td className={tableCellClass}>
                           <div className="flex gap-1">
+                            <Button size="sm" variant="outline" onClick={() => copyTemplateToForm(item)}>Copy</Button>
                             <Button size="sm" variant="outline" onClick={() => void loadTemplateDetail(item.id)}>Edit</Button>
                             <Button size="sm" variant="destructive" onClick={() => void deleteTemplate(item.id)} disabled={templateDeletingId === item.id}>
                               {templateDeletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Hapus'}
