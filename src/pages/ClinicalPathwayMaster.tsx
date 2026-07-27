@@ -364,6 +364,7 @@ const CATEGORY_GROUP_OPTIONS = [
     label: 'Terapi/ medikamentosa',
     options: [
       'Terapi/ medikamentosa',
+      'Tatalaksana/Intervensi',
       'Terapi/ medikamentosa - Injeksi',
       'Terapi/ medikamentosa - Obat anestesi',
       'Terapi/ medikamentosa - Cairan infus',
@@ -378,6 +379,7 @@ const CATEGORY_GROUP_OPTIONS = [
   {
     label: 'Monitoring (Post Op)',
     options: [
+      'Monitoring dan Evaluasi',
       'Monitoring (Post Op)',
       'Monitoring (Post Op) - Perawat',
       'Monitoring (Post Op) - Dokter ruangan',
@@ -1200,6 +1202,29 @@ const ClinicalPathwayMaster: React.FC = () => {
         variant: 'destructive'
       });
     }
+  };
+
+  const copyTemplateToForm = (item: TemplateItem) => {
+    setTemplateForm({
+      id: null,
+      clinical_pathway_id: Number(item.clinical_pathway_id || 0),
+      clinical_pathway_day_id: null,
+      hari_ke: Number(item.hari_ke || 1),
+      urutan: Number(item.urutan || 0),
+      kategori: item.kategori || '',
+      kegiatan: item.kegiatan || '',
+      tujuan_harian: item.tujuan_harian || '',
+      uraian_kegiatan: item.uraian_kegiatan || '',
+      aktivitas: item.aktivitas || '',
+      keterangan: item.keterangan || '',
+      wajib: item.wajib === 'Tidak' ? 'Tidak' : 'Ya'
+    });
+    setTemplateFilterMasterId(Number(item.clinical_pathway_id || 0));
+    setActiveTab('template');
+    toast({
+      title: 'Berhasil',
+      description: 'Template harian berhasil disalin ke form'
+    });
   };
 
   const saveTemplate = async () => {
@@ -2418,6 +2443,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                         <td className={tableCellClass}>{item.wajib}</td>
                         <td className={tableCellClass}>
                           <div className="flex gap-1">
+                            <Button size="sm" variant="outline" onClick={() => copyTemplateToForm(item)}>Copy</Button>
                             <Button size="sm" variant="outline" onClick={() => void loadTemplateDetail(item.id)}>Edit</Button>
                             <Button size="sm" variant="destructive" onClick={() => void deleteTemplate(item.id)} disabled={templateDeletingId === item.id}>
                               {templateDeletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Hapus'}
