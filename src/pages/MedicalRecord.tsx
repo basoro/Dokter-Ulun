@@ -4674,12 +4674,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
             delete radiologyHistoryCardRefs.current[observerKey];
           }
         }}
-        className="border rounded-lg p-4 cursor-move hover:shadow-lg transition-shadow"
-        draggable
-        onDragStart={(e) => {
-          setDraggingRad(rad);
-          e.dataTransfer.effectAllowed = 'move';
-        }}
+        className="select-text rounded-lg border p-4 transition-shadow hover:shadow-lg"
       >
         <div className="space-y-4">
           <div className="flex flex-col-reverse gap-3 md:flex-row md:items-start md:justify-between">
@@ -13623,29 +13618,25 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                 </div>
               </Collapsible>
 
-              {/* Drag & Drop Canvas */}
+              {/* Canvas Radiologi */}
               <div className="mb-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 dark:border-slate-700 dark:bg-slate-900/50">
                 <h4 className="mb-4 text-center text-lg font-semibold dark:text-slate-100">
-                  🏥 Drag & Drop Radiology Results Canvas
+                  Canvas Hasil Radiologi
                 </h4>
                 <div 
                   className="min-h-[200px] rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-950/80"
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    if (draggingRad) {
-                      addRadiologyResultToCanvas(draggingRad);
-                    }
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
                 >
                   {canvasItems.filter(item => item.type === 'radiology').length === 0 ? (
                     <div className="py-8 text-center text-gray-500 dark:text-slate-400">
-                      Drop radiology results here...
+                      Tambahkan hasil radiologi ke canvas melalui tombol "Tambah ke Canvas".
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {canvasItems.filter(item => item.type === 'radiology').map((item, index) => (
-                        <div key={`${(item.content as any).tanggal}-${(item.content as any).pemeriksaan}-${index}`} className="border rounded-lg p-3 bg-blue-50">
+                        <div
+                          key={`${(item.content as any).tanggal}-${(item.content as any).pemeriksaan}-${index}`}
+                          className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/70 dark:bg-blue-950/30"
+                        >
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="font-medium">{formatDateSafe((item.content as any).tanggal)}</p>
@@ -13726,7 +13717,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
 
                 <TabsContent value="history">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Riwayat Radiologi (Draggable)</h3>
+                    <h3 className="text-lg font-semibold">Riwayat Radiologi</h3>
                     <Tabs key={`radiology-history-${preferredCareSectionTab}`} defaultValue={preferredCareSectionTab} className="mt-2">
                       <TabsList className="mb-4">
                         <TabsTrigger value="outpatient">
