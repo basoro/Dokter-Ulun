@@ -11,7 +11,7 @@ import {
   Activity, ClipboardList, BedDouble, UserCircle, Building, MapPin,
   Phone, Heart, CalendarDays, FileText, Plus, X, Trash2, Image as ImageIcon, Clock, CreditCard,
   Copy, ChevronDown, ChevronUp, Brain, Check, ChevronsUpDown, Pencil, Play,
-  BadgeAlert, Maximize2, Mic, Square
+  BadgeAlert, Maximize2, Mic, Square, Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1657,6 +1657,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
   const voiceRecognitionRef = useRef<any>(null);
   const [voiceToSoapSupported, setVoiceToSoapSupported] = useState(false);
   const [voiceToSoapModalOpen, setVoiceToSoapModalOpen] = useState(false);
+  const [voiceToSoapInfoOpen, setVoiceToSoapInfoOpen] = useState(false);
   const [voiceToSoapRecording, setVoiceToSoapRecording] = useState(false);
   const [voiceToSoapTranscript, setVoiceToSoapTranscript] = useState('');
   const [voiceToSoapInterimTranscript, setVoiceToSoapInterimTranscript] = useState('');
@@ -11212,6 +11213,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                       onOpenChange={(open) => {
                         if (!open) {
                           stopVoiceToSoap();
+                          setVoiceToSoapInfoOpen(false);
                         }
                         setVoiceToSoapModalOpen(open);
                       }}
@@ -11282,6 +11284,77 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                 {voiceToSoapInterimTranscript}
                               </div>
                             ) : null}
+
+                            <Collapsible open={voiceToSoapInfoOpen} onOpenChange={setVoiceToSoapInfoOpen}>
+                              <CollapsibleTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center text-sm text-primary underline underline-offset-4"
+                                >
+                                  <Info className="mr-1 h-4 w-4" />
+                                  {voiceToSoapInfoOpen ? 'Cara Penggunaan' : 'Cara Penggunaan'}
+                                </button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="mt-3">
+                                <div className="space-y-3 rounded-md border bg-muted/30 p-4 text-sm dark:border-slate-800">
+                                  <div>
+                                    <div className="font-medium">Cara pakai Voice-to-SOAPIE</div>
+                                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-muted-foreground">
+                                      <li>Klik <span className="font-medium text-foreground">Mulai Rekam</span> atau tempel narasi langsung ke kolom transkrip.</li>
+                                      <li>Sampaikan keluhan, hasil pemeriksaan, kesan, dan rencana dengan urutan yang jelas.</li>
+                                      <li>Klik <span className="font-medium text-foreground">Generate SOAPIE</span> untuk mengubah narasi menjadi S, O, A, P, I, dan E.</li>
+                                      <li>Periksa hasilnya, lalu koreksi bila ada bagian yang perlu disesuaikan sebelum disimpan.</li>
+                                    </ol>
+                                  </div>
+
+                                  <div>
+                                    <div className="font-medium">Cara membedakan isi S, O, A, P, I, E</div>
+                                    <div className="mt-2 grid gap-2 md:grid-cols-2">
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">S - Subjective</div>
+                                        <div className="text-muted-foreground">Keluhan pasien, riwayat, apa yang dirasakan pasien atau keluarga.</div>
+                                      </div>
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">O - Objective</div>
+                                        <div className="text-muted-foreground">Temuan objektif seperti pemeriksaan fisik, tanda vital, hasil lab, radiologi, atau angka terukur.</div>
+                                      </div>
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">A - Assessment</div>
+                                        <div className="text-muted-foreground">Kesan klinis, diagnosis kerja, atau interpretasi kondisi pasien.</div>
+                                      </div>
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">P - Plan</div>
+                                        <div className="text-muted-foreground">Rencana terapi, obat, pemeriksaan lanjutan, observasi, edukasi, atau konsultasi.</div>
+                                      </div>
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">I - Implementation</div>
+                                        <div className="text-muted-foreground">Tindakan atau instruksi yang sudah diberikan/dikerjakan.</div>
+                                      </div>
+                                      <div className="rounded-md border bg-background p-3 dark:border-slate-800">
+                                        <div className="font-medium">E - Evaluation</div>
+                                        <div className="text-muted-foreground">Respons pasien, perkembangan, atau evaluasi hasil tindakan.</div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <div className="font-medium">Aturan penting yang dibaca AI</div>
+                                    <ul className="mt-2 list-disc space-y-1 pl-4 text-muted-foreground">
+                                      <li>Yang masuk ke <span className="font-medium text-foreground">O</span>: tanda vital seperti TD, nadi, RR, suhu, SpO2, GCS, hasil pemeriksaan fisik, lab, dan radiologi.</li>
+                                      <li>Yang masuk ke <span className="font-medium text-foreground">A</span>: diagnosis, kesan, suspek, atau masalah klinis utama.</li>
+                                      <li>Yang masuk ke <span className="font-medium text-foreground">P</span>: obat, terapi, monitoring, pemeriksaan lanjutan, edukasi, kontrol, atau konsultasi.</li>
+                                    </ul>
+                                  </div>
+
+                                  <div>
+                                    <div className="font-medium">Contoh narasi yang bagus</div>
+                                    <div className="mt-2 rounded-md border bg-background p-3 text-muted-foreground dark:border-slate-800">
+                                      Pasien mengeluh sesak sejak tadi malam, batuk berdahak 3 hari, disertai demam. Pemeriksaan: TD 130/80, nadi 104, RR 24, suhu 38,3, SpO2 92 persen. Auskultasi ronki basal kanan. GDS 264. Kesan pneumonia komunitas dengan DM tidak terkontrol. Rencana rawat inap, oksigen, antibiotik, antipiretik, cek darah lengkap dan foto toraks, monitor tanda vital dan saturasi.
+                                    </div>
+                                  </div>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
                           </div>
                         </div>
                       </DialogContent>
