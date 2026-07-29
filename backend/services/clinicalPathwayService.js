@@ -1418,6 +1418,7 @@ class ClinicalPathwayService {
     const page = Math.max(1, Number(filters.page || 1));
     const limit = Math.max(1, Math.min(100, Number(filters.limit || 50)));
     const offset = (page - 1) * limit;
+    const search = this.sanitizeLabel(filters.search);
 
     const whereClauses = ['1 = 1'];
     const params = [];
@@ -1425,6 +1426,33 @@ class ClinicalPathwayService {
     if (clinicalPathwayId) {
       whereClauses.push('d.clinical_pathway_id = ?');
       params.push(clinicalPathwayId);
+    }
+    if (search) {
+      whereClauses.push(`(
+        c.kode_cp LIKE ?
+        OR c.nama_cp LIKE ?
+        OR CAST(d.hari_ke AS CHAR) LIKE ?
+        OR COALESCE(d.label_hari, CONCAT('Hari ', d.hari_ke)) LIKE ?
+        OR a.kategori LIKE ?
+        OR COALESCE(a.uraian_kegiatan, '') LIKE ?
+        OR COALESCE(a.item_nama, '') LIKE ?
+        OR COALESCE(a.keterangan, '') LIKE ?
+        OR COALESCE(a.wajib, '') LIKE ?
+        OR CAST(a.urutan AS CHAR) LIKE ?
+      )`);
+      const searchTerm = `%${search}%`;
+      params.push(
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm
+      );
     }
 
     const whereSql = whereClauses.join(' AND ');
@@ -1438,6 +1466,7 @@ class ClinicalPathwayService {
         d.id AS clinical_pathway_day_id,
         d.hari_ke,
         COALESCE(d.label_hari, CONCAT('Hari ', d.hari_ke)) AS kegiatan,
+        COALESCE(d.tujuan_harian, '') AS tujuan_harian,
         a.kategori,
         COALESCE(a.uraian_kegiatan, '') AS uraian_kegiatan,
         a.item_nama AS aktivitas,
@@ -1457,6 +1486,7 @@ class ClinicalPathwayService {
       `SELECT COUNT(*) AS total
        FROM mlite_clinical_pathway_activity a
        INNER JOIN mlite_clinical_pathway_day d ON d.id = a.clinical_pathway_day_id
+       INNER JOIN mlite_clinical_pathway c ON c.id = d.clinical_pathway_id
        WHERE ${whereSql}`,
       params
     );
@@ -1541,10 +1571,14 @@ class ClinicalPathwayService {
       let targetDayId = Number(payload.clinical_pathway_day_id || 0);
       if (targetDayId) {
         const [dayRows] = await connection.execute(
-          'SELECT id FROM mlite_clinical_pathway_day WHERE id = ? AND clinical_pathway_id = ? LIMIT 1',
+          'SELECT id, hari_ke FROM mlite_clinical_pathway_day WHERE id = ? AND clinical_pathway_id = ? LIMIT 1',
           [targetDayId, clinicalPathwayId]
         );
-        if (!dayRows.length) {
+        const existingDay = dayRows[0] || null;
+        if (!existingDay) {
+          targetDayId = 0;
+        } else if (Number(existingDay.hari_ke || 0) !== hariKe) {
+          // Editing one activity may move it to another day group; do not force it to stay on the old day id.
           targetDayId = 0;
         }
       }
@@ -1570,6 +1604,11 @@ class ClinicalPathwayService {
           );
           targetDayId = Number(insertDay.insertId);
         }
+      } else {
+        await connection.execute(
+          'UPDATE mlite_clinical_pathway_day SET label_hari = ?, tujuan_harian = ? WHERE id = ?',
+          [kegiatan, String(payload.tujuan_harian || '').trim(), targetDayId]
+        );
       }
 
       const currentActivityId = Number(activityId || 0);
