@@ -354,7 +354,7 @@ type DashboardResponse = {
 const CATEGORY_GROUP_OPTIONS = [
   {
     label: 'Pemeriksaan dan Asesmen',
-    options: ['Pemeriksaan klinis', 'Laboratorium', 'Radiologi/ imaging', 'Elektromedik', 'Konsultasi', 'Asesmen klinis']
+    options: ['Pemeriksaan klinis', 'Laboratorium', 'Radiologi/ imaging', 'Elektromedik', 'Konsultasi', 'Asesmen klinis', 'diagnosis', 'asesmen lanjutan']
   },
   {
     label: 'Edukasi dan Form',
@@ -401,6 +401,12 @@ const textareaClass = 'min-h-[88px] w-full rounded-md border border-input bg-bac
 const tableHeadClass = 'border-b bg-muted/50 px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 dark:border-slate-800';
 const tableCellClass = 'border-b px-3 py-2 text-xs text-slate-700 align-top dark:text-slate-300 dark:border-slate-800';
 const confirmDeleteMessage = 'yakin ingin hapus ?';
+const createPaginationState = (limit = 10) => ({
+  page: 1,
+  limit,
+  total: 0,
+  totalPages: 1
+});
 
 const SearchableMasterSelect = ({
   options,
@@ -687,6 +693,8 @@ const ClinicalPathwayMaster: React.FC = () => {
 
   const [masterListLoading, setMasterListLoading] = React.useState(false);
   const [masterList, setMasterList] = React.useState<MasterItem[]>([]);
+  const [masterPage, setMasterPage] = React.useState(1);
+  const [masterPagination, setMasterPagination] = React.useState(createPaginationState());
   const [masterForm, setMasterForm] = React.useState<MasterForm>(createEmptyMasterForm());
   const [masterSearch, setMasterSearch] = React.useState('');
   const [masterSaving, setMasterSaving] = React.useState(false);
@@ -695,6 +703,9 @@ const ClinicalPathwayMaster: React.FC = () => {
   const [templateFilterMasterId, setTemplateFilterMasterId] = React.useState(0);
   const [templateListLoading, setTemplateListLoading] = React.useState(false);
   const [templateList, setTemplateList] = React.useState<TemplateItem[]>([]);
+  const [templateSearch, setTemplateSearch] = React.useState('');
+  const [templatePage, setTemplatePage] = React.useState(1);
+  const [templatePagination, setTemplatePagination] = React.useState(createPaginationState());
   const [templateForm, setTemplateForm] = React.useState<TemplateForm>(createEmptyTemplateForm());
   const [templateSaving, setTemplateSaving] = React.useState(false);
   const [templateDeletingId, setTemplateDeletingId] = React.useState<number | null>(null);
@@ -703,6 +714,8 @@ const ClinicalPathwayMaster: React.FC = () => {
   const [mappingSearch, setMappingSearch] = React.useState('');
   const [mappingListLoading, setMappingListLoading] = React.useState(false);
   const [mappingList, setMappingList] = React.useState<MappingItem[]>([]);
+  const [mappingPage, setMappingPage] = React.useState(1);
+  const [mappingPagination, setMappingPagination] = React.useState(createPaginationState());
   const [mappingForm, setMappingForm] = React.useState<MappingForm>(createEmptyMappingForm());
   const [mappingSaving, setMappingSaving] = React.useState(false);
   const [mappingDeletingId, setMappingDeletingId] = React.useState<number | null>(null);
@@ -808,12 +821,21 @@ const ClinicalPathwayMaster: React.FC = () => {
   const fetchMasterList = React.useCallback(async () => {
     try {
       setMasterListLoading(true);
-      const query = new URLSearchParams({ limit: '100' });
+      const query = new URLSearchParams({
+        limit: String(masterPagination.limit),
+        page: String(masterPage)
+      });
       if (masterSearch.trim()) {
         query.set('search', masterSearch.trim());
       }
       const result = await requestJson<ApiListResponse<MasterItem>>(`${API_URLS.CLINICAL_PATHWAY}/master?${query.toString()}`);
       setMasterList(Array.isArray(result.data) ? result.data : []);
+      setMasterPagination(result.pagination || {
+        page: masterPage,
+        limit: masterPagination.limit,
+        total: Array.isArray(result.data) ? result.data.length : 0,
+        totalPages: 1
+      });
     } catch (error) {
       console.error('Error loading master list:', error);
       toast({
@@ -824,17 +846,29 @@ const ClinicalPathwayMaster: React.FC = () => {
     } finally {
       setMasterListLoading(false);
     }
-  }, [masterSearch, requestJson, toast]);
+  }, [masterPage, masterPagination.limit, masterSearch, requestJson, toast]);
 
   const fetchTemplateList = React.useCallback(async () => {
     try {
       setTemplateListLoading(true);
-      const query = new URLSearchParams({ limit: '200' });
+      const query = new URLSearchParams({
+        limit: String(templatePagination.limit),
+        page: String(templatePage)
+      });
       if (templateFilterMasterId) {
         query.set('clinical_pathway_id', String(templateFilterMasterId));
       }
+      if (templateSearch.trim()) {
+        query.set('search', templateSearch.trim());
+      }
       const result = await requestJson<ApiListResponse<TemplateItem>>(`${API_URLS.CLINICAL_PATHWAY}/template-day?${query.toString()}`);
       setTemplateList(Array.isArray(result.data) ? result.data : []);
+      setTemplatePagination(result.pagination || {
+        page: templatePage,
+        limit: templatePagination.limit,
+        total: Array.isArray(result.data) ? result.data.length : 0,
+        totalPages: 1
+      });
     } catch (error) {
       console.error('Error loading template list:', error);
       toast({
@@ -845,12 +879,15 @@ const ClinicalPathwayMaster: React.FC = () => {
     } finally {
       setTemplateListLoading(false);
     }
-  }, [requestJson, templateFilterMasterId, toast]);
+  }, [requestJson, templateFilterMasterId, templatePage, templatePagination.limit, templateSearch, toast]);
 
   const fetchMappingList = React.useCallback(async () => {
     try {
       setMappingListLoading(true);
-      const query = new URLSearchParams({ limit: '200' });
+      const query = new URLSearchParams({
+        limit: String(mappingPagination.limit),
+        page: String(mappingPage)
+      });
       if (mappingFilterMasterId) {
         query.set('clinical_pathway_id', String(mappingFilterMasterId));
       }
@@ -859,6 +896,12 @@ const ClinicalPathwayMaster: React.FC = () => {
       }
       const result = await requestJson<ApiListResponse<MappingItem>>(`${API_URLS.CLINICAL_PATHWAY}/mapping?${query.toString()}`);
       setMappingList(Array.isArray(result.data) ? result.data : []);
+      setMappingPagination(result.pagination || {
+        page: mappingPage,
+        limit: mappingPagination.limit,
+        total: Array.isArray(result.data) ? result.data.length : 0,
+        totalPages: 1
+      });
     } catch (error) {
       console.error('Error loading mapping list:', error);
       toast({
@@ -869,7 +912,7 @@ const ClinicalPathwayMaster: React.FC = () => {
     } finally {
       setMappingListLoading(false);
     }
-  }, [mappingFilterMasterId, mappingSearch, requestJson, toast]);
+  }, [mappingFilterMasterId, mappingPage, mappingPagination.limit, mappingSearch, requestJson, toast]);
 
   const fetchMonitoringList = React.useCallback(async () => {
     try {
@@ -978,6 +1021,24 @@ const ClinicalPathwayMaster: React.FC = () => {
     void fetchGeneratorCandidates();
     void fetchMonitoringList();
   }, [fetchDashboard, fetchGeneratorCandidateFilterOptions, fetchGeneratorCandidates, fetchMappingList, fetchMasterList, fetchMasterOptions, fetchMonitoringList, fetchTemplateList]);
+
+  React.useEffect(() => {
+    if (masterPage > masterPagination.totalPages) {
+      setMasterPage(masterPagination.totalPages);
+    }
+  }, [masterPage, masterPagination.totalPages]);
+
+  React.useEffect(() => {
+    if (templatePage > templatePagination.totalPages) {
+      setTemplatePage(templatePagination.totalPages);
+    }
+  }, [templatePage, templatePagination.totalPages]);
+
+  React.useEffect(() => {
+    if (mappingPage > mappingPagination.totalPages) {
+      setMappingPage(mappingPagination.totalPages);
+    }
+  }, [mappingPage, mappingPagination.totalPages]);
 
   const generatorBatchSelectionSet = React.useMemo(
     () => new Set(generatorBatchSelections.map((item) => item.no_rawat)),
@@ -2121,6 +2182,36 @@ const ClinicalPathwayMaster: React.FC = () => {
     { key: 'monitoring', label: 'Monitoring' }
   ];
 
+  const renderListPagination = (
+    pagination: { page: number; total: number; totalPages: number },
+    loading: boolean,
+    onPageChange: (page: number) => void
+  ) => (
+    <div className="flex flex-col gap-2 border-t px-3 py-3 text-xs text-muted-foreground dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        Total {pagination.total} data | Halaman {pagination.page} / {pagination.totalPages}
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
+          disabled={loading || pagination.page <= 1}
+        >
+          Sebelumnya
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onPageChange(Math.min(pagination.totalPages, pagination.page + 1))}
+          disabled={loading || pagination.page >= pagination.totalPages}
+        >
+          Berikutnya
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="mx-auto w-full animate-fade-in space-y-6 rounded-md bg-white p-2 shadow-md transition-colors dark:bg-slate-950 dark:shadow-slate-950/40 md:p-6">
       <div className="flex flex-col gap-3">
@@ -2273,7 +2364,14 @@ const ClinicalPathwayMaster: React.FC = () => {
               <div className={panelHeaderClass}>Daftar Clinical Pathway</div>
               <div className="flex items-center justify-between gap-3 border-b p-3 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Input value={masterSearch} onChange={(e) => setMasterSearch(e.target.value)} placeholder="Cari kode / nama CP" />
+                  <Input
+                    value={masterSearch}
+                    onChange={(e) => {
+                      setMasterSearch(e.target.value);
+                      setMasterPage(1);
+                    }}
+                    placeholder="Cari kode / nama CP"
+                  />
                   <Button size="sm" variant="outline" onClick={() => void fetchMasterList()}>
                     <Search className="h-4 w-4" />
                   </Button>
@@ -2315,6 +2413,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                               variant="outline"
                               onClick={() => {
                                 setTemplateFilterMasterId(item.id);
+                                setTemplatePage(1);
                                 setTemplateForm((prev) => ({ ...prev, clinical_pathway_id: item.id }));
                                 setActiveTab('template');
                               }}
@@ -2344,6 +2443,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              {renderListPagination(masterPagination, masterListLoading, setMasterPage)}
             </div>
           </div>
         ) : null}
@@ -2416,17 +2516,32 @@ const ClinicalPathwayMaster: React.FC = () => {
 
             <div className={panelClass}>
               <div className={panelHeaderClass}>Daftar Template Harian</div>
-              <div className="flex items-center justify-end border-b p-3 dark:border-slate-800">
+              <div className="flex flex-wrap items-center gap-2 border-b p-3 dark:border-slate-800">
+                <Input
+                  value={templateSearch}
+                  onChange={(e) => {
+                    setTemplateSearch(e.target.value);
+                    setTemplatePage(1);
+                  }}
+                  placeholder="Cari hari / kategori / uraian / aktivitas / wajib / CP"
+                  className="max-w-sm"
+                />
+                <Button size="sm" variant="outline" onClick={() => void fetchTemplateList()} disabled={templateListLoading}>
+                  <Search className="h-4 w-4" />
+                </Button>
                 <SearchableMasterSelect
                   options={masterOptions}
                   value={Number(templateFilterMasterId || 0)}
-                  onChange={(nextId) => setTemplateFilterMasterId(nextId)}
+                  onChange={(nextId) => {
+                    setTemplateFilterMasterId(nextId);
+                    setTemplatePage(1);
+                  }}
                   placeholder="Semua Clinical Pathway"
                   allowEmpty
                   emptyOptionLabel="Semua Clinical Pathway"
                   className="max-w-md"
                 />
-                <Button size="sm" variant="outline" className="ml-2" onClick={() => void fetchTemplateList()} disabled={templateListLoading}>
+                <Button size="sm" variant="outline" onClick={() => void fetchTemplateList()} disabled={templateListLoading}>
                   {templateListLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 </Button>
               </div>
@@ -2477,6 +2592,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+              {renderListPagination(templatePagination, templateListLoading, setTemplatePage)}
             </div>
           </div>
         ) : null}
@@ -2572,13 +2688,24 @@ const ClinicalPathwayMaster: React.FC = () => {
                   <SearchableMasterSelect
                     options={masterOptions}
                     value={Number(mappingFilterMasterId || 0)}
-                    onChange={(nextId) => setMappingFilterMasterId(nextId)}
+                    onChange={(nextId) => {
+                      setMappingFilterMasterId(nextId);
+                      setMappingPage(1);
+                    }}
                     placeholder="Semua Clinical Pathway"
                     allowEmpty
                     emptyOptionLabel="Semua Clinical Pathway"
                     className="max-w-md"
                   />
-                  <Input value={mappingSearch} onChange={(e) => setMappingSearch(e.target.value)} placeholder="Cari kode ICD / nama diagnosis / CP" className="max-w-sm" />
+                  <Input
+                    value={mappingSearch}
+                    onChange={(e) => {
+                      setMappingSearch(e.target.value);
+                      setMappingPage(1);
+                    }}
+                    placeholder="Cari kode ICD / nama diagnosis / CP"
+                    className="max-w-sm"
+                  />
                   <Button size="sm" variant="outline" onClick={() => void fetchMappingList()} disabled={mappingListLoading}>
                     {mappingListLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                   </Button>
@@ -2629,6 +2756,7 @@ const ClinicalPathwayMaster: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              {renderListPagination(mappingPagination, mappingListLoading, setMappingPage)}
                 {selectedMappingMaster ? (
                   <div className="border-t bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground dark:border-slate-800">
                     Confidence aktif mengikuti master: {selectedMappingMaster.kode_cp} ({formatPercent(selectedMappingMaster.confidence_score)})
