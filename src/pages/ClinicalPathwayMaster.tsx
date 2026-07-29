@@ -400,6 +400,7 @@ const inputClass = 'h-9 w-full rounded-md border border-input bg-background px-3
 const textareaClass = 'min-h-[88px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 const tableHeadClass = 'border-b bg-muted/50 px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 dark:border-slate-800';
 const tableCellClass = 'border-b px-3 py-2 text-xs text-slate-700 align-top dark:text-slate-300 dark:border-slate-800';
+const confirmDeleteMessage = 'yakin ingin hapus ?';
 
 const SearchableMasterSelect = ({
   options,
@@ -2320,7 +2321,15 @@ const ClinicalPathwayMaster: React.FC = () => {
                             >
                               Template
                             </Button>
-                            <Button size="sm" variant="destructive" onClick={() => void deleteMaster(item.id)} disabled={masterDeleting}>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                if (!window.confirm(confirmDeleteMessage)) return;
+                                void deleteMaster(item.id);
+                              }}
+                              disabled={masterDeleting}
+                            >
                               Hapus
                             </Button>
                           </div>
@@ -2445,7 +2454,15 @@ const ClinicalPathwayMaster: React.FC = () => {
                           <div className="flex gap-1">
                             <Button size="sm" variant="outline" onClick={() => copyTemplateToForm(item)}>Copy</Button>
                             <Button size="sm" variant="outline" onClick={() => void loadTemplateDetail(item.id)}>Edit</Button>
-                            <Button size="sm" variant="destructive" onClick={() => void deleteTemplate(item.id)} disabled={templateDeletingId === item.id}>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                if (!window.confirm(confirmDeleteMessage)) return;
+                                void deleteTemplate(item.id);
+                              }}
+                              disabled={templateDeletingId === item.id}
+                            >
                               {templateDeletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Hapus'}
                             </Button>
                           </div>
@@ -2589,7 +2606,15 @@ const ClinicalPathwayMaster: React.FC = () => {
                           <td className={tableCellClass}>
                             <div className="flex gap-1">
                               <Button size="sm" variant="outline" onClick={() => void loadMappingDetail(item.id)}>Edit</Button>
-                              <Button size="sm" variant="destructive" onClick={() => void deleteMapping(item.id)} disabled={mappingDeletingId === item.id}>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  if (!window.confirm(confirmDeleteMessage)) return;
+                                  void deleteMapping(item.id);
+                                }}
+                                disabled={mappingDeletingId === item.id}
+                              >
                                 {mappingDeletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Hapus'}
                               </Button>
                             </div>
