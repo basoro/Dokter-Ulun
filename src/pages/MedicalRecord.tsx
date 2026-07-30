@@ -50,6 +50,7 @@ interface Medication {
     satuan?: string;
     harga?: number;
     stok?: number;
+    kategori_ddd?: string;
   }[];
 }
 
@@ -59,6 +60,7 @@ interface MedicineOption {
   satuan?: string;
   harga?: number;
   stok?: number;
+  kategori_ddd?: string;
 }
 
 type AllergyCategory = 'Lingkungan' | 'Makanan' | 'Obat';
@@ -83,6 +85,7 @@ interface RacikanMedicine {
   satuan?: string;
   harga?: number;
   stok?: number;
+  kategori_ddd?: string;
 }
 
 interface CompoundPrescription {
@@ -606,12 +609,40 @@ const getCurrentPrescriptionTime = () => format(new Date(), 'HH:mm:ss');
 const getCurrentRequestDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentRequestTime = () => format(new Date(), 'HH:mm:ss');
 
+const getDddCategoryMeta = (value?: string | null) => {
+  const normalized = String(value || '').trim().toLowerCase();
+
+  if (normalized === 'watch') {
+    return {
+      label: 'Watch',
+      className: 'border-yellow-300 bg-yellow-100 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300'
+    };
+  }
+
+  if (normalized === 'access') {
+    return {
+      label: 'Access',
+      className: 'border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+    };
+  }
+
+  if (normalized === 'reserve') {
+    return {
+      label: 'Reserve',
+      className: 'border-red-300 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300'
+    };
+  }
+
+  return null;
+};
+
 const createEmptyRacikanMedicine = (): RacikanMedicine => ({
   kode_brng: '',
   nama: '',
   jumlah: '',
   satuan: '',
-  stok: 0
+  stok: 0,
+  kategori_ddd: ''
 });
 
 const createDefaultCompoundPrescription = (): CompoundPrescription => ({
@@ -635,7 +666,8 @@ const getDefaultMedicationForm = (defaultStatus: PrescriptionStatus = 'Ralan'): 
     jumlah: '',
     aturan_pakai: '',
     satuan: '',
-    stok: 0
+    stok: 0,
+    kategori_ddd: ''
   }]
 }]);
 
@@ -1632,6 +1664,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
   const [loadingAllOutpatientMedicationRequests, setLoadingAllOutpatientMedicationRequests] = useState(false);
   const [kronisWarningShown, setKronisWarningShown] = useState(false);
   const [kronisWarningLoading, setKronisWarningLoading] = useState(false);
+  const [kronisWarningCheckedNoRm, setKronisWarningCheckedNoRm] = useState('');
   const [showAllInpatientMedicationRequests, setShowAllInpatientMedicationRequests] = useState(false);
   const [loadingAllInpatientMedicationRequests, setLoadingAllInpatientMedicationRequests] = useState(false);
   const [showAllOutpatientLaboratoryHistory, setShowAllOutpatientLaboratoryHistory] = useState(false);
@@ -5014,7 +5047,12 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
 
   const handleCheckKronisWarning = useCallback(async () => {
     const normalizedNoRm = String(no_rkm_medis || '').trim();
-    if (!normalizedNoRm || kronisWarningLoading || kronisWarningShown) {
+    if (
+      !normalizedNoRm ||
+      kronisWarningLoading ||
+      kronisWarningShown ||
+      kronisWarningCheckedNoRm === normalizedNoRm
+    ) {
       return;
     }
 
@@ -5039,9 +5077,10 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     } catch (error) {
       console.error('Error checking kronis warning:', error);
     } finally {
+      setKronisWarningCheckedNoRm(normalizedNoRm);
       setKronisWarningLoading(false);
     }
-  }, [kronisWarningLoading, kronisWarningShown, no_rkm_medis]);
+  }, [kronisWarningCheckedNoRm, kronisWarningLoading, kronisWarningShown, no_rkm_medis]);
 
   useEffect(() => {
     if (activeTab !== 'medications' || medicationDataTab !== 'current' || medicationCurrentCareTab !== 'outpatient') {
@@ -5090,6 +5129,14 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     kronisWarningShown,
     medicationCurrentCareTab
   ]);
+
+  useEffect(() => {
+    const normalizedNoRm = String(no_rkm_medis || '').trim();
+    if (kronisWarningCheckedNoRm && kronisWarningCheckedNoRm !== normalizedNoRm) {
+      setKronisWarningCheckedNoRm('');
+      setKronisWarningShown(false);
+    }
+  }, [kronisWarningCheckedNoRm, no_rkm_medis]);
 
   useEffect(() => {
     if (activeTab !== 'medications' || medicationDataTab !== 'current' || medicationCurrentCareTab !== 'inpatient') {
@@ -6248,6 +6295,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                 return {
                   ...item,
                   satuan: refreshedItem.option?.satuan || item.satuan || '',
+                  kategori_ddd: refreshedItem.option?.kategori_ddd || item.kategori_ddd || '',
                   stok: typeof refreshedItem.option?.stok === 'number'
                     ? Number(refreshedItem.option.stok) || 0
                     : 0
@@ -6301,6 +6349,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
           return {
             ...item,
             satuan: refreshedItem.option?.satuan || item.satuan || '',
+            kategori_ddd: refreshedItem.option?.kategori_ddd || item.kategori_ddd || '',
             stok: typeof refreshedItem.option?.stok === 'number'
               ? Number(refreshedItem.option.stok) || 0
               : 0
@@ -12213,8 +12262,18 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                     className="w-full justify-between"
                                     aria-expanded={!!medicineSearchOpen[fieldKey]}
                                   >
-                                    <span className="truncate text-left">
-                                      {obat.nama || 'Cari dan pilih obat'}
+                                    <span className="flex min-w-0 items-center gap-2 text-left">
+                                      <span className="truncate">
+                                        {obat.nama || 'Cari dan pilih obat'}
+                                      </span>
+                                      {(() => {
+                                        const dddMeta = getDddCategoryMeta(obat.kategori_ddd);
+                                        return dddMeta ? (
+                                          <span className={cn('inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                            {dddMeta.label}
+                                          </span>
+                                        ) : null;
+                                      })()}
                                     </span>
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                   </Button>
@@ -12244,7 +12303,8 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                                 nama: option.nama_brng,
                                                 satuan: option.satuan || '',
                                                 harga: typeof option.harga === 'number' ? Number(option.harga) || 0 : undefined,
-                                                stok: Number(option.stok) || 0
+                                                stok: Number(option.stok) || 0,
+                                                kategori_ddd: option.kategori_ddd || ''
                                               });
                                               setMedicineSearchQuery((previous) => ({
                                                 ...previous,
@@ -12262,8 +12322,18 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                                 obat.kode_brng === option.kode_brng ? "opacity-100" : "opacity-0"
                                               )}
                                             />
-                                            <div className="flex flex-col">
-                                              <span>{option.nama_brng}</span>
+                                            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                              <div className="flex items-center justify-between gap-2">
+                                                <span className="truncate">{option.nama_brng}</span>
+                                                {(() => {
+                                                  const dddMeta = getDddCategoryMeta(option.kategori_ddd);
+                                                  return dddMeta ? (
+                                                    <span className={cn('inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                                      {dddMeta.label}
+                                                    </span>
+                                                  ) : null;
+                                                })()}
+                                              </div>
                                               <span className="text-xs text-muted-foreground">
                                                 {option.kode_brng}
                                                 {option.satuan ? ` • ${option.satuan}` : ''}
@@ -12279,12 +12349,22 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                 </PopoverContent>
                               </Popover>
                               {(obat.kode_brng || obat.stok) ? (
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                  {obat.kode_brng || '-'}
-                                  {obat.satuan ? ` • ${obat.satuan}` : ''}
-                                  {typeof obat.harga === 'number' ? ` • Rp ${Number(obat.harga).toLocaleString('id-ID')}` : ''}
-                                  {typeof obat.stok === 'number' ? ` • Stok ${obat.stok}` : ''}
-                                </p>
+                                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                  {(() => {
+                                    const dddMeta = getDddCategoryMeta(obat.kategori_ddd);
+                                    return dddMeta ? (
+                                      <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                        {dddMeta.label}
+                                      </span>
+                                    ) : null;
+                                  })()}
+                                  <span>
+                                    {obat.kode_brng || '-'}
+                                    {obat.satuan ? ` • ${obat.satuan}` : ''}
+                                    {typeof obat.harga === 'number' ? ` • Rp ${Number(obat.harga).toLocaleString('id-ID')}` : ''}
+                                    {typeof obat.stok === 'number' ? ` • Stok ${obat.stok}` : ''}
+                                  </span>
+                                </div>
                               ) : null}
                             </div>
                             <div>
@@ -12522,8 +12602,18 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                               className="w-full justify-between"
                               aria-expanded={!!compoundMedicineSearchOpen[fieldKey]}
                             >
-                              <span className="truncate text-left">
-                                {racikan.nama || 'Cari dan pilih obat'}
+                              <span className="flex min-w-0 items-center gap-2 text-left">
+                                <span className="truncate">
+                                  {racikan.nama || 'Cari dan pilih obat'}
+                                </span>
+                                {(() => {
+                                  const dddMeta = getDddCategoryMeta(racikan.kategori_ddd);
+                                  return dddMeta ? (
+                                    <span className={cn('inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                      {dddMeta.label}
+                                    </span>
+                                  ) : null;
+                                })()}
                               </span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
@@ -12553,7 +12643,8 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                           nama: option.nama_brng,
                                           satuan: option.satuan || '',
                                           harga: typeof option.harga === 'number' ? Number(option.harga) || 0 : undefined,
-                                          stok: Number(option.stok) || 0
+                                          stok: Number(option.stok) || 0,
+                                          kategori_ddd: option.kategori_ddd || ''
                                         });
                                         setCompoundMedicineSearchQuery((previous) => ({
                                           ...previous,
@@ -12571,8 +12662,18 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                                           racikan.kode_brng === option.kode_brng ? "opacity-100" : "opacity-0"
                                         )}
                                       />
-                                      <div className="flex flex-col">
-                                        <span>{option.nama_brng}</span>
+                                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <span className="truncate">{option.nama_brng}</span>
+                                          {(() => {
+                                            const dddMeta = getDddCategoryMeta(option.kategori_ddd);
+                                            return dddMeta ? (
+                                              <span className={cn('inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                                {dddMeta.label}
+                                              </span>
+                                            ) : null;
+                                          })()}
+                                        </div>
                                         <span className="text-xs text-muted-foreground">
                                           {option.kode_brng}
                                           {option.satuan ? ` • ${option.satuan}` : ''}
@@ -12588,12 +12689,22 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                           </PopoverContent>
                         </Popover>
                         {(racikan.kode_brng || racikan.stok) ? (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {racikan.kode_brng || '-'}
-                            {racikan.satuan ? ` • ${racikan.satuan}` : ''}
-                            {typeof racikan.harga === 'number' ? ` • Rp ${Number(racikan.harga).toLocaleString('id-ID')}` : ''}
-                            {typeof racikan.stok === 'number' ? ` • Stok ${racikan.stok}` : ''}
-                          </p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            {(() => {
+                              const dddMeta = getDddCategoryMeta(racikan.kategori_ddd);
+                              return dddMeta ? (
+                                <span className={cn('inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold', dddMeta.className)}>
+                                  {dddMeta.label}
+                                </span>
+                              ) : null;
+                            })()}
+                            <span>
+                              {racikan.kode_brng || '-'}
+                              {racikan.satuan ? ` • ${racikan.satuan}` : ''}
+                              {typeof racikan.harga === 'number' ? ` • Rp ${Number(racikan.harga).toLocaleString('id-ID')}` : ''}
+                              {typeof racikan.stok === 'number' ? ` • Stok ${racikan.stok}` : ''}
+                            </span>
+                          </div>
                         ) : null}
                        </div>
                        <div>
