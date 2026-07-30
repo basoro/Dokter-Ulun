@@ -923,9 +923,11 @@ class PrescriptionDataService {
           db.nama_brng,
           db.kode_sat AS satuan,
           db.ralan AS harga,
+          COALESCE(modd.kategori, '') AS kategori_ddd,
           SUM(COALESCE(gb.stok, 0)) AS stok
         FROM gudangbarang gb
         INNER JOIN databarang db ON db.kode_brng = gb.kode_brng
+        LEFT JOIN master_obat_ddd modd ON modd.kode_brng = db.kode_brng
         WHERE db.status = '1'
           ${stockBangsalCode ? 'AND gb.kd_bangsal = ?' : ''}
           AND (
@@ -933,7 +935,7 @@ class PrescriptionDataService {
             OR db.kode_brng LIKE ?
             OR db.nama_brng LIKE ?
           )
-        GROUP BY db.kode_brng, db.nama_brng, db.kode_sat, db.ralan
+        GROUP BY db.kode_brng, db.nama_brng, db.kode_sat, db.ralan, modd.kategori
         HAVING stok > 0
         ORDER BY
           CASE
