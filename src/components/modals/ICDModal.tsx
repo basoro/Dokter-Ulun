@@ -89,6 +89,7 @@ interface ICDModalProps {
   onClose: () => void;
   noRawat: string;
   defaultStatusLayanan?: ServiceStatus;
+  onDataChanged?: () => void;
 }
 
 type TabType = 'icd10' | 'icd9';
@@ -121,7 +122,8 @@ export const ICDModal: React.FC<ICDModalProps> = ({
   isOpen,
   onClose,
   noRawat,
-  defaultStatusLayanan = 'Ralan'
+  defaultStatusLayanan = 'Ralan',
+  onDataChanged
 }) => {
   const { user } = useAuth();
   const fallbackStatusLayanan = normalizeServiceStatus(defaultStatusLayanan);
@@ -432,6 +434,7 @@ export const ICDModal: React.FC<ICDModalProps> = ({
 
       const result = await response.json();
       applyLoadedData(result.data);
+      onDataChanged?.();
       toast({ title: "Berhasil", description: `Data ${tab === 'icd10' ? 'ICD-10' : 'ICD-9'} berhasil dihapus` });
     } catch (error) {
       console.error('Error deleting ICD item:', error);
@@ -485,6 +488,7 @@ export const ICDModal: React.FC<ICDModalProps> = ({
 
         const result = await response.json();
         applyLoadedData(result.data);
+        onDataChanged?.();
         toast({ title: "Berhasil", description: "Data ICD-10 dan SNOMED-CT berhasil disimpan" });
       } else {
         const validItems = icd9Drafts
@@ -515,6 +519,7 @@ export const ICDModal: React.FC<ICDModalProps> = ({
 
         const result = await response.json();
         applyLoadedData(result.data);
+        onDataChanged?.();
         toast({ title: "Berhasil", description: "Data ICD-9 dan SNOMED-CT berhasil disimpan" });
       }
     } catch (error) {

@@ -358,7 +358,14 @@ const CATEGORY_GROUP_OPTIONS = [
   },
   {
     label: 'Edukasi dan Form',
-    options: ['Edukasi', 'Pengisian form', 'Prosedur administrasi', 'Rencana pulang/edukasi']
+    options: [
+      'Edukasi',
+      'Pengisian form',
+      'Prosedur administrasi',
+      'Rencana pulang/edukasi',
+      'kriteria pulang',
+      'rencana pulang / edukasi pelayanan lanjutan'
+    ]
   },
   {
     label: 'Terapi/ medikamentosa',

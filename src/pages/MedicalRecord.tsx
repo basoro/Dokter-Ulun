@@ -5217,6 +5217,14 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     }
   }, []);
 
+  const handleIcdDataChanged = useCallback(() => {
+    if (!formattedNoRawat) {
+      return;
+    }
+
+    void fetchVisitDetails(formattedNoRawat);
+  }, [fetchVisitDetails, formattedNoRawat]);
+
   const fetchExaminationHistory = useCallback(async ({
     reset = false,
     outpatientPage = 1,
@@ -14491,6 +14499,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
           noRawat={formattedNoRawat}
           noRkmMedis={String(no_rkm_medis || '').trim()}
           defaultStatusRawat={defaultExaminationStatusRawat as 'Ralan' | 'Ranap'}
+          onIcdDataChanged={handleIcdDataChanged}
         />
       )}
     </div>
