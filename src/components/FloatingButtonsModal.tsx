@@ -171,6 +171,7 @@ export const FloatingButtonsModal: React.FC<FloatingButtonsModalProps> = ({
         isOpen={activeModal === 'icd'} 
         onClose={closeModal}
         noRawat={noRawat}
+        noRkmMedis={noRkmMedis}
         defaultStatusLayanan={defaultStatusRawat}
         onDataChanged={onIcdDataChanged}
       />

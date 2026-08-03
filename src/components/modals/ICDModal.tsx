@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Plus, Trash2, Calculator, Save, Check, ChevronsUpDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Plus, Trash2, Calculator, Save, Check, ChevronsUpDown, History, ChevronDown, ChevronUp, Loader2, Copy } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { API_URLS } from '@/config/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +36,18 @@ interface ICD9Data {
   status_layanan: 'Ralan' | 'Ranap';
   snomed_concept_id?: string;
   snomed_term?: string;
+}
+
+interface IcdHistoryEntry {
+  no_rawat: string;
+  no_rkm_medis?: string;
+  tgl_registrasi?: string;
+  jam_registrasi?: string;
+  status_lanjut?: string;
+  nm_poli?: string;
+  nm_dokter?: string;
+  icd10: ICD10Data[];
+  icd9: ICD9Data[];
 }
 
 interface Icd10Option {
@@ -88,6 +101,7 @@ interface ICDModalProps {
   isOpen: boolean;
   onClose: () => void;
   noRawat: string;
+  noRkmMedis?: string;
   defaultStatusLayanan?: ServiceStatus;
   onDataChanged?: () => void;
 }
@@ -122,6 +136,7 @@ export const ICDModal: React.FC<ICDModalProps> = ({
   isOpen,
   onClose,
   noRawat,
+  noRkmMedis,
   defaultStatusLayanan = 'Ralan',
   onDataChanged
 }) => {
@@ -133,6 +148,10 @@ export const ICDModal: React.FC<ICDModalProps> = ({
   const [showTariffModal, setShowTariffModal] = useState(false);
   const [loadingSavedData, setLoadingSavedData] = useState(false);
   const [savingData, setSavingData] = useState(false);
+  const [showPreviousVisitHistory, setShowPreviousVisitHistory] = useState<Record<TabType, boolean>>({ icd10: false, icd9: false });
+  const [previousVisitHistoryLoaded, setPreviousVisitHistoryLoaded] = useState(false);
+  const [previousVisitHistoryLoading, setPreviousVisitHistoryLoading] = useState(false);
+  const [previousVisitHistoryEntries, setPreviousVisitHistoryEntries] = useState<IcdHistoryEntry[]>([]);
   const [icd10Drafts, setIcd10Drafts] = useState<ICD10Data[]>([createEmptyIcd10Entry(fallbackStatusLayanan)]);
   const [icd9Drafts, setIcd9Drafts] = useState<ICD9Data[]>([createEmptyIcd9Entry(fallbackStatusLayanan)]);
   const [icdSearchOpenByKey, setIcdSearchOpenByKey] = useState<Record<string, boolean>>({});
@@ -160,23 +179,26 @@ export const ICDModal: React.FC<ICDModalProps> = ({
   };
 
   const applyLoadedData = (data?: { icd10?: ICD10Data[]; icd9?: ICD9Data[] }) => {
-    const nextIcd10 = Array.isArray(data?.icd10)
+    const nextIcd10All = Array.isArray(data?.icd10)
       ? data.icd10.map((item) => ({
           ...item,
           status_layanan: normalizeServiceStatus(item.status_layanan, fallbackStatusLayanan)
-        })).filter((item) => item.status_layanan === fallbackStatusLayanan)
+        }))
       : [];
-    const nextIcd9 = Array.isArray(data?.icd9)
+    const nextIcd9All = Array.isArray(data?.icd9)
       ? data.icd9.map((item) => ({
           ...item,
           status_layanan: normalizeServiceStatus(item.status_layanan, fallbackStatusLayanan)
-        })).filter((item) => item.status_layanan === fallbackStatusLayanan)
+        }))
       : [];
 
-    setIcd10Data(nextIcd10);
-    setIcd9Data(nextIcd9);
-    setIcd10Drafts(nextIcd10.length ? nextIcd10.map((item) => ({ ...item })) : [createEmptyIcd10Entry(fallbackStatusLayanan)]);
-    setIcd9Drafts(nextIcd9.length ? nextIcd9.map((item) => ({ ...item })) : [createEmptyIcd9Entry(fallbackStatusLayanan)]);
+    const nextIcd10Drafts = nextIcd10All.filter((item) => item.status_layanan === fallbackStatusLayanan);
+    const nextIcd9Drafts = nextIcd9All.filter((item) => item.status_layanan === fallbackStatusLayanan);
+
+    setIcd10Data(nextIcd10All);
+    setIcd9Data(nextIcd9All);
+    setIcd10Drafts(nextIcd10Drafts.length ? nextIcd10Drafts.map((item) => ({ ...item })) : [createEmptyIcd10Entry(fallbackStatusLayanan)]);
+    setIcd9Drafts(nextIcd9Drafts.length ? nextIcd9Drafts.map((item) => ({ ...item })) : [createEmptyIcd9Entry(fallbackStatusLayanan)]);
     resetSearchState();
   };
 
@@ -188,9 +210,7 @@ export const ICDModal: React.FC<ICDModalProps> = ({
 
     setLoadingSavedData(true);
     try {
-      const response = await fetch(
-        `${API_URLS.ICD_MANAGEMENT}/${encodeURIComponent(noRawat)}?status_layanan=${encodeURIComponent(fallbackStatusLayanan)}`
-      );
+      const response = await fetch(`${API_URLS.ICD_MANAGEMENT}/${encodeURIComponent(noRawat)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -213,8 +233,59 @@ export const ICDModal: React.FC<ICDModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       void loadSavedData();
+      setShowPreviousVisitHistory({ icd10: false, icd9: false });
+      setPreviousVisitHistoryLoaded(false);
+      setPreviousVisitHistoryEntries([]);
     }
   }, [fallbackStatusLayanan, isOpen, noRawat]);
+
+  const fetchPreviousVisitHistory = async () => {
+    const normalizedNoRkmMedis = String(noRkmMedis || '').trim();
+
+    if (!normalizedNoRkmMedis) {
+      setPreviousVisitHistoryEntries([]);
+      setPreviousVisitHistoryLoaded(true);
+      return;
+    }
+
+    setPreviousVisitHistoryLoading(true);
+    try {
+      const query = new URLSearchParams();
+      if (noRawat) {
+        query.set('exclude_no_rawat', noRawat);
+      }
+      query.set('status_layanan', fallbackStatusLayanan);
+
+      const response = await fetch(
+        `${API_URLS.ICD_MANAGEMENT}/history/${encodeURIComponent(normalizedNoRkmMedis)}${query.toString() ? `?${query.toString()}` : ''}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setPreviousVisitHistoryEntries(Array.isArray(result.data) ? result.data : []);
+      setPreviousVisitHistoryLoaded(true);
+    } catch (error) {
+      console.error('Error loading previous visit ICD history:', error);
+      toast({
+        title: "Error",
+        description: "Gagal memuat riwayat ICD kunjungan sebelumnya",
+        variant: "destructive",
+      });
+    } finally {
+      setPreviousVisitHistoryLoading(false);
+    }
+  };
+
+  const handleTogglePreviousVisitHistory = async (tab: TabType, open: boolean) => {
+    setShowPreviousVisitHistory((prev) => ({ ...prev, [tab]: open }));
+
+    if (open && !previousVisitHistoryLoaded && !previousVisitHistoryLoading) {
+      await fetchPreviousVisitHistory();
+    }
+  };
 
   const getFieldKey = (tab: TabType, index: number) => `${tab}-${index}`;
 
@@ -317,6 +388,132 @@ export const ICDModal: React.FC<ICDModalProps> = ({
 
   const updateIcd9Draft = (index: number, updater: (item: ICD9Data) => ICD9Data) => {
     setIcd9Drafts((prev) => prev.map((item, rowIndex) => rowIndex === index ? updater(item) : item));
+  };
+
+  const handleCopyHistoryItem = (tab: TabType, item: ICD10Data | ICD9Data) => {
+    if (tab === 'icd10') {
+      const historyItem = item as ICD10Data;
+      const copiedItem: ICD10Data = {
+        kd_penyakit: historyItem.kd_penyakit || '',
+        nm_penyakit: historyItem.nm_penyakit || '',
+        ciri_ciri: historyItem.ciri_ciri || '',
+        keterangan: historyItem.keterangan || '',
+        status: historyItem.status || 'Tidak Menular',
+        prioritas: historyItem.prioritas || 'Sekunder',
+        status_layanan: fallbackStatusLayanan,
+        snomed_concept_id: historyItem.snomed_concept_id || '',
+        snomed_term: historyItem.snomed_term || ''
+      };
+
+      setIcd10Drafts((prev) => {
+        const firstEmptyIndex = prev.findIndex((draft) => !String(draft.kd_penyakit || '').trim());
+        if (firstEmptyIndex >= 0) {
+          return prev.map((draft, index) => (index === firstEmptyIndex ? copiedItem : draft));
+        }
+
+        return [...prev, copiedItem];
+      });
+    } else {
+      const historyItem = item as ICD9Data;
+      const copiedItem: ICD9Data = {
+        kode: historyItem.kode || '',
+        deskripsi_panjang: historyItem.deskripsi_panjang || '',
+        deskripsi_pendek: historyItem.deskripsi_pendek || '',
+        prioritas: historyItem.prioritas || 'Sekunder',
+        status_layanan: fallbackStatusLayanan,
+        snomed_concept_id: historyItem.snomed_concept_id || '',
+        snomed_term: historyItem.snomed_term || ''
+      };
+
+      setIcd9Drafts((prev) => {
+        const firstEmptyIndex = prev.findIndex((draft) => !String(draft.kode || '').trim());
+        if (firstEmptyIndex >= 0) {
+          return prev.map((draft, index) => (index === firstEmptyIndex ? copiedItem : draft));
+        }
+
+        return [...prev, copiedItem];
+      });
+    }
+
+    toast({
+      title: "Berhasil",
+      description: tab === 'icd10' ? "Diagnosa berhasil dicopy ke form" : "Procedure berhasil dicopy ke form",
+    });
+  };
+
+  const handleCopyHistoryEntry = (tab: TabType, items: Array<ICD10Data | ICD9Data>) => {
+    if (tab === 'icd10') {
+      const copiedItems = items.map((item) => {
+        const historyItem = item as ICD10Data;
+        return {
+          kd_penyakit: historyItem.kd_penyakit || '',
+          nm_penyakit: historyItem.nm_penyakit || '',
+          ciri_ciri: historyItem.ciri_ciri || '',
+          keterangan: historyItem.keterangan || '',
+          status: historyItem.status || 'Tidak Menular',
+          prioritas: historyItem.prioritas || 'Sekunder',
+          status_layanan: fallbackStatusLayanan,
+          snomed_concept_id: historyItem.snomed_concept_id || '',
+          snomed_term: historyItem.snomed_term || ''
+        } satisfies ICD10Data;
+      }).filter((item) => String(item.kd_penyakit || '').trim());
+
+      setIcd10Drafts((prev) => {
+        let copiedIndex = 0;
+        const nextDrafts = prev.map((draft) => {
+          if (!String(draft.kd_penyakit || '').trim() && copiedIndex < copiedItems.length) {
+            const nextItem = copiedItems[copiedIndex];
+            copiedIndex += 1;
+            return nextItem;
+          }
+
+          return draft;
+        });
+
+        if (copiedIndex < copiedItems.length) {
+          return [...nextDrafts, ...copiedItems.slice(copiedIndex)];
+        }
+
+        return nextDrafts;
+      });
+    } else {
+      const copiedItems = items.map((item) => {
+        const historyItem = item as ICD9Data;
+        return {
+          kode: historyItem.kode || '',
+          deskripsi_panjang: historyItem.deskripsi_panjang || '',
+          deskripsi_pendek: historyItem.deskripsi_pendek || '',
+          prioritas: historyItem.prioritas || 'Sekunder',
+          status_layanan: fallbackStatusLayanan,
+          snomed_concept_id: historyItem.snomed_concept_id || '',
+          snomed_term: historyItem.snomed_term || ''
+        } satisfies ICD9Data;
+      }).filter((item) => String(item.kode || '').trim());
+
+      setIcd9Drafts((prev) => {
+        let copiedIndex = 0;
+        const nextDrafts = prev.map((draft) => {
+          if (!String(draft.kode || '').trim() && copiedIndex < copiedItems.length) {
+            const nextItem = copiedItems[copiedIndex];
+            copiedIndex += 1;
+            return nextItem;
+          }
+
+          return draft;
+        });
+
+        if (copiedIndex < copiedItems.length) {
+          return [...nextDrafts, ...copiedItems.slice(copiedIndex)];
+        }
+
+        return nextDrafts;
+      });
+    }
+
+    toast({
+      title: "Berhasil",
+      description: tab === 'icd10' ? "Semua diagnosa pada riwayat berhasil dicopy" : "Semua procedure pada riwayat berhasil dicopy",
+    });
   };
 
   const handleIcdQueryChange = (tab: TabType, index: number, value: string) => {
@@ -486,8 +683,8 @@ export const ICDModal: React.FC<ICDModalProps> = ({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
-        applyLoadedData(result.data);
+        await response.json();
+        await loadSavedData();
         onDataChanged?.();
         toast({ title: "Berhasil", description: "Data ICD-10 dan SNOMED-CT berhasil disimpan" });
       } else {
@@ -517,8 +714,8 @@ export const ICDModal: React.FC<ICDModalProps> = ({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const result = await response.json();
-        applyLoadedData(result.data);
+        await response.json();
+        await loadSavedData();
         onDataChanged?.();
         toast({ title: "Berhasil", description: "Data ICD-9 dan SNOMED-CT berhasil disimpan" });
       }
@@ -893,6 +1090,123 @@ export const ICDModal: React.FC<ICDModalProps> = ({
     });
   };
 
+  const renderPreviousVisitHistorySection = (tab: TabType) => {
+    const tabLabel = tab === 'icd10' ? 'ICD-10' : 'ICD-9';
+    const filteredEntries = previousVisitHistoryEntries.filter((entry) => (
+      tab === 'icd10' ? Array.isArray(entry.icd10) && entry.icd10.length > 0 : Array.isArray(entry.icd9) && entry.icd9.length > 0
+    ));
+
+    return (
+      <>
+        <div className="flex justify-start pt-1">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!String(noRkmMedis || '').trim()}
+            onClick={() => void handleTogglePreviousVisitHistory(tab, !showPreviousVisitHistory[tab])}
+          >
+            <History className="mr-2 h-4 w-4" />
+            {tab === 'icd10' ? 'Lihat Riwayat Diagnosa' : 'Lihat Riwayat Procedure'}
+            {showPreviousVisitHistory[tab] ? (
+              <ChevronUp className="ml-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        <Collapsible open={showPreviousVisitHistory[tab]}>
+          <CollapsibleContent className="space-y-3">
+            <div className="rounded-lg border border-dashed bg-background p-4">
+              <div className="mb-3">
+                <p className="text-base font-medium">Riwayat {tabLabel} Kunjungan Sebelumnya</p>
+              </div>
+
+              {previousVisitHistoryLoading && (
+                <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Memuat riwayat {tabLabel}...
+                </div>
+              )}
+
+              {!previousVisitHistoryLoading && filteredEntries.map((entry) => {
+                const items = tab === 'icd10' ? entry.icd10 : entry.icd9;
+
+                return (
+                  <div key={`${tab}-${entry.no_rawat}`} className="rounded-lg border bg-muted/10 p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs text-muted-foreground">No. Rawat</div>
+                        <div className="font-medium break-all">{entry.no_rawat || '-'}</div>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="shrink-0"
+                        onClick={() => handleCopyHistoryEntry(tab, items)}
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy Semua
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {items.map((item, index) => (
+                        <div key={`${tab}-${entry.no_rawat}-${index}`} className="rounded-md border bg-background px-3 py-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              {tab === 'icd10' ? (
+                                <>
+                                  <div className="font-mono text-sm">{(item as ICD10Data).kd_penyakit || '-'}</div>
+                                  <div className="text-sm">{(item as ICD10Data).nm_penyakit || '-'}</div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="font-mono text-sm">{formatIcd9ProcedureCode((item as ICD9Data).kode) || '-'}</div>
+                                  <div className="text-sm">{(item as ICD9Data).deskripsi_pendek || '-'}</div>
+                                </>
+                              )}
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                Prioritas {(item as ICD10Data | ICD9Data).prioritas} • Status {(item as ICD10Data | ICD9Data).status_layanan}
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="shrink-0"
+                              onClick={() => handleCopyHistoryItem(tab, item)}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {!previousVisitHistoryLoading && previousVisitHistoryLoaded && filteredEntries.length === 0 && (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Belum ada riwayat {tabLabel} kunjungan sebelumnya
+                </div>
+              )}
+
+              {!String(noRkmMedis || '').trim() && (
+                <div className="py-2 text-sm text-muted-foreground">
+                  No. rekam medis belum tersedia untuk memuat riwayat.
+                </div>
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </>
+    );
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1005,6 +1319,8 @@ export const ICDModal: React.FC<ICDModalProps> = ({
                     </TableBody>
                   </Table>
                 </div>
+
+                {renderPreviousVisitHistorySection('icd10')}
               </TabsContent>
 
               <TabsContent value="icd9" className="space-y-4">
@@ -1073,6 +1389,8 @@ export const ICDModal: React.FC<ICDModalProps> = ({
                     </TableBody>
                   </Table>
                 </div>
+
+                {renderPreviousVisitHistorySection('icd9')}
               </TabsContent>
             </div>
           </Tabs>

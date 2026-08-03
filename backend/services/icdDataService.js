@@ -1,4 +1,4 @@
-import db from '../config/database.js';
+import db, { executeQuery } from '../config/database.js';
 
 class IcdDataService {
   static normalizeStatusLayanan(status) {
@@ -479,6 +479,166 @@ class IcdDataService {
       };
     } catch (error) {
       console.error('Error loading patient ICD data:', error);
+      throw error;
+    }
+  }
+
+  static async getPreviousVisitIcdData(noRkmMedis, excludeNoRawat = '', statusLayanan = '') {
+    try {
+      const normalizedNoRkmMedis = String(noRkmMedis || '').trim();
+      const normalizedExcludeNoRawat = String(excludeNoRawat || '').trim();
+      const normalizedStatusLayanan = statusLayanan ? this.normalizeStatusLayanan(statusLayanan) : '';
+
+      if (!normalizedNoRkmMedis) {
+        throw new Error('no_rkm_medis wajib diisi');
+      }
+
+      const icd10Query = `
+        SELECT
+          rp.no_rawat,
+          rp.no_rkm_medis,
+          DATE_FORMAT(rp.tgl_registrasi, '%Y-%m-%d') AS tgl_registrasi,
+          TIME_FORMAT(rp.jam_reg, '%H:%i') AS jam_registrasi,
+          COALESCE(rp.status_lanjut, '') AS status_lanjut,
+          COALESCE(pol.nm_poli, '') AS nm_poli,
+          COALESCE(dok.nm_dokter, '') AS nm_dokter,
+          CONCAT(dp.no_rawat, '|', dp.kd_penyakit, '|', dp.status, '|', dp.prioritas) AS id,
+          dp.kd_penyakit,
+          COALESCE(p.nm_penyakit, '') AS nm_penyakit,
+          COALESCE(p.ciri_ciri, '') AS ciri_ciri,
+          COALESCE(p.keterangan, '') AS keterangan,
+          COALESCE(p.status, 'Tidak Menular') AS status,
+          dp.status AS status_layanan,
+          dp.prioritas,
+          CAST(COALESCE(sm.snomed_concept_id, '') AS CHAR) AS snomed_concept_id,
+          COALESCE(sm.snomed_term, '') AS snomed_term
+        FROM reg_periksa rp
+        INNER JOIN diagnosa_pasien dp ON dp.no_rawat = rp.no_rawat
+        LEFT JOIN penyakit p ON p.kd_penyakit = dp.kd_penyakit
+        LEFT JOIN poliklinik pol ON pol.kd_poli = rp.kd_poli
+        LEFT JOIN dokter dok ON dok.kd_dokter = rp.kd_dokter
+        LEFT JOIN (
+          SELECT m.no_rawat, m.kd_penyakit, m.snomed_concept_id, m.snomed_term
+          FROM mlite_mapping_snomed_icd m
+          INNER JOIN (
+            SELECT no_rawat, kd_penyakit, MAX(id) AS latest_id
+            FROM mlite_mapping_snomed_icd
+            GROUP BY no_rawat, kd_penyakit
+          ) latest ON latest.latest_id = m.id
+        ) sm ON sm.no_rawat = dp.no_rawat AND sm.kd_penyakit = dp.kd_penyakit
+        WHERE rp.no_rkm_medis = ?
+          AND (? = '' OR rp.no_rawat <> ?)
+          AND (? = '' OR dp.status = ?)
+        ORDER BY rp.tgl_registrasi DESC, rp.jam_reg DESC, dp.prioritas ASC, dp.kd_penyakit ASC
+      `;
+
+      const icd9Query = `
+        SELECT
+          rp.no_rawat,
+          rp.no_rkm_medis,
+          DATE_FORMAT(rp.tgl_registrasi, '%Y-%m-%d') AS tgl_registrasi,
+          TIME_FORMAT(rp.jam_reg, '%H:%i') AS jam_registrasi,
+          COALESCE(rp.status_lanjut, '') AS status_lanjut,
+          COALESCE(pol.nm_poli, '') AS nm_poli,
+          COALESCE(dok.nm_dokter, '') AS nm_dokter,
+          CONCAT(pp.no_rawat, '|', pp.kode, '|', pp.status, '|', pp.prioritas) AS id,
+          pp.kode,
+          COALESCE(i9.deskripsi_panjang, '') AS deskripsi_panjang,
+          COALESCE(i9.deskripsi_pendek, '') AS deskripsi_pendek,
+          pp.status AS status_layanan,
+          pp.prioritas,
+          CAST(COALESCE(sm9.snomed_concept_id, '') AS CHAR) AS snomed_concept_id,
+          COALESCE(sm9.snomed_term, '') AS snomed_term
+        FROM reg_periksa rp
+        INNER JOIN prosedur_pasien pp ON pp.no_rawat = rp.no_rawat
+        LEFT JOIN icd9 i9 ON i9.kode = pp.kode
+        LEFT JOIN poliklinik pol ON pol.kd_poli = rp.kd_poli
+        LEFT JOIN dokter dok ON dok.kd_dokter = rp.kd_dokter
+        LEFT JOIN (
+          SELECT m.no_rawat, m.kd_tindakan, m.snomed_concept_id, m.snomed_term
+          FROM mlite_mapping_snomed_icd9 m
+          INNER JOIN (
+            SELECT no_rawat, kd_tindakan, MAX(id) AS latest_id
+            FROM mlite_mapping_snomed_icd9
+            GROUP BY no_rawat, kd_tindakan
+          ) latest ON latest.latest_id = m.id
+        ) sm9 ON sm9.no_rawat = pp.no_rawat AND sm9.kd_tindakan = pp.kode
+        WHERE rp.no_rkm_medis = ?
+          AND (? = '' OR rp.no_rawat <> ?)
+          AND (? = '' OR pp.status = ?)
+        ORDER BY rp.tgl_registrasi DESC, rp.jam_reg DESC, pp.prioritas ASC, pp.kode ASC
+      `;
+
+      const params = [
+        normalizedNoRkmMedis,
+        normalizedExcludeNoRawat,
+        normalizedExcludeNoRawat,
+        normalizedStatusLayanan,
+        normalizedStatusLayanan
+      ];
+
+      const [icd10Rows, icd9Rows] = await Promise.all([
+        executeQuery(icd10Query, params),
+        executeQuery(icd9Query, params)
+      ]);
+
+      const historyMap = new Map();
+
+      const getEntry = (row) => {
+        const visitKey = String(row?.no_rawat || '').trim();
+        if (!historyMap.has(visitKey)) {
+          historyMap.set(visitKey, {
+            no_rawat: visitKey,
+            no_rkm_medis: String(row?.no_rkm_medis || '').trim(),
+            tgl_registrasi: String(row?.tgl_registrasi || '').trim(),
+            jam_registrasi: String(row?.jam_registrasi || '').trim(),
+            status_lanjut: String(row?.status_lanjut || '').trim(),
+            nm_poli: String(row?.nm_poli || '').trim(),
+            nm_dokter: String(row?.nm_dokter || '').trim(),
+            icd10: [],
+            icd9: []
+          });
+        }
+
+        return historyMap.get(visitKey);
+      };
+
+      (Array.isArray(icd10Rows) ? icd10Rows : []).forEach((row) => {
+        const entry = getEntry(row);
+        entry.icd10.push({
+          id: row.id,
+          kd_penyakit: row.kd_penyakit,
+          nm_penyakit: row.nm_penyakit,
+          ciri_ciri: row.ciri_ciri,
+          keterangan: row.keterangan,
+          status: row.status,
+          prioritas: this.mapPrioritasLabel(row.prioritas),
+          status_layanan: this.normalizeStatusLayanan(row.status_layanan),
+          snomed_concept_id: row.snomed_concept_id,
+          snomed_term: row.snomed_term
+        });
+      });
+
+      (Array.isArray(icd9Rows) ? icd9Rows : []).forEach((row) => {
+        const entry = getEntry(row);
+        entry.icd9.push({
+          id: row.id,
+          kode: row.kode,
+          deskripsi_panjang: row.deskripsi_panjang,
+          deskripsi_pendek: row.deskripsi_pendek,
+          prioritas: this.mapPrioritasLabel(row.prioritas),
+          status_layanan: this.normalizeStatusLayanan(row.status_layanan),
+          snomed_concept_id: row.snomed_concept_id,
+          snomed_term: row.snomed_term
+        });
+      });
+
+      return {
+        success: true,
+        data: Array.from(historyMap.values())
+      };
+    } catch (error) {
+      console.error('Error loading previous visit ICD data:', error);
       throw error;
     }
   }
