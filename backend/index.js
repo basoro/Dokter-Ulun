@@ -1511,6 +1511,20 @@ app.post('/api/icd-data', async (req, res) => {
   }
 });
 
+app.get('/api/icd-management/history/:no_rkm_medis', async (req, res) => {
+  try {
+    const data = await IcdDataService.getPreviousVisitIcdData(
+      req.params.no_rkm_medis,
+      req.query.exclude_no_rawat,
+      req.query.status_layanan
+    );
+    res.json(data);
+  } catch (error) {
+    console.error('ICD management history load error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/icd-management/:no_rawat', async (req, res) => {
   try {
     const data = await IcdDataService.getPatientIcdData(req.params.no_rawat, req.query.status_layanan);
