@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +24,7 @@ import { DateRange } from 'react-day-picker';
 import { formatDateTimeWIB, formatLocalDateValue, parseLocalDateValue, formatUIDate } from '@/lib/date-utils';
 import { API_URLS } from '@/config/api';
 import { DatePickerPopover } from '@/components/DatePickerPopover';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import {
   Dialog,
   DialogContent,
@@ -62,7 +62,6 @@ const hemodialisaColumns = [
 ];
 
 const HemodialisaTabs = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,6 +86,7 @@ const HemodialisaTabs = () => {
   const [currentPage, setCurrentPage] = useState(parsePositiveInt(searchParams.get('page'), 1));
   const [total, setTotal] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
   
   const fetchHemodialisaPatients = async (overrides: Record<string, string> = {}) => {
     if (!date?.from || !date?.to) {
@@ -99,7 +99,7 @@ const HemodialisaTabs = () => {
       let requestBody = {
         startDate: formatLocalDateValue(date.from),
         endDate: formatLocalDateValue(date.to),
-        search: overrides.search ?? searchQuery.trim(),
+        search: overrides.search ?? debouncedSearchQuery,
         status: overrides.status ?? statusFilter,
         statusBayar: overrides.statusBayar ?? statusBayarFilter,
         page: overrides.page ?? currentPage.toString(),
@@ -161,7 +161,7 @@ const HemodialisaTabs = () => {
     if (date?.from && date?.to) {
       fetchHemodialisaPatients();
     }
-  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter, searchQuery]);
+  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter, debouncedSearchQuery]);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -463,30 +463,25 @@ const HemodialisaTabs = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="text-muted-foreground">Memuat data pasien...</div>
-            </div>
-          ) : (
-            <PatientTable 
-              patients={filteredHemodialisaData} 
-              columns={hemodialisaColumns}
-              getRowMenuItems={getHemodialisaRowMenuItems}
-              pagination={{
-                currentPage,
-                totalPages: Math.ceil(total / itemsPerPage),
-                totalItems: total,
-                itemsPerPage,
-                onPageChange: (page) => {
-                  setCurrentPage(page);
-                },
-                onItemsPerPageChange: (newItemsPerPage) => {
-                  setItemsPerPage(newItemsPerPage);
-                  setCurrentPage(1);
-                }
-              }}
-            />
-          )}
+          <PatientTable
+            patients={filteredHemodialisaData}
+            columns={hemodialisaColumns}
+            loading={loading}
+            getRowMenuItems={getHemodialisaRowMenuItems}
+            pagination={{
+              currentPage,
+              totalPages: Math.ceil(total / itemsPerPage),
+              totalItems: total,
+              itemsPerPage,
+              onPageChange: (page) => {
+                setCurrentPage(page);
+              },
+              onItemsPerPageChange: (newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage);
+                setCurrentPage(1);
+              }
+            }}
+          />
         </CardContent>
       </Card>
     </div>

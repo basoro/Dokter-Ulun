@@ -63,6 +63,7 @@ import { API_URLS } from '@/config/api';
 import { DatePickerPopover } from '@/components/DatePickerPopover';
 import { StatusPill } from '@/components/StatusPill';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import {
   Dialog,
   DialogContent,
@@ -187,6 +188,7 @@ const BookingTabs = () => {
   const [totalPagi, setTotalPagi] = useState(0);
   const [totalSore, setTotalSore] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
 
   const fetchBookingData = async (tabValue: 'pagi' | 'sore' = activeTab, overrides: Record<string, string> = {}) => {
     setLoading(true);
@@ -195,6 +197,7 @@ const BookingTabs = () => {
         action: 'getAll',
         startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
         endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+        search: overrides.search ?? debouncedSearchQuery,
         status: overrides.status ?? statusFilter,
         sessionFilter: tabValue,
         page: overrides.page ?? currentPage.toString(),
@@ -325,7 +328,7 @@ const BookingTabs = () => {
   useEffect(() => {
     fetchBookingData();
     fetchDoctors();
-  }, [currentPage, itemsPerPage, activeTab]);
+  }, [currentPage, itemsPerPage, activeTab, debouncedSearchQuery]);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -512,41 +515,35 @@ const BookingTabs = () => {
             {renderBookingFilterBar()}
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="text-muted-foreground">Memuat data booking...</div>
-              </div>
-            ) : (
-              <PatientTable 
-                patients={bookingPagi.filter(booking => {
-                  if (!searchQuery) return true;
-                  const searchLower = searchQuery.toLowerCase();
-                  return (
-                    booking.nm_pasien?.toLowerCase().includes(searchLower) ||
-                    booking.no_rkm_medis?.toLowerCase().includes(searchLower) ||
-                    booking.no_tlp?.toLowerCase().includes(searchLower) ||
-                    booking.email?.toLowerCase().includes(searchLower) ||
-                    booking.nm_poli?.toLowerCase().includes(searchLower) ||
-                    booking.nm_dokter?.toLowerCase().includes(searchLower)
-                  );
-                })}
-                columns={bookingColumns} 
-                loading={loading}
-                 pagination={{
-                  currentPage,
-                  totalPages: Math.ceil(totalPagi / itemsPerPage),
-                  totalItems: totalPagi,
-                  itemsPerPage,
-                  onPageChange: (page) => {
-                    setCurrentPage(page);
-                  },
-                  onItemsPerPageChange: (newItemsPerPage) => {
-                    setItemsPerPage(newItemsPerPage);
-                    setCurrentPage(1);
-                  }
-                }}
-              />
-            )}
+          <PatientTable
+            patients={bookingPagi.filter(booking => {
+              if (!searchQuery) return true;
+              const searchLower = searchQuery.toLowerCase();
+              return (
+                booking.nm_pasien?.toLowerCase().includes(searchLower) ||
+                booking.no_rkm_medis?.toLowerCase().includes(searchLower) ||
+                booking.no_tlp?.toLowerCase().includes(searchLower) ||
+                booking.email?.toLowerCase().includes(searchLower) ||
+                booking.nm_poli?.toLowerCase().includes(searchLower) ||
+                booking.nm_dokter?.toLowerCase().includes(searchLower)
+              );
+            })}
+            columns={bookingColumns}
+            loading={loading}
+            pagination={{
+              currentPage,
+              totalPages: Math.ceil(totalPagi / itemsPerPage),
+              totalItems: totalPagi,
+              itemsPerPage,
+              onPageChange: (page) => {
+                setCurrentPage(page);
+              },
+              onItemsPerPageChange: (newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage);
+                setCurrentPage(1);
+              }
+            }}
+          />
           </CardContent>
         </Card>
       </TabsContent>
@@ -557,41 +554,35 @@ const BookingTabs = () => {
             {renderBookingFilterBar()}
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="text-muted-foreground">Memuat data booking...</div>
-              </div>
-            ) : (
-              <PatientTable 
-                patients={bookingSore.filter(booking => {
-                  if (!searchQuery) return true;
-                  const searchLower = searchQuery.toLowerCase();
-                  return (
-                    booking.nm_pasien?.toLowerCase().includes(searchLower) ||
-                    booking.no_rkm_medis?.toLowerCase().includes(searchLower) ||
-                    booking.no_tlp?.toLowerCase().includes(searchLower) ||
-                    booking.email?.toLowerCase().includes(searchLower) ||
-                    booking.nm_poli?.toLowerCase().includes(searchLower) ||
-                    booking.nm_dokter?.toLowerCase().includes(searchLower)
-                  );
-                })}
-                columns={bookingColumns} 
-                loading={loading}
-                 pagination={{
-                  currentPage,
-                  totalPages: Math.ceil(totalSore / itemsPerPage),
-                  totalItems: totalSore,
-                  itemsPerPage,
-                  onPageChange: (page) => {
-                    setCurrentPage(page);
-                  },
-                  onItemsPerPageChange: (newItemsPerPage) => {
-                    setItemsPerPage(newItemsPerPage);
-                    setCurrentPage(1);
-                  }
-                }}
-              />
-            )}
+          <PatientTable
+            patients={bookingSore.filter(booking => {
+              if (!searchQuery) return true;
+              const searchLower = searchQuery.toLowerCase();
+              return (
+                booking.nm_pasien?.toLowerCase().includes(searchLower) ||
+                booking.no_rkm_medis?.toLowerCase().includes(searchLower) ||
+                booking.no_tlp?.toLowerCase().includes(searchLower) ||
+                booking.email?.toLowerCase().includes(searchLower) ||
+                booking.nm_poli?.toLowerCase().includes(searchLower) ||
+                booking.nm_dokter?.toLowerCase().includes(searchLower)
+              );
+            })}
+            columns={bookingColumns}
+            loading={loading}
+            pagination={{
+              currentPage,
+              totalPages: Math.ceil(totalSore / itemsPerPage),
+              totalItems: totalSore,
+              itemsPerPage,
+              onPageChange: (page) => {
+                setCurrentPage(page);
+              },
+              onItemsPerPageChange: (newItemsPerPage) => {
+                setItemsPerPage(newItemsPerPage);
+                setCurrentPage(1);
+              }
+            }}
+          />
           </CardContent>
         </Card>
       </TabsContent>
@@ -1051,6 +1042,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
   const [total, setTotal] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
   const [tabCounts, setTabCounts] = useState(emptyTabCounts);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
   const effectiveResumeJenisDpjp = viewMode === 'raber' ? 'raber' : 'utama';
 
   useEffect(() => {
@@ -1229,7 +1221,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
   ): RawatInapRequestBody => ({
     page: overrides.page ?? currentPage.toString(),
     itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-    search: overrides.search ?? searchQuery.trim(),
+    search: overrides.search ?? debouncedSearchQuery,
     statusPulang: overrides.statusPulang ?? 'belum-pulang',
     username: user?.username || '',
     tab: tabValue,
@@ -1243,7 +1235,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
   const buildResumeRequestBody = (overrides: Partial<Record<string, string>> = {}) => ({
     page: overrides.page ?? currentPage.toString(),
     itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-    search: overrides.search ?? searchQuery.trim(),
+    search: overrides.search ?? debouncedSearchQuery,
     statusPulang: overrides.statusPulang ?? 'sudah-pulang',
     username: user?.username || '',
     resumeStatus: overrides.resumeStatus ?? resumeStatus,
@@ -1525,7 +1517,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
     currentPage,
     itemsPerPage,
     baseListTab,
-    searchQuery,
+    debouncedSearchQuery,
     claimVerificationStatus,
     dateRange?.from,
     dateRange?.to
@@ -1806,6 +1798,7 @@ const RawatJagaTabs = () => {
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
   const [total, setTotal] = useState(0);
   const [tabCounts, setTabCounts] = useState<Record<RawatJagaCountKey, number>>(emptyRawatJagaCounts);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
   const activeConfig = rawatJagaTabOptions.find((item) => item.value === activeTab) || rawatJagaTabOptions[0];
   const showDateRange = activeConfig.statusPulang !== 'belum-pulang';
 
@@ -1815,7 +1808,7 @@ const RawatJagaTabs = () => {
   ) => ({
     page: overrides.page ?? currentPage.toString(),
     itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-    search: overrides.search ?? searchQuery,
+    search: overrides.search ?? debouncedSearchQuery,
     statusPulang: config.statusPulang,
     username: user?.username || '',
     tab: config.requestTab,
@@ -1950,7 +1943,7 @@ const RawatJagaTabs = () => {
 
   useEffect(() => {
     fetchRawatJagaData(activeTab);
-  }, [activeTab, currentPage, itemsPerPage, searchQuery, dateRange?.from, dateRange?.to]);
+  }, [activeTab, currentPage, itemsPerPage, debouncedSearchQuery, dateRange?.from, dateRange?.to]);
 
   useEffect(() => {
     if (!showDateRange) {
@@ -2086,7 +2079,10 @@ const RawatJagaTabs = () => {
                     placeholder="Cari pasien..."
                     className="w-full pl-8"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
                   />
                 </div>
 
@@ -2195,6 +2191,7 @@ const IGDTabs = () => {
   const [total, setTotal] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
   const [tabCounts, setTabCounts] = useState(emptyIgdTabCounts);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
 
   const fetchIGDData = async (tab: string, overrides: Record<string, string> = {}) => {
     setLoading(true);
@@ -2202,7 +2199,7 @@ const IGDTabs = () => {
       const requestParams = {
         page: overrides.page ?? currentPage.toString(),
         itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-        search: overrides.search ?? searchQuery.trim(),
+        search: overrides.search ?? debouncedSearchQuery,
         status: overrides.status ?? statusFilter,
         kd_dokter: overrides.kd_dokter ?? doctorFilter,
         triase_level: overrides.triase_level ?? triaseLevel,
@@ -2365,7 +2362,7 @@ const IGDTabs = () => {
 
   useEffect(() => {
     fetchIGDData(activeTab);
-  }, [activeTab, currentPage, itemsPerPage, searchQuery, statusFilter, doctorFilter, triaseLevel, dateRange?.from, dateRange?.to]);
+  }, [activeTab, currentPage, itemsPerPage, debouncedSearchQuery, statusFilter, doctorFilter, triaseLevel, dateRange?.from, dateRange?.to]);
 
   useEffect(() => {
     fetchIGDDoctors();
