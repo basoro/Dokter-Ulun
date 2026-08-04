@@ -394,6 +394,8 @@ const PatientTable: React.FC<PatientTableProps> = ({
   
   // Handle the case when simple view is used (with type and without columns)
   const renderSimpleView = () => {
+    const shouldShowLoadingState = loading && displayData.length === 0;
+
     return (
       <div className="overflow-x-auto">
         <Table>
@@ -445,7 +447,13 @@ const PatientTable: React.FC<PatientTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayData.length > 0 ? (
+            {shouldShowLoadingState ? (
+              <TableRow>
+                <TableCell colSpan={3} className="py-6 text-center italic text-slate-500 dark:text-slate-400">
+                  Memuat data...
+                </TableCell>
+              </TableRow>
+            ) : displayData.length > 0 ? (
               displayData.map((patient, rowIndex) => renderTableRow(
                 patient,
                 <TableRow
@@ -512,6 +520,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
   // Handle the case when columns are provided (for complex tables)
   const renderColumnsView = () => {
     if (!columns) return renderSimpleView();
+    const shouldShowLoadingState = loading && displayData.length === 0;
     
     return (
       <div className="overflow-x-auto">
@@ -537,7 +546,7 @@ const PatientTable: React.FC<PatientTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {shouldShowLoadingState ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="py-6 text-center italic text-slate-500 dark:text-slate-400">
                   Memuat data...

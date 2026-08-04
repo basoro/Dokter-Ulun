@@ -30,6 +30,7 @@ import { DateRange } from 'react-day-picker';
 import { formatDateTimeWIB, formatLocalDateValue, parseLocalDateValue, formatUIDate } from '@/lib/date-utils';
 import { API_URLS } from '@/config/api';
 import { DatePickerPopover } from '@/components/DatePickerPopover';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import {
   Dialog,
   DialogContent,
@@ -116,6 +117,7 @@ const RawatJalanTabs = () => {
   const [total, setTotal] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
   const [tabCounts, setTabCounts] = useState<Record<RawatJalanTab, number>>(emptyTabCounts);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
   const effectiveDoctorFilter = doctorFilter || "all";
   const requestDoctorFilter = doctorFilter || "all";
   const isPagiGroupActive = pagiTabGroup.includes(activeTab);
@@ -199,7 +201,7 @@ const RawatJalanTabs = () => {
     startDate: date?.from ? formatLocalDateValue(date.from) : '',
     endDate: date?.to ? formatLocalDateValue(date.to) : '',
     username: user?.username,
-    search: searchQuery.trim() || '',
+    search: overrides.search ?? debouncedSearchQuery,
     status: overrides.status ?? statusFilter,
     statusBayar: overrides.statusBayar ?? statusBayarFilter,
     kd_dokter: overrides.kd_dokter ?? requestDoctorFilter,
@@ -324,24 +326,7 @@ const RawatJalanTabs = () => {
     if (date?.from && date?.to) {
       fetchRawatJalanPatients();
     }
-  }, [user?.kd_poli, date?.from, date?.to, activeTab, currentPage, itemsPerPage]);
-
-  useEffect(() => {
-    if (!date?.from || !date?.to) {
-      return;
-    }
-
-    const handle = setTimeout(() => {
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-        return;
-      }
-
-      fetchRawatJalanPatients();
-    }, 400);
-
-    return () => clearTimeout(handle);
-  }, [searchQuery]);
+  }, [user?.kd_poli, date?.from, date?.to, activeTab, currentPage, itemsPerPage, debouncedSearchQuery]);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -588,7 +573,10 @@ const RawatJalanTabs = () => {
                     placeholder="Cari pasien..."
                     className="w-full pl-8"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
                   />
                 </div>
                 
@@ -693,30 +681,25 @@ const RawatJalanTabs = () => {
               </Dialog>
             </CardHeader>
             <CardContent>
-              {loading ? (
-                <div className="flex justify-center items-center py-8">
-                  <div className="text-muted-foreground">Memuat data pasien...</div>
-                </div>
-              ) : (
-                <PatientTable 
-                  patients={filteredRawatJalanData} 
-                  columns={rawatJalanColumns}
-                  getRowMenuItems={rawatJalanRowMenuItems}
-                  pagination={{
-                    currentPage,
-                    totalPages: Math.ceil(total / itemsPerPage),
-                    totalItems: total,
-                    itemsPerPage,
-                    onPageChange: (page) => {
-                      setCurrentPage(page);
-                    },
-                    onItemsPerPageChange: (newItemsPerPage) => {
-                      setItemsPerPage(newItemsPerPage);
-                      setCurrentPage(1);
-                    }
-                  }}
-                />
-              )}
+              <PatientTable
+                patients={filteredRawatJalanData}
+                columns={rawatJalanColumns}
+                loading={loading}
+                getRowMenuItems={rawatJalanRowMenuItems}
+                pagination={{
+                  currentPage,
+                  totalPages: Math.ceil(total / itemsPerPage),
+                  totalItems: total,
+                  itemsPerPage,
+                  onPageChange: (page) => {
+                    setCurrentPage(page);
+                  },
+                  onItemsPerPageChange: (newItemsPerPage) => {
+                    setItemsPerPage(newItemsPerPage);
+                    setCurrentPage(1);
+                  }
+                }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
