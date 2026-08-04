@@ -4,6 +4,7 @@ class HemodialisaDataService {
   static async getHemodialisaData({
     startDate,
     endDate,
+    search = '',
     status = 'all',
     statusBayar = 'all',
     page = 1,
@@ -45,6 +46,31 @@ class HemodialisaDataService {
       `;
 
       const params = [startDate, endDate];
+      const normalizedSearch = String(search || '').trim();
+
+      if (normalizedSearch) {
+        query += `
+          AND (
+            rp.no_reg LIKE ? OR
+            rp.no_rawat LIKE ? OR
+            rp.no_rkm_medis LIKE ? OR
+            p.nm_pasien LIKE ? OR
+            d.nm_dokter LIKE ? OR
+            pol.nm_poli LIKE ? OR
+            pj.png_jawab LIKE ?
+          )
+        `;
+        const searchPattern = `%${normalizedSearch}%`;
+        params.push(
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern
+        );
+      }
 
       // Add status filter if specified
       if (status && status !== 'all') {
@@ -91,7 +117,10 @@ class HemodialisaDataService {
       let countQuery = `
         SELECT COUNT(DISTINCT rp.no_rawat) as total
         FROM reg_periksa rp
+        LEFT JOIN pasien p ON rp.no_rkm_medis = p.no_rkm_medis
+        LEFT JOIN dokter d ON rp.kd_dokter = d.kd_dokter
         LEFT JOIN poliklinik pol ON rp.kd_poli = pol.kd_poli
+        LEFT JOIN penjab pj ON rp.kd_pj = pj.kd_pj
         WHERE (
           pol.nm_poli LIKE '%Hemodialisa%' OR 
           pol.nm_poli LIKE '%Hemodialisis%' OR 
@@ -102,6 +131,30 @@ class HemodialisaDataService {
       `;
 
       const countParams = [startDate, endDate];
+
+      if (normalizedSearch) {
+        countQuery += `
+          AND (
+            rp.no_reg LIKE ? OR
+            rp.no_rawat LIKE ? OR
+            rp.no_rkm_medis LIKE ? OR
+            p.nm_pasien LIKE ? OR
+            d.nm_dokter LIKE ? OR
+            pol.nm_poli LIKE ? OR
+            pj.png_jawab LIKE ?
+          )
+        `;
+        const searchPattern = `%${normalizedSearch}%`;
+        countParams.push(
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern,
+          searchPattern
+        );
+      }
 
       if (status && status !== 'all') {
         countQuery += ` AND rp.stts = ?`;
