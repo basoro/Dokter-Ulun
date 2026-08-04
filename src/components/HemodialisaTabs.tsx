@@ -99,6 +99,7 @@ const HemodialisaTabs = () => {
       let requestBody = {
         startDate: formatLocalDateValue(date.from),
         endDate: formatLocalDateValue(date.to),
+        search: overrides.search ?? searchQuery.trim(),
         status: overrides.status ?? statusFilter,
         statusBayar: overrides.statusBayar ?? statusBayarFilter,
         page: overrides.page ?? currentPage.toString(),
@@ -160,7 +161,7 @@ const HemodialisaTabs = () => {
     if (date?.from && date?.to) {
       fetchHemodialisaPatients();
     }
-  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter]);
+  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter, searchQuery]);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -300,38 +301,14 @@ const HemodialisaTabs = () => {
     }
   ];
   
-  console.log('Filtering data:', {
+  console.log('Mapping hemodialisa data:', {
     totalPatients: hemodialisaPatients.length,
     searchQuery,
     statusFilter,
     statusBayarFilter
   });
-  
-  const filteredHemodialisaData = hemodialisaPatients.filter(patient => {
-    let passesSearch = true;
-    let passesStatus = true;
-    let passesPaymentStatus = true;
-    
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      passesSearch = 
-        patient.nm_pasien?.toLowerCase().includes(searchLower) ||
-        patient.nm_dokter?.toLowerCase().includes(searchLower) ||
-        patient.nm_poli?.toLowerCase().includes(searchLower) ||
-        patient.png_jawab?.toLowerCase().includes(searchLower) ||
-        patient.no_rkm_medis?.toString().includes(searchQuery);
-    }
-    
-    if (statusFilter && statusFilter !== "all") {
-      passesStatus = patient.status?.toLowerCase() === statusFilter.toLowerCase();
-    }
-    
-    if (statusBayarFilter && statusBayarFilter !== "all") {
-      passesPaymentStatus = patient.payment_status?.toLowerCase() === statusBayarFilter.toLowerCase();
-    }
-    
-    return passesSearch && passesStatus && passesPaymentStatus;
-  }).map(patient => ({
+
+  const filteredHemodialisaData = hemodialisaPatients.map(patient => ({
     id: patient.no_rkm_medis,
     no_rkm_medis: patient.no_rkm_medis,
     no_reg: patient.no_reg,
@@ -395,7 +372,10 @@ const HemodialisaTabs = () => {
                 placeholder="Cari pasien..."
                 className="w-full pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             

@@ -82,25 +82,21 @@ export function PaginationControls({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-      {/* <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
         <div className="text-sm text-muted-foreground">
-          Menampilkan {startItem}-{endItem} dari {totalItems.toLocaleString()} data
+          {startItem}-{endItem} dari {totalItems.toLocaleString()} data
         </div>
         
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Data per halaman:</span>
+          <span className="text-sm text-muted-foreground">View:</span>
           <Select
-            value={itemsPerPage >= totalItems ? "all" : itemsPerPage.toString()}
+            value={itemsPerPage.toString()}
             onValueChange={(value) => {
-              if (value === "all") {
-                onItemsPerPageChange(totalItems > 0 ? totalItems : 1000);
-              } else {
-                onItemsPerPageChange(parseInt(value));
-              }
+              onItemsPerPageChange(parseInt(value, 10));
             }}
             disabled={loading}
           >
-            <SelectTrigger className="w-20">
+            <SelectTrigger className="w-[88px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -108,13 +104,10 @@ export function PaginationControls({
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
               <SelectItem value="100">100</SelectItem>
-              <SelectItem value="250">250</SelectItem>
-              <SelectItem value="500">500</SelectItem>
-              <SelectItem value="all">Tampilkan Semua</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div> */}
+      </div>
 
       {totalPages > 1 && !isShowingAll && (
         <Pagination>

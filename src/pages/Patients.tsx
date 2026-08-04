@@ -1229,7 +1229,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
   ): RawatInapRequestBody => ({
     page: overrides.page ?? currentPage.toString(),
     itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-    search: overrides.search ?? searchQuery,
+    search: overrides.search ?? searchQuery.trim(),
     statusPulang: overrides.statusPulang ?? 'belum-pulang',
     username: user?.username || '',
     tab: tabValue,
@@ -1243,7 +1243,7 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
   const buildResumeRequestBody = (overrides: Partial<Record<string, string>> = {}) => ({
     page: overrides.page ?? currentPage.toString(),
     itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-    search: overrides.search ?? searchQuery,
+    search: overrides.search ?? searchQuery.trim(),
     statusPulang: overrides.statusPulang ?? 'sudah-pulang',
     username: user?.username || '',
     resumeStatus: overrides.resumeStatus ?? resumeStatus,
@@ -1611,7 +1611,10 @@ const RawatInapTabs = ({ viewMode = 'utama' }: RawatInapTabsProps) => {
             placeholder="Cari pasien..."
             className="w-full pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
 
@@ -2199,7 +2202,7 @@ const IGDTabs = () => {
       const requestParams = {
         page: overrides.page ?? currentPage.toString(),
         itemsPerPage: overrides.itemsPerPage ?? itemsPerPage.toString(),
-        search: overrides.search ?? searchQuery,
+        search: overrides.search ?? searchQuery.trim(),
         status: overrides.status ?? statusFilter,
         kd_dokter: overrides.kd_dokter ?? doctorFilter,
         triase_level: overrides.triase_level ?? triaseLevel,
@@ -2544,7 +2547,10 @@ const IGDTabs = () => {
             placeholder="Cari pasien..."
             className="w-full pl-8"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
 
