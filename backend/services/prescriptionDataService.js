@@ -1103,8 +1103,9 @@ class PrescriptionDataService {
     try {
       await connection.beginTransaction();
       const currentSystemDateTime = this.getCurrentSystemDateTime();
-      const normalizedPrescriptionDate = this.normalizePrescriptionDate(prescriptionDate) || currentSystemDateTime.date;
-      const normalizedPrescriptionTime = this.normalizePrescriptionTime(prescriptionTime) || currentSystemDateTime.time;
+      // Always use backend server date/time so saved prescriptions do not depend on browser/device clocks.
+      const normalizedPrescriptionDate = currentSystemDateTime.date;
+      const normalizedPrescriptionTime = currentSystemDateTime.time;
       const resolvedPrescriptionStatus = await this.resolvePrescriptionStatus(connection, no_rawat, prescriptionStatus);
       const setKronis = this.normalizeBooleanFlag(options?.set_kronis);
       const setPrb = this.normalizeBooleanFlag(options?.set_prb);
@@ -1312,9 +1313,10 @@ class PrescriptionDataService {
     try {
       await connection.beginTransaction();
       const normalizedUsername = String(username || '').trim();
-      const normalizedPrescriptionDate = this.normalizePrescriptionDate(prescriptionDate);
       const currentSystemDateTime = this.getCurrentSystemDateTime();
-      const normalizedPrescriptionTime = this.normalizePrescriptionTime(prescriptionTime) || currentSystemDateTime.time;
+      // Always use backend server date/time so edits stay consistent with server-side prescription timestamps.
+      const normalizedPrescriptionDate = currentSystemDateTime.date;
+      const normalizedPrescriptionTime = currentSystemDateTime.time;
       const normalizedPrescriptionStatus = this.normalizePrescriptionStatus(prescriptionStatus);
       const normalizedMedicines = await this.normalizeMedicines(medicines);
       const normalizedCompounds = await this.normalizeCompounds(connection, compounds);
@@ -1410,16 +1412,24 @@ class PrescriptionDataService {
           ])
         );
 
-        if (normalizedPrescriptionDate) {
-          await connection.execute(
-            `
-              UPDATE resep_dokter_pulang
-              SET tgl_perawatan = ?, tgl_peresepan = ?
-              WHERE no_resep = ?
-            `,
-            [normalizedPrescriptionDate, normalizedPrescriptionDate, no_resep]
-          );
-        }
+        await connection.execute(
+          `
+            UPDATE resep_dokter_pulang
+            SET
+              tgl_perawatan = ?,
+              jam_perawatan = ?,
+              tgl_peresepan = ?,
+              jam_peresepan = ?
+            WHERE no_resep = ?
+          `,
+          [
+            normalizedPrescriptionDate,
+            normalizedPrescriptionTime,
+            normalizedPrescriptionDate,
+            normalizedPrescriptionTime,
+            no_resep
+          ]
+        );
 
         await connection.execute('DELETE FROM resep_pulang WHERE no_resep = ?', [no_resep]);
 
@@ -1455,13 +1465,18 @@ class PrescriptionDataService {
         };
       }
 
-      const headerUpdates = [];
-      const headerParams = [];
-
-      if (normalizedPrescriptionDate) {
-        headerUpdates.push('tgl_peresepan = ?');
-        headerParams.push(normalizedPrescriptionDate);
-      }
+      const headerUpdates = [
+        'tgl_perawatan = ?',
+        'jam = ?',
+        'tgl_peresepan = ?',
+        'jam_peresepan = ?'
+      ];
+      const headerParams = [
+        normalizedPrescriptionDate,
+        normalizedPrescriptionTime,
+        normalizedPrescriptionDate,
+        normalizedPrescriptionTime
+      ];
 
       if (normalizedPrescriptionStatus) {
         headerUpdates.push('status = ?');

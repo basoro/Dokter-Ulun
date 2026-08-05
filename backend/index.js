@@ -1047,6 +1047,70 @@ app.delete('/api/operation-reports', async (req, res) => {
   }
 });
 
+app.get('/api/operation-reports/:no_rawat/files', async (req, res) => {
+  try {
+    const { no_rawat } = req.params;
+    const kdDokter = String(req.query.username || req.query.kd_dokter || '').trim();
+    const result = await OperationReportService.getDigitalFiles(no_rawat, kdDokter);
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting operation report digital files:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Gagal memuat berkas digital laporan operasi'
+    });
+  }
+});
+
+app.post('/api/operation-reports/files/upload', handleDigitalFilesUpload, async (req, res) => {
+  try {
+    const uploadedFiles = [
+      ...((req.files && Array.isArray(req.files.file)) ? req.files.file : []),
+      ...((req.files && Array.isArray(req.files.files)) ? req.files.files : [])
+    ];
+    const { no_rawat } = req.body || {};
+
+    const result = await OperationReportService.uploadDigitalFiles({
+      noRawat: no_rawat,
+      files: uploadedFiles
+    });
+
+    res.status(result.success ? 200 : 207).json(result);
+  } catch (error) {
+    console.error('Error uploading operation report digital files:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Gagal upload berkas digital laporan operasi'
+    });
+  }
+});
+
+app.delete('/api/operation-reports/files', async (req, res) => {
+  try {
+    const {
+      no_rawat,
+      lokasi_file,
+      username,
+      kd_dokter
+    } = req.body || {};
+
+    const result = await OperationReportService.deleteDigitalFile({
+      noRawat: no_rawat,
+      lokasiFile: lokasi_file,
+      kdDokter: username || kd_dokter
+    });
+
+    res.json(result);
+  } catch (error) {
+    const statusCode = Number(error?.statusCode) || 500;
+    console.error('Error deleting operation report digital file:', error);
+    res.status(statusCode).json({
+      success: false,
+      error: error.message || 'Gagal menghapus berkas digital laporan operasi'
+    });
+  }
+});
+
 app.get('/api/assesmen-rehab-medik/access/:username', async (req, res) => {
   try {
     const { username } = req.params;

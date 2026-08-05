@@ -1,6 +1,13 @@
 import { executeQuery } from '../config/database.js';
+import DigitalFilesService from './digitalFilesService.js';
 
 class OperationReportService {
+  static getDigitalFileCode() {
+    return String(process.env.BERKAS_LAP_OPERASI || '')
+      .trim()
+      .replace(/^['"`]+|['"`]+$/g, '');
+  }
+
   static formatDateTimeLocal(dateTime) {
     if (!dateTime) {
       return '';
@@ -262,6 +269,59 @@ class OperationReportService {
       success: true,
       message: 'Laporan operasi berhasil dihapus',
     };
+  }
+
+  static async getDigitalFiles(noRawat, kdDokter = '') {
+    const normalizedNoRawat = String(noRawat || '').trim();
+    const configuredKode = this.getDigitalFileCode();
+
+    if (!normalizedNoRawat) {
+      throw new Error('no_rawat wajib diisi');
+    }
+
+    if (!configuredKode) {
+      throw new Error('BERKAS_LAP_OPERASI belum dikonfigurasi');
+    }
+
+    const result = await DigitalFilesService.getFiles(normalizedNoRawat, kdDokter);
+    const filteredData = Array.isArray(result?.data)
+      ? result.data.filter((item) => String(item?.kode || '').trim() === configuredKode)
+      : [];
+
+    return {
+      ...result,
+      data: filteredData,
+      kode_berkas: configuredKode
+    };
+  }
+
+  static async uploadDigitalFiles({ noRawat, files = [] }) {
+    const configuredKode = this.getDigitalFileCode();
+
+    if (!configuredKode) {
+      throw new Error('BERKAS_LAP_OPERASI belum dikonfigurasi');
+    }
+
+    return DigitalFilesService.uploadFiles({
+      noRawat,
+      kode: configuredKode,
+      files
+    });
+  }
+
+  static async deleteDigitalFile({ noRawat, lokasiFile, kdDokter = '' }) {
+    const configuredKode = this.getDigitalFileCode();
+
+    if (!configuredKode) {
+      throw new Error('BERKAS_LAP_OPERASI belum dikonfigurasi');
+    }
+
+    return DigitalFilesService.deleteFile({
+      noRawat,
+      kode: configuredKode,
+      lokasiFile,
+      kdDokter
+    });
   }
 }
 
