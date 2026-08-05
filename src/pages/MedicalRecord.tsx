@@ -605,7 +605,6 @@ const getCurrentExaminationDateTime = () => ({
 });
 
 const getCurrentPrescriptionDate = () => format(new Date(), 'yyyy-MM-dd');
-const getCurrentPrescriptionTime = () => format(new Date(), 'HH:mm:ss');
 const getCurrentRequestDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentRequestTime = () => format(new Date(), 'HH:mm:ss');
 
@@ -9284,8 +9283,6 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
             action: 'create_prescription',
             no_rawat: formattedNoRawat,
             kd_dokter: user.username,
-            prescription_date: referenceDate,
-            prescription_time: getCurrentPrescriptionTime(),
             prescription_status: effectiveStatusRawat === 'Ranap' ? 'Ranap' : 'Ralan',
             medicines: [],
             compounds: validCompounds
@@ -9365,8 +9362,6 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
               action: 'update_prescription',
               no_resep: editingPrescriptionNo,
               username: currentUsername,
-              prescription_date: prescription.tanggal,
-              prescription_time: getCurrentPrescriptionTime(),
               prescription_status: prescription.status,
               medicines: prescription.medicines,
               compounds: []
@@ -9398,8 +9393,6 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                 action: 'create_prescription',
                 no_rawat: formattedNoRawat,
                 kd_dokter: user.username,
-                prescription_date: prescription.tanggal,
-                prescription_time: getCurrentPrescriptionTime(),
                 prescription_status: prescription.status,
                 set_kronis: Boolean(prescription.set_kronis),
                 set_prb: Boolean(prescription.set_prb),
@@ -12182,8 +12175,12 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                             )));
                           }}
                           displayValue={medication.tanggal ? formatUIDate(new Date(medication.tanggal)) : undefined}
-                          placeholder="Pilih tanggal resep"
+                          placeholder="Otomatis mengikuti tanggal server"
+                          buttonClassName="pointer-events-none opacity-70"
                         />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Tanggal dan jam resep tersimpan otomatis mengikuti server.
+                        </p>
                       </div>
                       <div className="flex gap-4">
                         <div className="flex-1">
@@ -12504,8 +12501,12 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                             )));
                           }}
                           displayValue={compound.tanggal ? formatUIDate(new Date(compound.tanggal)) : undefined}
-                          placeholder="Pilih tanggal resep"
+                          placeholder="Otomatis mengikuti tanggal server"
+                          buttonClassName="pointer-events-none opacity-70"
                         />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Tanggal dan jam resep tersimpan otomatis mengikuti server.
+                        </p>
                        </div>
                        <div>
                          <Label htmlFor={`racikan-nama-${compoundIndex}`}>Nama Racikan</Label>
