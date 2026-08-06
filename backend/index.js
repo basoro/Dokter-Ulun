@@ -43,6 +43,7 @@ import RadiologyDataService from './services/radiologyDataService.js';
 import ResumePasienDataService from './services/resumePasienDataService.js';
 import SaveExaminationService from './services/saveExaminationService.js';
 import TriageIgdService from './services/triageIgdService.js';
+import VerifyExaminationService from './services/verifyExaminationService.js';
 import WhatsappOtpService from './services/whatsappOtpService.js';
 import { getAuditHistory, getAuditHistoryAccessInfo, initCrudAuditStorage, logCrudActivity } from './services/crudAuditService.js';
 import statisticsDataRoutes from './routes/statisticsData.js';
@@ -1560,6 +1561,27 @@ app.post('/api/delete-examination', async (req, res) => {
     await auditCrudFailure(req, 'examination', 'delete', error);
     console.error('Delete examination error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/verify-examination', async (req, res) => {
+  try {
+    const { no_rawat, tgl_perawatan, jam_rawat, username } = req.body || {};
+    const data = await VerifyExaminationService.verifyInpatientExamination(
+      no_rawat,
+      tgl_perawatan,
+      jam_rawat,
+      username
+    );
+    await auditCrudSuccess(req, 'examination', 'verify', data);
+    res.json(data);
+  } catch (error) {
+    await auditCrudFailure(req, 'examination', 'verify', error);
+    console.error('Verify examination error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 

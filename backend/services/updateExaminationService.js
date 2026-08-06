@@ -98,7 +98,29 @@ export const updateExaminationData = async (examinationData) => {
 
     console.log(`🔄 Updating ${tableName} for no_rawat: ${no_rawat}`);
 
-    if (normalizedUsername) {
+    if (status_rawat === 'Ranap') {
+      const ownershipRows = await executeQuery(
+        `
+          SELECT nip, verified_at
+          FROM pemeriksaan_ranap
+          WHERE no_rawat = ? AND tgl_perawatan = ? AND jam_rawat = ?
+          LIMIT 1
+        `,
+        [no_rawat, original_date, original_time]
+      );
+
+      if (!ownershipRows.length) {
+        throw new Error(`No examination record found to update in ${tableName}`);
+      }
+
+      if (ownershipRows[0]?.verified_at) {
+        throw new Error('SOAP harian rawat inap yang sudah diverifikasi tidak dapat diedit');
+      }
+
+      if (normalizedUsername && String(ownershipRows[0].nip || '').trim() !== normalizedUsername) {
+        throw new Error('Anda tidak berhak mengedit data pemeriksaan ini');
+      }
+    } else if (normalizedUsername) {
       const ownerQuery = `
         SELECT nip
         FROM ${tableName}
