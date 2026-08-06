@@ -2954,8 +2954,13 @@ const Patients = () => {
       />
     );
   } else if (path.includes('hemodialisa')) {
-    title = "Hemodialisa";
-    description = "Pasien yang prosedur cuci darah yang dilakukan untuk membersihkan darah dari racun dan sisa metabolisme tubuh";
+    if (path.includes('/peritoneal-dialisis')) {
+      title = "Peritoneal Dialisis";
+      description = "Daftar pasien peritoneal dialisis.";
+    } else {
+      title = "Hemo Dialisis";
+      description = "Daftar pasien hemo dialisis.";
+    }
     tabs = <HemodialisaTabs />;
   }
   

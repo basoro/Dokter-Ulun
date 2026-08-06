@@ -61,6 +61,17 @@ const hemodialisaColumns = [
   { accessor: 'paymentStatus', header: 'Status Bayar' },
 ];
 
+const HEMODIALISA_TYPE_CONFIG = {
+  hemo: {
+    label: 'Hemo Dialisis',
+    kdPoli: 'PL051'
+  },
+  peritoneal: {
+    label: 'Peritoneal Dialisis',
+    kdPoli: 'PL053'
+  }
+} as const;
+
 const HemodialisaTabs = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -87,6 +98,9 @@ const HemodialisaTabs = () => {
   const [total, setTotal] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(parsePositiveInt(searchParams.get('itemsPerPage'), 10));
   const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
+  const activeHemodialisaType = location.pathname.includes('/peritoneal-dialisis')
+    ? HEMODIALISA_TYPE_CONFIG.peritoneal
+    : HEMODIALISA_TYPE_CONFIG.hemo;
   
   const fetchHemodialisaPatients = async (overrides: Record<string, string> = {}) => {
     if (!date?.from || !date?.to) {
@@ -99,6 +113,7 @@ const HemodialisaTabs = () => {
       let requestBody = {
         startDate: formatLocalDateValue(date.from),
         endDate: formatLocalDateValue(date.to),
+        kd_poli: activeHemodialisaType.kdPoli,
         search: overrides.search ?? debouncedSearchQuery,
         status: overrides.status ?? statusFilter,
         statusBayar: overrides.statusBayar ?? statusBayarFilter,
@@ -161,7 +176,11 @@ const HemodialisaTabs = () => {
     if (date?.from && date?.to) {
       fetchHemodialisaPatients();
     }
-  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter, debouncedSearchQuery]);
+  }, [date?.from, date?.to, currentPage, itemsPerPage, statusFilter, statusBayarFilter, debouncedSearchQuery, activeHemodialisaType.kdPoli]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeHemodialisaType.kdPoli]);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -363,7 +382,7 @@ const HemodialisaTabs = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-2 w-full">
-          <CardTitle>Daftar Pasien Hemodialisa</CardTitle>
+          <CardTitle>Daftar Pasien {activeHemodialisaType.label}</CardTitle>
           <div className="mb-4 flex w-full flex-col items-start gap-2 lg:flex-row lg:flex-nowrap lg:items-center">
             <div className="relative w-full lg:min-w-0 lg:flex-[1.8_1_0%]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -416,7 +435,7 @@ const HemodialisaTabs = () => {
           <Dialog open={isFilterModalOpen} onOpenChange={setIsFilterModalOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Filter Pasien Hemodialisa</DialogTitle>
+                <DialogTitle>Filter Pasien {activeHemodialisaType.label}</DialogTitle>
                 <DialogDescription>
                   Atur filter status pasien dan status bayar, lalu tekan Terapkan Filter.
                 </DialogDescription>
