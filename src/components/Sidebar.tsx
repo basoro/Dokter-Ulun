@@ -64,6 +64,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     || location.pathname.startsWith('/pasien/rawat-gabung')
     || location.pathname.startsWith('/pasien/rawat-jaga')
   );
+  const [hemodialisaOpen, setHemodialisaOpen] = useState(
+    location.pathname.startsWith('/pasien/hemodialisa')
+  );
   
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -104,15 +107,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     { name: 'Rawat Jalan', path: '/pasien/rawat-jalan' },
   ];
 
-  const pasienSubmenuStandaloneItems: SubmenuItem[] = [
-    { name: 'Hemodialisa', path: '/pasien/hemodialisa' }
-  ];
-
   const rawatInapSubmenuItems: SubmenuItem[] = [
     { name: 'Rawat Utama', path: '/pasien/rawat-inap/utama' },
     { name: 'Rawat Bersama', path: '/pasien/rawat-inap/raber' },
     { name: 'Rawat Gabung', path: '/pasien/rawat-gabung' },
     { name: 'Rawat Jaga', path: '/pasien/rawat-jaga' }
+  ];
+
+  const hemodialisaSubmenuItems: SubmenuItem[] = [
+    { name: 'Hemo Dialisis', path: '/pasien/hemodialisa/hemo-dialisis' },
+    { name: 'Peritoneal Dialisis', path: '/pasien/hemodialisa/peritoneal-dialisis' }
   ];
 
   const statistikSubmenuItems: SubmenuItem[] = [
@@ -144,6 +148,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       || location.pathname.startsWith('/pasien/rawat-jaga')
     ) {
       setRawatInapOpen(true);
+    }
+    if (location.pathname.startsWith('/pasien/hemodialisa')) {
+      setHemodialisaOpen(true);
     }
   }, [location.pathname]);
 
@@ -301,20 +308,40 @@ const Sidebar: React.FC<SidebarProps> = ({
                     ))}
                   </CollapsibleContent>
                 </Collapsible>
-                {pasienSubmenuStandaloneItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                      item.exact
-                        ? (location.pathname === item.path ? activeItemClass : inactiveItemClass)
-                        : (location.pathname.startsWith(item.path) ? activeItemClass : inactiveItemClass)
+                <Collapsible
+                  open={hemodialisaOpen}
+                  onOpenChange={setHemodialisaOpen}
+                  className="w-full"
+                >
+                  <CollapsibleTrigger
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                      location.pathname.startsWith('/pasien/hemodialisa')
+                        ? activeItemClass
+                        : inactiveItemClass
                     }`}
-                    onClick={handlePatientsMenuClick}
                   >
-                    {item.name}
-                  </Link>
-                ))}
+                    <span>Hemodialisa</span>
+                    <span className="text-slate-500 dark:text-slate-400">
+                      {hemodialisaOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="ml-4 mt-1 space-y-1">
+                    {hemodialisaSubmenuItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                          location.pathname.startsWith(item.path)
+                            ? activeItemClass
+                            : inactiveItemClass
+                        }`}
+                        onClick={handlePatientsMenuClick}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
               </CollapsibleContent>
             </Collapsible>
           </div>

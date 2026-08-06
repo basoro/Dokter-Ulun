@@ -4,6 +4,7 @@ class HemodialisaDataService {
   static async getHemodialisaData({
     startDate,
     endDate,
+    kd_poli = '',
     search = '',
     status = 'all',
     statusBayar = 'all',
@@ -11,8 +12,9 @@ class HemodialisaDataService {
     itemsPerPage = 10
   }) {
     try {
-      // Build the query for hemodialisa patients (search for HD/Hemodialisa/Hemodialisis/Cuci Darah in name)
-      // Since we don't know the exact kd_poli, we'll filter by poli name
+      const normalizedKdPoli = String(kd_poli || '').trim();
+      const hasSpecificKdPoli = Boolean(normalizedKdPoli);
+
       let query = `
         SELECT 
           rp.no_reg,
@@ -36,16 +38,23 @@ class HemodialisaDataService {
         LEFT JOIN dokter d ON rp.kd_dokter = d.kd_dokter
         LEFT JOIN poliklinik pol ON rp.kd_poli = pol.kd_poli
         LEFT JOIN penjab pj ON rp.kd_pj = pj.kd_pj
-        WHERE (
-          pol.nm_poli LIKE '%Hemodialisa%' OR 
-          pol.nm_poli LIKE '%Hemodialisis%' OR 
-          pol.nm_poli LIKE '%Cuci Darah%' OR
-          pol.nm_poli LIKE '%HD%'
-        )
-          AND DATE(rp.tgl_registrasi) BETWEEN ? AND ?
+        WHERE DATE(rp.tgl_registrasi) BETWEEN ? AND ?
       `;
 
       const params = [startDate, endDate];
+      if (hasSpecificKdPoli) {
+        query += ` AND rp.kd_poli = ?`;
+        params.push(normalizedKdPoli);
+      } else {
+        query += `
+          AND (
+            pol.nm_poli LIKE '%Hemodialisa%' OR
+            pol.nm_poli LIKE '%Hemodialisis%' OR
+            pol.nm_poli LIKE '%Cuci Darah%' OR
+            pol.nm_poli LIKE '%HD%'
+          )
+        `;
+      }
       const normalizedSearch = String(search || '').trim();
 
       if (normalizedSearch) {
@@ -121,16 +130,23 @@ class HemodialisaDataService {
         LEFT JOIN dokter d ON rp.kd_dokter = d.kd_dokter
         LEFT JOIN poliklinik pol ON rp.kd_poli = pol.kd_poli
         LEFT JOIN penjab pj ON rp.kd_pj = pj.kd_pj
-        WHERE (
-          pol.nm_poli LIKE '%Hemodialisa%' OR 
-          pol.nm_poli LIKE '%Hemodialisis%' OR 
-          pol.nm_poli LIKE '%Cuci Darah%' OR
-          pol.nm_poli LIKE '%HD%'
-        )
-          AND DATE(rp.tgl_registrasi) BETWEEN ? AND ?
+        WHERE DATE(rp.tgl_registrasi) BETWEEN ? AND ?
       `;
 
       const countParams = [startDate, endDate];
+      if (hasSpecificKdPoli) {
+        countQuery += ` AND rp.kd_poli = ?`;
+        countParams.push(normalizedKdPoli);
+      } else {
+        countQuery += `
+          AND (
+            pol.nm_poli LIKE '%Hemodialisa%' OR
+            pol.nm_poli LIKE '%Hemodialisis%' OR
+            pol.nm_poli LIKE '%Cuci Darah%' OR
+            pol.nm_poli LIKE '%HD%'
+          )
+        `;
+      }
 
       if (normalizedSearch) {
         countQuery += `

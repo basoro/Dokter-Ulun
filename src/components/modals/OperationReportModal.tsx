@@ -483,6 +483,83 @@ export const OperationReportModal: React.FC<OperationReportModalProps> = ({ isOp
     />
   );
 
+  const renderDigitalFilesGallery = () => {
+    if (digitalFilesLoading) {
+      return (
+        <div className="flex items-center text-sm text-muted-foreground">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Memuat berkas...
+        </div>
+      );
+    }
+
+    if (!digitalFiles.length) {
+      return (
+        <div className="rounded-md border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+          Belum ada berkas digital laporan operasi untuk nomor rawat ini
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {digitalFiles.map((file) => {
+          const isImage = String(file.tipe_file || '').startsWith('image/');
+
+          return (
+            <div key={file.id || file.lokasi_file} className="overflow-hidden rounded-lg border bg-background">
+              <div className="flex aspect-video items-center justify-center bg-muted/30">
+                {isImage && file.url ? (
+                  <img
+                    src={file.url}
+                    alt={file.nama_berkas || file.nama_file}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    {getDigitalFileIcon(file.tipe_file)}
+                    <span className="text-xs">{file.nama_file}</span>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-3 p-3">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{file.nama_berkas || file.nama_file}</div>
+                  <div className="truncate text-xs text-muted-foreground">{file.nama_file}</div>
+                  <div className="mt-1 break-all text-xs text-muted-foreground">{file.lokasi_file || '-'}</div>
+                </div>
+                <div className="flex gap-2">
+                  {file.url ? (
+                    <Button asChild size="sm" variant="outline" className="flex-1">
+                      <a href={file.url} target="_blank" rel="noreferrer">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Buka
+                      </a>
+                    </Button>
+                  ) : null}
+                  {file.can_delete ? (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteDigitalFile(file)}
+                      disabled={deletingFileId === (file.id || file.lokasi_file)}
+                    >
+                      {deletingFileId === (file.id || file.lokasi_file) ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -550,75 +627,13 @@ export const OperationReportModal: React.FC<OperationReportModalProps> = ({ isOp
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-medium">Berkas Tersimpan</div>
-                  {digitalFilesLoading ? (
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                      Memuat berkas...
-                    </div>
-                  ) : null}
+                  <div className="text-xs text-muted-foreground">
+                    {digitalFilesLoading ? 'Memuat berkas...' : `${digitalFiles.length} file`}
+                  </div>
                 </div>
-
-                {digitalFiles.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {digitalFiles.map((file) => {
-                      const isImage = String(file.tipe_file || '').startsWith('image/');
-
-                      return (
-                        <div key={file.id || file.lokasi_file} className="overflow-hidden rounded-lg border bg-background">
-                          <div className="flex aspect-video items-center justify-center bg-muted/30">
-                            {isImage && file.url ? (
-                              <img
-                                src={file.url}
-                                alt={file.nama_berkas || file.nama_file}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                {getDigitalFileIcon(file.tipe_file)}
-                                <span className="text-xs">{file.nama_file}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="space-y-3 p-3">
-                            <div className="min-w-0">
-                              <div className="truncate text-sm font-medium">{file.nama_berkas || file.nama_file}</div>
-                              <div className="truncate text-xs text-muted-foreground">{file.nama_file}</div>
-                              <div className="mt-1 break-all text-xs text-muted-foreground">{file.lokasi_file || '-'}</div>
-                            </div>
-                            <div className="flex gap-2">
-                              {file.url ? (
-                                <Button asChild size="sm" variant="outline" className="flex-1">
-                                  <a href={file.url} target="_blank" rel="noreferrer">
-                                    <ExternalLink className="mr-2 h-4 w-4" />
-                                    Buka
-                                  </a>
-                                </Button>
-                              ) : null}
-                              {file.can_delete ? (
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleDeleteDigitalFile(file)}
-                                  disabled={deletingFileId === (file.id || file.lokasi_file)}
-                                >
-                                  {deletingFileId === (file.id || file.lokasi_file) ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              ) : null}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-md border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
-                    Belum ada berkas digital laporan operasi untuk nomor rawat ini
-                  </div>
-                )}
+                <div className="rounded-md border border-dashed px-4 py-4 text-sm text-muted-foreground">
+                  Foto dan berkas digital laporan operasi akan ditampilkan di bawah data laporan operasi.
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -806,6 +821,21 @@ export const OperationReportModal: React.FC<OperationReportModalProps> = ({ isOp
               <div className="text-center py-8 text-muted-foreground">
                 Belum ada laporan operasi untuk pasien ini
               </div>
+            )}
+            {!loading && reports.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between gap-3">
+                    <span>Foto / Berkas Digital Laporan Operasi</span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {digitalFilesLoading ? 'Memuat berkas...' : `${digitalFiles.length} file`}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {renderDigitalFilesGallery()}
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
