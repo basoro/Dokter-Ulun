@@ -139,6 +139,20 @@ class SaveExaminationService {
       } else {
         // Insert into pemeriksaan_ranap table
         tableName = 'pemeriksaan_ranap';
+
+        const [existingRows] = await connection.execute(
+          `
+            SELECT verified_at
+            FROM pemeriksaan_ranap
+            WHERE no_rawat = ? AND tgl_perawatan = ? AND jam_rawat = ?
+            LIMIT 1
+          `,
+          [no_rawat, tgl_perawatan, jam_rawat]
+        );
+
+        if (existingRows.length > 0 && existingRows[0]?.verified_at) {
+          throw new Error('SOAP harian rawat inap yang sudah diverifikasi tidak dapat diubah');
+        }
         
         const query = `
           INSERT INTO pemeriksaan_ranap (

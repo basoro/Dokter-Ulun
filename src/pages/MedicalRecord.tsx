@@ -11,7 +11,7 @@ import {
   Activity, ClipboardList, BedDouble, UserCircle, Building, MapPin,
   Phone, Heart, CalendarDays, FileText, Plus, X, Trash2, Image as ImageIcon, Clock, CreditCard,
   Copy, ChevronDown, ChevronUp, Brain, Check, ChevronsUpDown, Pencil, Play,
-  BadgeAlert, Maximize2, Mic, Square, Info
+  BadgeAlert, Maximize2, Mic, Square, Info, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1479,6 +1479,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
   const [statusRawat, setStatusRawat] = useState<string>(defaultStatusRawat || 'Ralan');
   const [isDpjpExpanded, setIsDpjpExpanded] = useState(false);
   const [editingExamination, setEditingExamination] = useState<any>(null);
+  const [verifyingExaminationKey, setVerifyingExaminationKey] = useState<string | null>(null);
   const [aiScribeModal, setAiScribeModal] = useState(false);
   const [aiScribeData, setAiScribeData] = useState<any>(null);
   const [aiScribeLoading, setAiScribeLoading] = useState(false);
@@ -2993,16 +2994,28 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
         return normalized && normalized === currentUsername;
       })
     );
+  const isVerifiedExamination = (exam: any) => Boolean(String(exam?.verified_at || '').trim());
+  const getExaminationRecordKey = (exam: any, visit?: any) => (
+    [
+      visit?.no_rawat || exam?.no_rawat || '',
+      exam?.tgl_perawatan || '',
+      exam?.jam_rawat || ''
+    ].join('|')
+  );
   const isPrescriptionPendingService = (med: any) => {
     const normalizedStatus = String(med?.status_layanan || '').trim();
     return !normalizedStatus || normalizedStatus === 'Belum Terlayani';
   };
-  const canDeleteExamination = (exam: any) => matchesCurrentUser(exam?.nip, exam?.kd_dokter);
+  const canDeleteExamination = (exam: any) => matchesCurrentUser(exam?.nip, exam?.kd_dokter) && !isVerifiedExamination(exam);
   const canDeleteProcedure = (procedure: any) => matchesCurrentUser(procedure?.kd_dokter, procedure?.nip);
   const canDeletePrescription = (med: any) => matchesCurrentUser(med?.kd_dokter) && isPrescriptionPendingService(med);
   const canDeleteLabRequest = (lab: any) => matchesCurrentUser(lab?.dokter_perujuk);
   const canDeleteRadiologyRequest = (rad: any) => matchesCurrentUser(rad?.dokter_perujuk);
   const canEditExamination = canDeleteExamination;
+  const canVerifyExamination = (exam: any, rawatType: 'Ralan' | 'Ranap' | 'IGD') => (
+    rawatType === 'Ranap' &&
+    !isVerifiedExamination(exam)
+  );
   const canEditPrescription = canDeletePrescription;
   const canEditLabRequest = canDeleteLabRequest;
   const canEditRadiologyRequest = canDeleteRadiologyRequest;
@@ -3049,8 +3062,13 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     return history.map(({ key, visit, exam, rawatType }) => {
       const allowedToDelete = canDeleteExamination(exam);
       const canEdit = canEditExamination(exam);
-      const editLabel = canEdit ? 'Edit' : 'Bukan Data Anda';
-      const deleteLabel = allowedToDelete ? 'Hapus' : 'Bukan Data Anda';
+      const isVerified = isVerifiedExamination(exam);
+      const canVerify = canVerifyExamination(exam, rawatType);
+      const examinationKey = getExaminationRecordKey(exam, visit);
+      const isVerifying = verifyingExaminationKey === examinationKey;
+      const editLabel = isVerified ? 'Sudah Diverifikasi' : canEdit ? 'Edit' : 'Bukan Data Anda';
+      const deleteLabel = isVerified ? 'Sudah Diverifikasi' : allowedToDelete ? 'Hapus' : 'Bukan Data Anda';
+      const verifyLabel = isVerified ? 'Sudah Diverifikasi' : canVerify ? 'Verifikasi' : 'Bukan Data Anda';
       const resolvedRole = resolveExaminationRole(exam?.role, exam?.pegawai, exam?.nama, visit?.dokter, visit?.nm_dokter);
       const roleStyles = getExaminationRoleStyles(resolvedRole);
       const roleLabel = getExaminationRoleLabel(resolvedRole);
@@ -3131,6 +3149,20 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
               <Trash2 className="h-4 w-4 sm:mr-1" />
               <span className="sr-only sm:not-sr-only">{deleteLabel}</span>
             </Button>
+            {rawatType === 'Ranap' && (
+              <Button
+                size="sm"
+                variant={isVerified ? 'secondary' : 'default'}
+                onClick={() => handleVerifyExamination(exam, visit)}
+                disabled={!canVerify || isVerifying}
+                className="h-9 w-9 p-0 sm:w-auto sm:px-3"
+                aria-label={verifyLabel}
+                title={verifyLabel}
+              >
+                {isVerifying ? <Loader2 className="h-4 w-4 animate-spin sm:mr-1" /> : <Check className="h-4 w-4 sm:mr-1" />}
+                <span className="sr-only sm:not-sr-only">{isVerified ? 'Verified' : 'Verifikasi'}</span>
+              </Button>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3148,9 +3180,17 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
           <div className={cn('space-y-2 rounded-lg border p-4', roleStyles.soap)}>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h4 className="font-medium">SOAPIE</h4>
-              <span className={cn('inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium', roleStyles.badge)}>
-                {roleLabel}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn('inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium', roleStyles.badge)}>
+                  {roleLabel}
+                </span>
+                {rawatType === 'Ranap' && isVerified ? (
+                  <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    <Check className="mr-1 h-3.5 w-3.5" />
+                    Verified
+                  </span>
+                ) : null}
+              </div>
             </div>
             <div className="text-sm">
               <strong>S (Subjektif):</strong>
@@ -3181,6 +3221,11 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
               </div>
             )}
             <p className="text-sm"><strong>Petugas:</strong> {exam.pegawai || exam.nip || '-'}</p>
+            {rawatType === 'Ranap' && isVerified ? (
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                <strong>Waktu Verifikasi:</strong> {formatUIDateTime(exam.verified_at)}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -8144,7 +8189,9 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     if (!canEditExamination(examination)) {
       toast({
         title: "Akses Ditolak",
-        description: "Hanya petugas yang membuat data pemeriksaan yang dapat mengeditnya.",
+        description: isVerifiedExamination(examination)
+          ? "SOAP harian rawat inap yang sudah diverifikasi tidak dapat diedit."
+          : "Hanya petugas yang membuat data pemeriksaan yang dapat mengeditnya.",
         variant: "destructive"
       });
       return;
@@ -8275,7 +8322,9 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     if (!canDeleteExamination(examination)) {
       toast({
         title: "Akses Ditolak",
-        description: "Hanya petugas yang membuat data pemeriksaan yang dapat menghapusnya.",
+        description: isVerifiedExamination(examination)
+          ? "SOAP harian rawat inap yang sudah diverifikasi tidak dapat dihapus."
+          : "Hanya petugas yang membuat data pemeriksaan yang dapat menghapusnya.",
         variant: "destructive",
       });
       return;
@@ -8320,6 +8369,63 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
         description: "Gagal menghapus data pemeriksaan",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleVerifyExamination = async (examination: any, visit: any) => {
+    const rawatType = mapStatusLanjutToStatusRawat(visit?.status_lanjut);
+
+    if (!canVerifyExamination(examination, rawatType)) {
+      toast({
+        title: "Akses Ditolak",
+        description: isVerifiedExamination(examination)
+          ? "SOAP harian rawat inap ini sudah diverifikasi."
+          : "Hanya SOAP harian rawat inap yang belum diverifikasi yang dapat diproses.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const examinationKey = getExaminationRecordKey(examination, visit);
+
+    try {
+      setVerifyingExaminationKey(examinationKey);
+
+      const response = await fetch(API_URLS.VERIFY_EXAMINATION, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          no_rawat: visit.no_rawat,
+          tgl_perawatan: examination.tgl_perawatan,
+          jam_rawat: examination.jam_rawat,
+          username: currentUsername
+        })
+      });
+
+      const responseJson = await response.json().catch(() => null);
+      if (!response.ok || !responseJson?.success) {
+        throw new Error(
+          responseJson?.details ||
+          responseJson?.error ||
+          `HTTP error! status: ${response.status}`
+        );
+      }
+
+      toast({
+        title: "Berhasil",
+        description: responseJson?.message || "SOAP harian rawat inap berhasil diverifikasi",
+      });
+
+      await fetchMedicalRecord({ reset: true, outpatientPage: 1, inpatientPage: 1 });
+    } catch (error) {
+      console.error('Error verifying examination:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Gagal memverifikasi SOAP harian rawat inap",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyingExaminationKey(null);
     }
   };
 

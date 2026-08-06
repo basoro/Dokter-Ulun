@@ -965,7 +965,8 @@ class GetMedicalRecordService {
       p: row.rtl || '',
       i: row.instruksi || '',
       e: row.evaluasi || '',
-      pegawai: row.nama || ''
+      pegawai: row.nama || '',
+      verified_at: row.verified_at || null
     }));
   }
 
