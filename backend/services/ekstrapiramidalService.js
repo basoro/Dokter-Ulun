@@ -58,8 +58,7 @@ class EkstrapiramidalService {
         `
           UPDATE mlite_ekstrapiramidal
           SET dokter = ?,
-              hasil = ?,
-              updated_at = NOW()
+              hasil = ?
           WHERE id = ?
         `,
         [dokter, hasil, existing.id]
@@ -71,9 +70,8 @@ class EkstrapiramidalService {
             no_rawat,
             dokter,
             hasil,
-            created_at,
-            updated_at
-          ) VALUES (?, ?, ?, NOW(), NULL)
+            created_at
+          ) VALUES (?, ?, ?, NOW())
         `,
         [noRawat, dokter, hasil]
       );
