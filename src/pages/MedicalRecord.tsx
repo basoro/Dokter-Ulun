@@ -1450,6 +1450,7 @@ interface MedicalRecordProps {
   embedded?: boolean;
   workspaceActive?: boolean;
   defaultStatusRawat?: 'Ralan' | 'Ranap';
+  allowRanapVerification?: boolean;
 }
 
 const MedicalRecord: React.FC<MedicalRecordProps> = ({
@@ -1457,7 +1458,8 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
   noRawat,
   embedded = false,
   workspaceActive = true,
-  defaultStatusRawat
+  defaultStatusRawat,
+  allowRanapVerification = true
 }) => {
   const routeParams = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -3014,6 +3016,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
   const canEditExamination = canDeleteExamination;
   const canVerifyExamination = (exam: any, rawatType: 'Ralan' | 'Ranap' | 'IGD') => (
     rawatType === 'Ranap' &&
+    allowRanapVerification &&
     !isVerifiedExamination(exam)
   );
   const canEditPrescription = canDeletePrescription;
@@ -3149,7 +3152,7 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
               <Trash2 className="h-4 w-4 sm:mr-1" />
               <span className="sr-only sm:not-sr-only">{deleteLabel}</span>
             </Button>
-            {rawatType === 'Ranap' && (
+            {rawatType === 'Ranap' && allowRanapVerification && (
               <Button
                 size="sm"
                 variant={isVerified ? 'secondary' : 'default'}
