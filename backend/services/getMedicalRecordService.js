@@ -233,6 +233,82 @@ class GetMedicalRecordService {
     return `${primary.code} - ${primary.description}`;
   }
 
+  static buildPatientNoteSummary(note) {
+    if (!note) {
+      return null;
+    }
+
+    const catatan = String(note.catatan || '').trim();
+    if (!catatan) {
+      return null;
+    }
+
+    return {
+      tanggal: String(note.tanggal || '').trim(),
+      jam: String(note.jam || '').trim(),
+      catatan,
+      petugas: String(note.petugas || '').trim()
+    };
+  }
+
+  static async fetchPatientNotesSummaryMap(noRawats = []) {
+    const normalizedNoRawats = Array.from(
+      new Set((Array.isArray(noRawats) ? noRawats : [])
+        .map((item) => String(item || '').trim())
+        .filter(Boolean))
+    );
+
+    if (!normalizedNoRawats.length) {
+      return new Map();
+    }
+
+    const placeholders = normalizedNoRawats.map(() => '?').join(', ');
+    const query = `
+      SELECT
+        cp.no_rawat,
+        DATE_FORMAT(cp.tanggal, '%Y-%m-%d') AS tanggal,
+        TIME_FORMAT(cp.jam, '%H:%i') AS jam,
+        TRIM(cp.catatan) AS catatan,
+        COALESCE(d.nm_dokter, cp.kd_dokter, '') AS petugas
+      FROM catatan_perawatan cp
+      LEFT JOIN dokter d ON d.kd_dokter = cp.kd_dokter
+      INNER JOIN (
+        SELECT
+          no_rawat,
+          MAX(CONCAT(
+            DATE_FORMAT(tanggal, '%Y-%m-%d'),
+            ' ',
+            TIME_FORMAT(jam, '%H:%i:%s')
+          )) AS latest_at
+        FROM catatan_perawatan
+        WHERE no_rawat IN (${placeholders})
+        GROUP BY no_rawat
+      ) latest_note
+        ON latest_note.no_rawat = cp.no_rawat
+       AND CONCAT(
+         DATE_FORMAT(cp.tanggal, '%Y-%m-%d'),
+         ' ',
+         TIME_FORMAT(cp.jam, '%H:%i:%s')
+       ) = latest_note.latest_at
+      WHERE cp.no_rawat IN (${placeholders})
+      ORDER BY cp.no_rawat ASC
+    `;
+
+    const [rows] = await db.execute(query, [...normalizedNoRawats, ...normalizedNoRawats]);
+    const noteMap = new Map();
+
+    rows.forEach((row) => {
+      const noRawat = String(row?.no_rawat || '').trim();
+      if (!noRawat || noteMap.has(noRawat)) {
+        return;
+      }
+
+      noteMap.set(noRawat, this.buildPatientNoteSummary(row));
+    });
+
+    return noteMap;
+  }
+
   static async fetchIcdDetailsByNoRawat(noRawat, statusLanjut) {
     const normalizedNoRawat = String(noRawat || '').trim();
     if (!normalizedNoRawat) {
@@ -1415,7 +1491,6 @@ class GetMedicalRecordService {
             INNER JOIN resep_dokter_racikan rdr ON rdr.no_resep = ro.no_resep
             WHERE rp.no_rkm_medis = ?
               AND LOWER(COALESCE(ro.status, '')) = ?
-              AND rp.status_lanjut = 'Ranap'
           `
       : '';
 
@@ -1437,7 +1512,6 @@ class GetMedicalRecordService {
             INNER JOIN resep_dokter rd ON rd.no_resep = ro.no_resep
             WHERE rp.no_rkm_medis = ?
               AND LOWER(COALESCE(ro.status, '')) = ?
-              AND rp.status_lanjut = 'Ranap'
           `
       : '';
 
@@ -1448,7 +1522,6 @@ class GetMedicalRecordService {
           INNER JOIN resep_pulang rp ON rp.no_rawat = reg.no_rawat
           INNER JOIN resep_dokter_pulang rdp ON rdp.no_resep = rp.no_resep
           WHERE reg.no_rkm_medis = ?
-            AND reg.status_lanjut = 'Ranap'
         `
       : normalizedStatus === 'ralan'
         ? `
@@ -1465,7 +1538,6 @@ class GetMedicalRecordService {
           INNER JOIN resep_obat ro ON ro.no_rawat = rp.no_rawat
           WHERE rp.no_rkm_medis = ?
             AND LOWER(COALESCE(ro.status, '')) = ?
-            AND rp.status_lanjut = 'Ranap'
         `;
 
     const prescRequestQuery = normalizedStatus === 'pulang'
@@ -1483,7 +1555,6 @@ class GetMedicalRecordService {
           INNER JOIN resep_dokter_pulang rdp ON rdp.no_resep = rp.no_resep
           LEFT JOIN dokter d ON d.kd_dokter = rdp.kd_dokter
           WHERE reg.no_rkm_medis = ?
-            AND reg.status_lanjut = 'Ranap'
           ORDER BY rdp.tgl_peresepan DESC, rdp.jam_peresepan DESC
           ${historyMode === 'latest' ? 'LIMIT 1' : ''}
         `
@@ -1531,7 +1602,6 @@ class GetMedicalRecordService {
             LEFT JOIN dokter d ON d.kd_dokter = ro.kd_dokter
             WHERE rp.no_rkm_medis = ?
               AND LOWER(COALESCE(ro.status, '')) = ?
-              AND rp.status_lanjut = 'Ranap'
           ORDER BY ro.tgl_peresepan DESC, ro.jam_peresepan DESC
           ${historyMode === 'latest' ? 'LIMIT 1' : ''}
         `;
@@ -2324,7 +2394,7 @@ class GetMedicalRecordService {
     return inpatientRows;
   }
 
-  static buildOutpatientVisitSummary(visit) {
+  static buildOutpatientVisitSummary(visit, patientNote = null) {
     const isIgdVisit = this.isIgdVisitByKdPoli(visit.kd_poli);
     return {
       no_rawat: visit.no_rawat,
@@ -2335,11 +2405,12 @@ class GetMedicalRecordService {
       status: visit.stts || '',
       status_lanjut: visit.status_lanjut || 'Ralan',
       is_igd_visit: isIgdVisit,
+      patient_note: this.buildPatientNoteSummary(patientNote),
       details_loaded: false
     };
   }
 
-  static buildInpatientVisitSummary(visit, inpatientDetail) {
+  static buildInpatientVisitSummary(visit, inpatientDetail, patientNote = null) {
     const isIgdVisit = this.isIgdVisitByKdPoli(visit.kd_poli);
     return {
       no_rawat: visit.no_rawat,
@@ -2355,11 +2426,12 @@ class GetMedicalRecordService {
       is_igd_visit: isIgdVisit,
       cara_keluar: inpatientDetail?.stts_pulang || '',
       diagnosa_akhir: inpatientDetail?.diagnosa_akhir || '',
+      patient_note: this.buildPatientNoteSummary(patientNote),
       details_loaded: false
     };
   }
 
-  static async buildOutpatientVisit(visit) {
+  static async buildOutpatientVisit(visit, patientNote = null) {
     const isIgdVisit = this.isIgdVisitByKdPoli(visit.kd_poli) || String(visit.status_lanjut || '').trim() === 'IGD';
     const [
       examinations,
@@ -2398,6 +2470,7 @@ class GetMedicalRecordService {
       status: visit.stts || '',
       status_lanjut: visit.status_lanjut || 'Ralan',
       is_igd_visit: isIgdVisit,
+      patient_note: this.buildPatientNoteSummary(patientNote),
       examinations,
       procedures,
       medicationsRequest,
@@ -2411,7 +2484,7 @@ class GetMedicalRecordService {
     };
   }
 
-  static async buildInpatientVisit(visit, inpatientDetail) {
+  static async buildInpatientVisit(visit, inpatientDetail, patientNote = null) {
     const isIgdVisit = this.isIgdVisitByKdPoli(visit.kd_poli);
     const [
       examinations,
@@ -2459,6 +2532,7 @@ class GetMedicalRecordService {
       is_igd_visit: isIgdVisit,
       cara_keluar: inpatientDetail?.stts_pulang || '',
       diagnosa_akhir: inpatientDetail?.diagnosa_akhir || '',
+      patient_note: this.buildPatientNoteSummary(patientNote),
       examinations,
       procedures,
       medicationsRequest: medicationsRequestRanap,
@@ -2496,10 +2570,12 @@ class GetMedicalRecordService {
     if (String(visit.status_lanjut || '').trim() === 'Ranap') {
       const inpatientDetails = await this.fetchInpatientDetailsByNoRawats([noRawat]);
       const inpatientDetail = inpatientDetails.find((detail) => detail.no_rawat === noRawat);
-      return this.buildInpatientVisit(visit, inpatientDetail);
+        const patientNoteMap = await this.fetchPatientNotesSummaryMap([noRawat]);
+        return this.buildInpatientVisit(visit, inpatientDetail, patientNoteMap.get(noRawat) || null);
     }
 
-    return this.buildOutpatientVisit(visit);
+      const patientNoteMap = await this.fetchPatientNotesSummaryMap([noRawat]);
+      return this.buildOutpatientVisit(visit, patientNoteMap.get(noRawat) || null);
   }
 
   static async fetchExaminationsPage(no_rm, statusLanjut, page, limit, focusNoRawat) {
@@ -2803,9 +2879,13 @@ class GetMedicalRecordService {
       const prbProgram = String(patientPrbProgram?.[0]?.nm_program || '').trim();
       const outpatientVisits = outpatientPageResult?.rows || [];
       const inpatientVisitRefs = inpatientPageResult?.rows || [];
-      const [outpatientIcd10Map, inpatientIcd10Map] = await Promise.all([
+      const [outpatientIcd10Map, inpatientIcd10Map, patientNotesSummaryMap] = await Promise.all([
         outpatientVisits.length ? this.fetchIcd10DiagnosesMap(outpatientVisits.map((visit) => visit.no_rawat), 'Ralan') : Promise.resolve(new Map()),
-        inpatientVisitRefs.length ? this.fetchIcd10DiagnosesMap(inpatientVisitRefs.map((visit) => visit.no_rawat), 'Ranap') : Promise.resolve(new Map())
+        inpatientVisitRefs.length ? this.fetchIcd10DiagnosesMap(inpatientVisitRefs.map((visit) => visit.no_rawat), 'Ranap') : Promise.resolve(new Map()),
+        this.fetchPatientNotesSummaryMap([
+          ...outpatientVisits.map((visit) => visit.no_rawat),
+          ...inpatientVisitRefs.map((visit) => visit.no_rawat)
+        ])
       ]);
 
       let inpatientDetails = [];
@@ -2848,23 +2928,37 @@ class GetMedicalRecordService {
 
       const [finalOutpatientVisits, finalInpatientVisits] = await Promise.all([
         includeVisitDetails
-          ? Promise.all(outpatientVisits.map((visit) => this.buildOutpatientVisit(visit)))
+            ? Promise.all(outpatientVisits.map((visit) => this.buildOutpatientVisit(
+                visit,
+                patientNotesSummaryMap.get(String(visit.no_rawat || '').trim()) || null
+              )))
           : Promise.resolve(
               outpatientVisits.map((visit) => ({
-                ...this.buildOutpatientVisitSummary(visit),
+                  ...this.buildOutpatientVisitSummary(
+                    visit,
+                    patientNotesSummaryMap.get(String(visit.no_rawat || '').trim()) || null
+                  ),
                 diagnosa_icd10: String(outpatientIcd10Map.get(visit.no_rawat) || '')
               }))
             ),
         includeVisitDetails
           ? Promise.all(
               inpatientVisitRefs.map((visit) =>
-                this.buildInpatientVisit(visit, inpatientDetailsMap.get(visit.no_rawat))
+                  this.buildInpatientVisit(
+                    visit,
+                    inpatientDetailsMap.get(visit.no_rawat),
+                    patientNotesSummaryMap.get(String(visit.no_rawat || '').trim()) || null
+                  )
               )
             )
           : Promise.resolve(
               inpatientVisitRefs.map((visit) =>
                 ({
-                  ...this.buildInpatientVisitSummary(visit, inpatientDetailsMap.get(visit.no_rawat)),
+                    ...this.buildInpatientVisitSummary(
+                      visit,
+                      inpatientDetailsMap.get(visit.no_rawat),
+                      patientNotesSummaryMap.get(String(visit.no_rawat || '').trim()) || null
+                    ),
                   diagnosa_icd10: String(inpatientIcd10Map.get(visit.no_rawat) || '')
                 })
               )
