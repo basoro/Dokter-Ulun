@@ -190,13 +190,36 @@ const BookingTabs = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 300);
 
-  const fetchBookingData = async (tabValue: 'pagi' | 'sore' = activeTab, overrides: Record<string, string> = {}) => {
+    const formatBookingFilterDate = (value?: Date) => (value ? format(value, 'yyyy-MM-dd') : null);
+    const normalizeBookingDateRange = (value?: DateRange): DateRange | undefined => {
+      if (!value?.from) {
+        return undefined;
+      }
+
+      return {
+        from: value.from,
+        to: value.to ?? value.from
+      };
+    };
+
+    const fetchBookingData = async (
+      tabValue: 'pagi' | 'sore' = activeTab,
+      overrides: {
+        search?: string;
+        status?: string;
+        kd_dokter?: string;
+        page?: string;
+        itemsPerPage?: string;
+        startDate?: string | null;
+        endDate?: string | null;
+      } = {}
+    ) => {
     setLoading(true);
     try {
       const requestBody = {
         action: 'getAll',
-        startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
-        endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+          startDate: overrides.startDate !== undefined ? overrides.startDate : formatBookingFilterDate(dateRange?.from),
+          endDate: overrides.endDate !== undefined ? overrides.endDate : formatBookingFilterDate(dateRange?.to),
         search: overrides.search ?? debouncedSearchQuery,
         status: overrides.status ?? statusFilter,
         sessionFilter: tabValue,
@@ -304,10 +327,15 @@ const BookingTabs = () => {
   };
 
   const handleClearFilters = () => {
-    setDateRange({
-      from: new Date(),
-      to: new Date()
-    });
+      const today = new Date();
+      const normalizedRange = normalizeBookingDateRange({
+        from: today,
+        to: today
+      });
+      const startDate = formatBookingFilterDate(normalizedRange?.from);
+      const endDate = formatBookingFilterDate(normalizedRange?.to);
+
+      setDateRange(normalizedRange);
     setStatusFilter("all");
     setDoctorFilter("all");
     setPendingStatusFilter("all");
@@ -316,7 +344,14 @@ const BookingTabs = () => {
     setIsFilterModalOpen(false);
     setSearchQuery("");
     setCurrentPage(1);
-    fetchBookingData();
+      fetchBookingData(activeTab, {
+        search: '',
+        status: 'all',
+        kd_dokter: 'all',
+        page: '1',
+        startDate,
+        endDate
+      });
   };
 
   const handleTabChange = (value: string) => {
@@ -325,10 +360,13 @@ const BookingTabs = () => {
     setCurrentPage(1);
   };
 
-  useEffect(() => {
-    fetchBookingData();
-    fetchDoctors();
-  }, [currentPage, itemsPerPage, activeTab, debouncedSearchQuery]);
+    useEffect(() => {
+      fetchBookingData();
+    }, [currentPage, itemsPerPage, activeTab, debouncedSearchQuery, dateRange?.from?.getTime(), dateRange?.to?.getTime()]);
+
+    useEffect(() => {
+      fetchDoctors();
+    }, []);
 
   useEffect(() => {
     if (!isFilterModalOpen) {
@@ -365,14 +403,21 @@ const BookingTabs = () => {
             mode="range"
             defaultMonth={dateRange?.from}
             selected={dateRange}
-            onSelect={setDateRange}
+              onSelect={(nextRange) => {
+                const normalizedRange = normalizeBookingDateRange(nextRange);
+                setDateRange(normalizedRange);
+
+                if (currentPage !== 1) {
+                  setCurrentPage(1);
+                }
+              }}
             numberOfMonths={2}
             locale={indonesianLocale}
             calendarClassName="sm:min-w-[600px]"
             buttonClassName="w-full sm:w-[350px]"
             placeholder="Pilih rentang tanggal"
             displayValue={dateRange?.from ? (
-              dateRange.to ? (
+                dateRange.to && formatBookingFilterDate(dateRange.from) !== formatBookingFilterDate(dateRange.to) ? (
                 <>
                   {formatUIDate(dateRange.from)} - {formatUIDate(dateRange.to)}
                 </>

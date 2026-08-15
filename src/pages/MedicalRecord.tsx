@@ -347,7 +347,7 @@ type LabStatusRawat = 'Ralan' | 'Ranap' | 'IGD';
 type RadiologyStatusRawat = 'Ralan' | 'Ranap' | 'IGD';
 type OutpatientExaminationSectionTabValue = 'examinations' | 'rehab-medik';
 type InpatientExaminationSectionTabValue = 'examinations' | 'balance-cairan' | 'ventilator' | 'ekstrapiramidal' | 'echo-echocardiography' | 'rehab-medik';
-type VisitDetailSectionFilterValue = 'all' | 'triase' | 'pemeriksaan' | 'diagnosa' | 'tindakan' | 'resep' | 'laboratorium' | 'radiologi';
+type VisitDetailSectionFilterValue = 'all' | 'triase' | 'catatan' | 'pemeriksaan' | 'diagnosa' | 'tindakan' | 'resep' | 'laboratorium' | 'radiologi';
 
 interface MedicalRecordData {
   patient: {
@@ -893,7 +893,7 @@ const matchesMedicationRequestFilter = (item: any, filter: MedicationRequestFilt
     case 'ibs':
       return status === 'IBS' && !isPackage;
     case 'package':
-      return isPackage;
+      return status !== 'Pulang' && status !== 'IBS' && isPackage;
     default:
       return status !== 'Pulang' && status !== 'IBS' && !isPackage && !hasCompoundItems;
   }
@@ -903,13 +903,6 @@ const getMedicationRequestTypeMeta = (item: any) => {
   const status = item?.status || mapPrescriptionSourceToStatus(item?.source);
   const isPackage = Boolean(item?.is_package);
   const hasCompoundItems = Array.isArray(item?.compounds) && item.compounds.length > 0;
-
-  if (isPackage) {
-    return {
-      label: 'Paket Obat & BHP',
-      className: 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100'
-    };
-  }
 
   if (status === 'Pulang') {
     return {
@@ -922,6 +915,13 @@ const getMedicationRequestTypeMeta = (item: any) => {
     return {
       label: 'Obat IBS',
       className: 'border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-700 dark:bg-rose-900 dark:text-rose-100'
+    };
+  }
+
+  if (isPackage) {
+    return {
+      label: 'Paket Obat & BHP',
+      className: 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100'
     };
   }
 
@@ -2248,10 +2248,12 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
     const icdDetails = visit?.icd_details || {};
     const hasDiagnosa = (Array.isArray(icdDetails?.icd10) && icdDetails.icd10.length > 0)
       || (Array.isArray(icdDetails?.icd9) && icdDetails.icd9.length > 0);
+    const hasPatientNote = Boolean(String(visit?.patient_note?.catatan || '').trim());
 
     return [
       { value: 'all' as VisitDetailSectionFilterValue, label: 'Semua' },
       ...(visit?.triase_igd ? [{ value: 'triase' as VisitDetailSectionFilterValue, label: 'Triase' }] : []),
+      ...(hasPatientNote ? [{ value: 'catatan' as VisitDetailSectionFilterValue, label: 'Catatan Pasien' }] : []),
       ...(Array.isArray(visit?.examinations) && visit.examinations.length > 0
         ? [{ value: 'pemeriksaan' as VisitDetailSectionFilterValue, label: 'Pemeriksaan' }]
         : []),
@@ -4627,6 +4629,32 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
         </div>
       </div>
     ));
+  };
+
+  const renderVisitPatientNoteSection = (visit: any) => {
+    const note = visit?.patient_note;
+    const noteText = String(note?.catatan || '').trim();
+    if (!noteText) {
+      return null;
+    }
+
+    const noteDateTime = [note?.tanggal, note?.jam].filter(Boolean).join(' ');
+    const noteMeta = [note?.petugas, noteDateTime ? formatUIDateTime(noteDateTime) : '']
+      .filter(Boolean)
+      .join(' • ');
+
+    return (
+      <div className="border rounded-lg p-4 bg-muted/20">
+        <h3 className="text-lg font-semibold mb-3 flex items-center">
+          <FileText className="h-5 w-5 mr-2" />
+          Catatan Pasien
+        </h3>
+        <p className="whitespace-pre-wrap break-words text-sm text-foreground">{noteText}</p>
+        {noteMeta ? (
+          <p className="mt-3 text-xs text-muted-foreground">{noteMeta}</p>
+        ) : null}
+      </div>
+    );
   };
   const renderVisitLaboratoryHistory = (items: LabData[], noRawat: string, source: string) => {
     const normalizedItems = buildFocusedLabItems(items || [], noRawat, source);
@@ -10140,6 +10168,8 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
 
                         {isVisitDetailSectionVisible(visit.no_rawat, 'triase') ? renderVisitIgdTriageDetails(visit) : null}
 
+                          {isVisitDetailSectionVisible(visit.no_rawat, 'catatan') ? renderVisitPatientNoteSection(visit) : null}
+
                         {/* Pemeriksaan */}
                         {isVisitDetailSectionVisible(visit.no_rawat, 'pemeriksaan') ? (
                         <div className="border rounded-lg p-2">
@@ -10438,6 +10468,8 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
                         </div>
 
                         {isVisitDetailSectionVisible(visit.no_rawat, 'triase') ? renderVisitIgdTriageDetails(visit) : null}
+
+                          {isVisitDetailSectionVisible(visit.no_rawat, 'catatan') ? renderVisitPatientNoteSection(visit) : null}
 
                         {/* Pemeriksaan */}
                         {isVisitDetailSectionVisible(visit.no_rawat, 'pemeriksaan') ? (
