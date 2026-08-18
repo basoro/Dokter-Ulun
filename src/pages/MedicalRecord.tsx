@@ -4493,6 +4493,11 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
           </div>
           <div className="overflow-x-auto">
             <div className="min-w-[720px] space-y-2">
+              {renderLaboratoryPaProcessingAlert(
+                panel.nm_perawatan,
+                Array.isArray(panel?.hasil) ? panel.hasil : [],
+                String(labGroup?.lab_type || '')
+              )}
               {renderLaboratoryResultHeaderRow()}
               {(Array.isArray(panel?.hasil) ? panel.hasil : []).map((test: LabTest, testIndex: number) => (
                 <div
@@ -4532,6 +4537,11 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
         ) : null}
         <div className="overflow-x-auto">
           <div className="min-w-[720px] space-y-2">
+            {renderLaboratoryPaProcessingAlert(
+              groupName,
+              tests as LabTest[],
+              String(labGroup?.lab_type || '')
+            )}
             {renderLaboratoryResultHeaderRow()}
             {(tests as LabTest[]).map((test, testIndex) => (
               <div
@@ -4553,6 +4563,37 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
         </div>
       </div>
     ));
+  };
+
+  const renderLaboratoryPaProcessingAlert = (
+    panelName: string,
+    tests: LabTest[] = [],
+    labType?: string
+  ) => {
+    const normalizedPanelName = String(panelName || '').trim().toLowerCase();
+    const normalizedLabType = String(labType || '').trim().toLowerCase();
+    if (normalizedLabType !== 'pa' && normalizedPanelName !== 'lab pa') {
+      return null;
+    }
+
+    const requiredChecks = new Set(['makroskopik', 'mikroskopik', 'kesimpulan']);
+    const completedChecks = new Set(
+      (Array.isArray(tests) ? tests : [])
+        .filter((test) => String(test?.hasil || '').trim())
+        .map((test) => String(test?.pemeriksaan || '').trim().toLowerCase())
+        .filter((value) => requiredChecks.has(value))
+    );
+
+    if (completedChecks.size === requiredChecks.size) {
+      return null;
+    }
+
+    return (
+      <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+        <BadgeAlert className="mt-0.5 h-4 w-4 shrink-0" />
+        <span>hasil pemeriksaan lab PA masih dalam proses 🙏🏻</span>
+      </div>
+    );
   };
 
   const renderLaboratoryResultHeaderRow = () => (

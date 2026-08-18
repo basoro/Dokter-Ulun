@@ -2036,74 +2036,115 @@ class GetMedicalRecordService {
         pa.makroskopik,
         pa.mikroskopik,
         pa.kesimpulan,
-        skl.saran
+        skl.saran,
+        COALESCE(pl.kd_jenis_prw, '') AS kd_jenis_prw,
+        COALESCE(jp.nm_perawatan, '') AS nm_perawatan,
+        COALESCE(dokter.nm_dokter, '') AS nm_dokter,
+        COALESCE(petugas.nama, '') AS nama_petugas,
+        COALESCE(d2.nm_dokter, '') AS nm_dokter_penanggung_jawab
       FROM detail_periksa_lab_pa pa
       LEFT JOIN saran_kesan_lab skl
         ON skl.no_rawat = pa.no_rawat
         AND skl.tgl_periksa = pa.tgl_periksa
         AND skl.jam = pa.jam
+      LEFT JOIN periksa_lab pl
+        ON pl.no_rawat = pa.no_rawat
+        AND pl.tgl_periksa = pa.tgl_periksa
+        AND pl.jam = pa.jam
+      LEFT JOIN jns_perawatan_lab jp
+        ON jp.kd_jenis_prw = pl.kd_jenis_prw
+      LEFT JOIN dokter dokter
+        ON dokter.kd_dokter = pl.dokter_perujuk
+      LEFT JOIN dokter d2
+        ON d2.kd_dokter = pl.kd_dokter
+      LEFT JOIN petugas
+        ON petugas.nip = pl.nip
       WHERE pa.no_rawat = ?
-      ORDER BY pa.tgl_periksa DESC, pa.jam DESC
+      ORDER BY pa.tgl_periksa DESC, pa.jam DESC, pl.kd_jenis_prw ASC
     `;
     const [rows] = await db.execute(labPaQuery, [noRawat]);
 
-    const grouped = {};
+    const grouped = new Map();
     rows.forEach((row) => {
-      const dateKey = this.formatDateOnly(row.tgl_periksa) + ' ' + row.jam;
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
+      const formattedDate = this.formatDateOnly(row.tgl_periksa);
+      const time = String(row.jam || '').trim();
+      const kdJenis = String(row.kd_jenis_prw || '').trim();
+      const groupKey = [formattedDate, time, kdJenis || 'lab-pa'].join('|');
+
+      if (!grouped.has(groupKey)) {
+        grouped.set(groupKey, {
+          tanggal: `${formattedDate} ${time}`.trim(),
+          no_rawat: row.no_rawat || noRawat,
+          kd_jenis_prw: kdJenis,
+          nm_perawatan: String(row.nm_perawatan || '').trim() || 'Lab PA',
+          dokter: String(row.nm_dokter || '').trim(),
+          petugas: String(row.nama_petugas || '').trim(),
+          pemeriksaanMap: new Map(),
+          lab_responsible_doctor_name: String(row.nm_dokter_penanggung_jawab || '').trim()
+        });
       }
 
+      const currentGroup = grouped.get(groupKey);
       const nilaiMakro = String(row.makroskopik || '').trim();
       const nilaiMikro = String(row.mikroskopik || '').trim();
       const nilaiKesimpulan = String(row.kesimpulan || '').trim();
       const nilaiSaran = String(row.saran || '').trim();
 
       if (nilaiMakro) {
-        grouped[dateKey].push({
-          nama: 'Lab PA',
+        currentGroup.pemeriksaanMap.set('makroskopik', {
+          nama: currentGroup.nm_perawatan || 'Lab PA',
           pemeriksaan: 'Makroskopik',
           hasil: nilaiMakro,
           rujukan: '',
+          satuan: '',
           keterangan: ''
         });
       }
 
       if (nilaiMikro) {
-        grouped[dateKey].push({
-          nama: 'Lab PA',
+        currentGroup.pemeriksaanMap.set('mikroskopik', {
+          nama: currentGroup.nm_perawatan || 'Lab PA',
           pemeriksaan: 'Mikroskopik',
           hasil: nilaiMikro,
           rujukan: '',
+          satuan: '',
           keterangan: ''
         });
       }
 
       if (nilaiKesimpulan) {
-        grouped[dateKey].push({
-          nama: 'Lab PA',
+        currentGroup.pemeriksaanMap.set('kesimpulan', {
+          nama: currentGroup.nm_perawatan || 'Lab PA',
           pemeriksaan: 'Kesimpulan',
           hasil: nilaiKesimpulan,
           rujukan: '',
+          satuan: '',
           keterangan: ''
         });
       }
 
       if (nilaiSaran) {
-        grouped[dateKey].push({
-          nama: 'Lab PA',
+        currentGroup.pemeriksaanMap.set('saran', {
+          nama: currentGroup.nm_perawatan || 'Lab PA',
           pemeriksaan: 'Saran',
           hasil: nilaiSaran,
           rujukan: '',
+          satuan: '',
           keterangan: ''
         });
       }
     });
 
-    return Object.entries(grouped).map(([tanggal, pemeriksaan]) => ({
-      tanggal,
-      pemeriksaan,
-      lab_type: 'pa'
+    return Array.from(grouped.values()).map((entry) => ({
+      tanggal: entry.tanggal,
+      no_rawat: entry.no_rawat,
+      kd_jenis_prw: entry.kd_jenis_prw,
+      nm_perawatan: entry.nm_perawatan,
+      dokter: entry.dokter,
+      petugas: entry.petugas,
+      pemeriksaan: Array.from(entry.pemeriksaanMap.values()),
+      lab_type: 'pa',
+      lab_responsible_doctor_name: entry.lab_responsible_doctor_name
     }));
   }
 
