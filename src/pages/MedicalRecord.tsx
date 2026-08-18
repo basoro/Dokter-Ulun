@@ -3081,22 +3081,24 @@ const MedicalRecord: React.FC<MedicalRecordProps> = ({
 
       return (
       <div key={key} className="border rounded-lg p-4">
-        <div className="mb-4 flex flex-col-reverse gap-3 md:flex-row md:items-start md:justify-between">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <div className="mb-4 flex flex-col-reverse gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div>
               <p className="text-sm text-muted-foreground">Tanggal & Jam</p>
               <p className="font-medium">{formatDateSafe(examinationDateTime)}</p>
             </div>
-            <div>
+              <div className="sm:col-span-2 xl:col-span-1">
               <p className="text-sm text-muted-foreground">No. Rawat</p>
-              <p className="font-medium">{visit.no_rawat}</p>
+                <p className="break-words text-sm font-medium leading-relaxed sm:text-base">
+                  {visit.no_rawat}
+                </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Jenis Rawat</p>
               <p className="font-medium">{rawatType}</p>
             </div>
           </div>
-          <div className="flex flex-wrap justify-end gap-2 md:justify-end">
+            <div className="flex flex-wrap justify-start gap-2 xl:justify-end xl:self-start">
             <Button
               size="sm"
               variant="secondary"
