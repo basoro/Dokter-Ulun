@@ -3161,7 +3161,7 @@ const Patients = () => {
                 embedded
                 workspaceActive={activeMedicalRecordTabId === tab.id}
                 defaultStatusRawat={path.includes('rawat-inap') ? 'Ranap' : 'Ralan'}
-                allowRanapVerification={path.includes('/pasien/rawat-inap/utama')}
+                allowRanapVerification={path.includes('/pasien/rawat-inap/utama') || path.includes('/pasien/rawat-inap/raber')}
               />
             </div>
           ))}
